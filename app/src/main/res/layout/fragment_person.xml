@@ -1,0 +1,49 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.clothshop.Activity.PersonFragment"
+    android:background="@color/background"
+    android:orientation="vertical">
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/login_btn"
+            android:layout_width="fill_parent"
+            android:layout_height="89dp"
+            android:layout_gravity="right"
+            android:layout_marginTop="@dimen/top_margin"
+            android:layout_marginBottom="@dimen/top_margin"
+            android:background="@color/white"
+            android:visibility="visible"
+            android:stateListAnimator="@null"/>
+
+
+        <TextView
+            android:id="@+id/user_name_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/username_margin"
+            android:layout_gravity="center_vertical"
+            android:text="@string/not_login" />
+
+        <ImageButton
+            android:id="@+id/avatar_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/common_google_signin_btn_icon_light"
+            android:layout_marginLeft="@dimen/user_avatar_margin"
+            android:layout_gravity="center_vertical"/>
+
+
+
+    </FrameLayout>
+
+
+
+</LinearLayout>
