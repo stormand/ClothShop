@@ -3,8 +3,12 @@ package com.example.clothshop.Activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Notification;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +32,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Handler;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -55,6 +61,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final int REQUEST_READ_CONTACTS = 0;
     public static String LOGIN_TO_MAIN = "login_to_main";
     public static String USER_NAME="user_name";
+
+    private ImageHandler handler=new ImageHandler();
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -71,6 +79,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
+    private EditText mImageConfirmTextView;
+    private ImageView mImageConfirmView;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -95,6 +105,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+        mImageConfirmTextView= (EditText) findViewById(R.id.image_confirm_text_view);
+
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -114,6 +126,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        //验证码
+        mImageConfirmView= (ImageView) findViewById(R.id.image_comfirm_view);
+        ImageThread imageThread=new ImageThread();
+        imageThread.start();
+        mImageConfirmView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: 2017/3/23
+                ImageThread imageThread=new ImageThread();
+                imageThread.start();
+            }
+        });
+
     }
 
     private void populateAutoComplete() {
@@ -174,9 +200,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView.setError(null);
         mPasswordView.setError(null);
 
+
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
+        String confirmcode=mImageConfirmTextView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -207,7 +235,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(email, password,confirmcode);
             mAuthTask.execute((Void) null);
         }
     }
@@ -320,11 +348,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         private final String mEmail;
         private final String mPassword;
+        private final String mConfirmCode;
         private String mes;
 
-        UserLoginTask(String email, String password) {
+        UserLoginTask(String email, String password, String confirmcode) {
             mEmail = email;
             mPassword = password;
+            mConfirmCode=confirmcode;
         }
 
         /**
@@ -338,7 +368,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             Map<String,String> myparams=new HashMap<String,String>();
             myparams.put(getString(R.string.user_name),mEmail);
             myparams.put(getString(R.string.passwrod),mPassword);
-            // TODO: 2017/3/22 put num？？？？
+            myparams.put("code",mConfirmCode);
             String result=httpPostUtil.sendPostMessage(myparams,"utf-8",httpPostUtil.LOGIN_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
@@ -348,7 +378,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Intent intent=new Intent();
                     Bundle bundle=new Bundle();
                     bundle.putString(getString(R.string.user_name),mEmail);
-                    intent.putExtras(bundle);
                     intent.putExtra(USER_NAME,bundle);
                     //跳转到person页面
                     intent.putExtra(LOGIN_TO_MAIN,MainActivity.TAB_PERSON);
@@ -372,6 +401,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
+                MainActivity.isLogin=true;
                 finish();
             } else {
                 Toast.makeText(LoginActivity.this, mes, Toast.LENGTH_SHORT).show();
@@ -390,7 +420,41 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onStop() {
         super.onStop();
-        // TODO: 2017/3/22
+        // 保存用户名和密码
+        SharedPreferences settings=getSharedPreferences("user_info",0);
+        settings.edit().putString(getString(R.string.user_name),mEmailView.getText().toString())
+        .putString(getString(R.string.passwrod),mPasswordView.getText().toString()).commit();
+
+    }
+
+    class ImageHandler extends android.os.Handler{
+        public static final int SHOW_NETWORK_IMAGE = 0x0001;
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what==SHOW_NETWORK_IMAGE){
+                Bitmap bitmap= (Bitmap) msg.obj;
+                mImageConfirmView.setImageBitmap(bitmap);
+            }
+        }
+    }
+
+    class ImageThread extends Thread{
+        @Override
+        public void run() {
+            HttpPostUtil httpPostUtil=new HttpPostUtil();
+            Bitmap bitmap=HttpPostUtil.getHttpBitmap(httpPostUtil.IMAGE_PATH);
+            showImage(bitmap);
+        }
+
+        private void showImage(Bitmap bitmap){
+
+            Message msg=Message.obtain(handler,ImageHandler.SHOW_NETWORK_IMAGE);
+            msg.obj=bitmap;
+            msg.sendToTarget();
+        }
+
+
     }
 }
 

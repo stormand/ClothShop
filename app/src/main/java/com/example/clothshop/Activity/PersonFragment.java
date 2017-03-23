@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.clothshop.R;
 
@@ -79,8 +80,12 @@ public class PersonFragment extends Fragment {
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(getActivity(),LoginActivity.class);
-                startActivity(intent);
+                if(!MainActivity.isLogin){
+                    Intent intent=new Intent(getActivity(),LoginActivity.class);
+                    startActivity(intent);
+                }else {
+                    // TODO: 2017/3/24  退出登陆，个人信息 
+                }
             }
         });
 
@@ -104,6 +109,14 @@ public class PersonFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //reset the username
+        TextView username= (TextView) getView().findViewById(R.id.user_name_textview);
+         username.setText(getArguments().getString("username"));
     }
 
     @Override

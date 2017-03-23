@@ -137,13 +137,16 @@ public class HttpPostUtil {
             HttpURLConnection conn= (HttpURLConnection) myFileURL.openConnection();
             conn.setConnectTimeout(6000);
             conn.setDoInput(true);
-            String session_value=conn.getHeaderField("Set_Cookie");
+
+            String session_value=conn.getHeaderField("Set-Cookie");
             sessionId=session_value.split(";");
 
             conn.connect();
             //得到数据流
+
             InputStream is=conn.getInputStream();
             //解析为图片
+            //changeInputStream(is,"utf-8");
             bitmap = BitmapFactory.decodeStream(is);
             is.close();
 

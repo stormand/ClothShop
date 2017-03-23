@@ -15,6 +15,7 @@ import com.example.clothshop.R;
 
 public class MainActivity extends AppCompatActivity implements PersonFragment.OnFragmentInteractionListener{
 
+    public static boolean isLogin=false;
 
     public static int TAB_HOME=1;
     public static int TAB_PERSON=3;
@@ -22,7 +23,6 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
 
     private FragmentManager fragmentManager;
     private PersonFragment personFragment;
-    private String userName;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -55,8 +55,10 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
             case 3:
                 if(personFragment==null){
                     personFragment=new PersonFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("username","未登录");
+                    personFragment.setArguments(bundle);
                     transaction.add(R.id.content,personFragment);
-                    Log.v("bb","aa");
                 }else{
                     transaction.show(personFragment);
                 }break;
@@ -89,9 +91,11 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
         //从注册页面返回
         if(id==TAB_PERSON){
             chooseNav(TAB_PERSON);
-            userName=getIntent().getBundleExtra(LoginActivity.USER_NAME).getString("username");
-            TextView userNameView= (TextView) findViewById(R.id.user_name_textview);
-            userNameView.setText(userName);
+            String username=getIntent().getBundleExtra(LoginActivity.USER_NAME).getString("username");
+            Bundle bundle = new Bundle();
+            bundle.putString("username",username);
+            personFragment.setArguments(bundle);
+
         }
         super.onResume();
     }
