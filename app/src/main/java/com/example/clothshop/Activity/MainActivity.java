@@ -1,5 +1,6 @@
 package com.example.clothshop.Activity;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,16 +14,19 @@ import android.widget.TextView;
 
 import com.example.clothshop.R;
 
-public class MainActivity extends AppCompatActivity implements PersonFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements PersonFragment.OnFragmentInteractionListener,HomeFragment.OnFragmentInteractionListener{
 
     public static boolean isLogin=false;
 
+    public static String mUserName;
     public static int TAB_HOME=1;
     public static int TAB_PERSON=3;
     private TextView mTextMessage;
+    private BottomNavigationView bottomNavigationView;
 
     private FragmentManager fragmentManager;
     private PersonFragment personFragment;
+    private HomeFragment homeFragment;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -48,15 +52,26 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
     private void chooseNav(int num){
         FragmentTransaction transaction=fragmentManager.beginTransaction();
         hideFragments(transaction);
-
         switch (num){
-            case 1:break;
-            case 2:break;
+            case 1:
+                if(homeFragment==null){
+                    homeFragment=new HomeFragment();
+                    transaction.add(R.id.content,homeFragment);
+                }else{
+                    transaction.show(homeFragment);
+                }break;
+            case 2:
+
+                break;
             case 3:
                 if(personFragment==null){
                     personFragment=new PersonFragment();
                     Bundle bundle = new Bundle();
-                    bundle.putString("username","未登录");
+                    if (isLogin){
+                        bundle.putString("username",mUserName);
+                    }else{
+                        bundle.putString("username",getString(R.string.not_login));
+                    }
                     personFragment.setArguments(bundle);
                     transaction.add(R.id.content,personFragment);
                 }else{
@@ -69,6 +84,8 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
     private void hideFragments(FragmentTransaction transaction) {
         if (personFragment!= null) {
             transaction.hide(personFragment);
+        }if (homeFragment!= null) {
+            transaction.hide(homeFragment);
         }
     }
 
@@ -79,24 +96,16 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
 
         fragmentManager=getSupportFragmentManager();
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
 
     }
 
     @Override
     protected void onResume() {
         int id = getIntent().getIntExtra(LoginActivity.LOGIN_TO_MAIN, TAB_HOME);
-
-        //从注册页面返回
-        if(id==TAB_PERSON){
-            chooseNav(TAB_PERSON);
-            String username=getIntent().getBundleExtra(LoginActivity.USER_NAME).getString("username");
-            Bundle bundle = new Bundle();
-            bundle.putString("username",username);
-            personFragment.setArguments(bundle);
-
-        }
+        chooseNav(id);
         super.onResume();
     }
 
@@ -104,5 +113,6 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
     public void onFragmentInteraction(Uri uri) {
 
     }
+
 
 }

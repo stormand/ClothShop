@@ -367,18 +367,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             //传入http请求参数
             Map<String,String> myparams=new HashMap<String,String>();
             myparams.put(getString(R.string.user_name),mEmail);
-            myparams.put(getString(R.string.passwrod),mPassword);
+            myparams.put(getString(R.string.password),mPassword);
             myparams.put("code",mConfirmCode);
             String result=httpPostUtil.sendPostMessage(myparams,"utf-8",httpPostUtil.LOGIN_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
                 if (jsonObject.getString("status").equals("0")){
 
-
+                    MainActivity.isLogin=true;
+                    MainActivity.mUserName=mEmail;
                     Intent intent=new Intent();
-                    Bundle bundle=new Bundle();
-                    bundle.putString(getString(R.string.user_name),mEmail);
-                    intent.putExtra(USER_NAME,bundle);
                     //跳转到person页面
                     intent.putExtra(LOGIN_TO_MAIN,MainActivity.TAB_PERSON);
                     intent.setClass(LoginActivity.this,MainActivity.class);
@@ -401,7 +399,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                MainActivity.isLogin=true;
                 finish();
             } else {
                 Toast.makeText(LoginActivity.this, mes, Toast.LENGTH_SHORT).show();
@@ -423,7 +420,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // 保存用户名和密码
         SharedPreferences settings=getSharedPreferences("user_info",0);
         settings.edit().putString(getString(R.string.user_name),mEmailView.getText().toString())
-        .putString(getString(R.string.passwrod),mPasswordView.getText().toString()).commit();
+        .putString(getString(R.string.password),mPasswordView.getText().toString()).commit();
 
     }
 
@@ -443,7 +440,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         public void run() {
             HttpPostUtil httpPostUtil=new HttpPostUtil();
-            Bitmap bitmap=HttpPostUtil.getHttpBitmap(httpPostUtil.IMAGE_PATH);
+            Bitmap bitmap=HttpPostUtil.getHttpBitmap(HttpPostUtil.IMAGE_PATH);
             showImage(bitmap);
         }
 

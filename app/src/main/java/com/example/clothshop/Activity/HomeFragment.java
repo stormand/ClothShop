@@ -1,14 +1,25 @@
 package com.example.clothshop.Activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.clothshop.R;
+import com.example.clothshop.adapter.RecyclerAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -24,6 +35,15 @@ public class HomeFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
+    private FloatingActionButton mFab;
+    private RecyclerView mRecyclerview;
+    private RecyclerView.Adapter mAdapter;
+    private LinearLayoutManager mLayoutManager;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private List<String> stringList;
+    private int lastVisibleItem;
+
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -59,14 +79,95 @@ public class HomeFragment extends Fragment {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        mFab= (FloatingActionButton) view.findViewById(R.id.fab);
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (MainActivity.isLogin){
+                  Intent intent=new Intent(getActivity(),PublishActivity.class);
+                    startActivity(intent);
+                }else {
+                    Toast.makeText(getContext(), "请登录", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        mRecyclerview= (RecyclerView) view.findViewById(R.id.recycler_view);
+        mRecyclerview.setHasFixedSize(true);
+        //创建线性布局
+        mLayoutManager = new LinearLayoutManager(getContext());
+        //垂直方向
+        mLayoutManager.setOrientation(OrientationHelper.VERTICAL);
+        //给RecyclerView设置布局管理器
+        mRecyclerview.setLayoutManager(mLayoutManager);
+        //创建适配器，并且设置
+        stringList=new ArrayList<String>();
+        stringList.add("1");
+        stringList.add("2");
+        stringList.add("3");
+
+        mAdapter = new RecyclerAdapter(getContext(),stringList);
+        mRecyclerview.setAdapter(mAdapter);
+
+        mSwipeRefreshLayout= (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                stringList.add("下拉刷新");
+                mAdapter.notifyDataSetChanged();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
+        mRecyclerview.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                //判断是当前layoutManager是否为LinearLayoutManager
+                // 只有LinearLayoutManager才有查找第一个和最后一个可见view位置的方法
+                if (mLayoutManager instanceof LinearLayoutManager) {
+                    //获取最后一个可见view的位置
+                    lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
+
+                }
+
+
+                if (dy > 0 && mFab.isShown()) mFab.hide();
+                if (dy < 0 && !mFab.isShown()) mFab.show();
+
+
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE
+                        && lastVisibleItem + 1 == mAdapter.getItemCount()) {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                    //实际项目中这里一般是用网络请求获取数据
+
+                    //为了有刷新的效果，延迟关闭刷新效果
+                    mSwipeRefreshLayout.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            mAdapter.notifyDataSetChanged();
+
+                        }
+                    }, 2000);
+                }
+            }
+        });
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

@@ -324,7 +324,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             //传入请求参数
             Map<String,String> myparams= new HashMap<String, String>();
             myparams.put(getString(R.string.user_name),mEmail);
-            myparams.put(getString(R.string.passwrod),mPassword);
+            myparams.put(getString(R.string.password),mPassword);
             myparams.put("num","1");
             String result=httpPostUtil.sendPostMessage(myparams,"utf-8",httpPostUtil.REGISTER_PATH);
             try {

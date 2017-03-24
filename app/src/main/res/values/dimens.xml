@@ -5,4 +5,6 @@
     <dimen name="top_margin">8dp</dimen>
     <dimen name="username_margin">80dp</dimen>
     <dimen name="user_avatar_margin">6dp</dimen>
+
+    <dimen name="fab_margin">20dp</dimen>
 </resources>
