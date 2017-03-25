@@ -30,16 +30,7 @@ public class HttpPostUtil {
 
     //// TODO: 2017/3/21 这是什么？
     public static String[] sessionId = null;
-
-    public static String PATH = "http://122.112.247.7:8080/Order/Main/";
-    public static String IMAGE_PATH = PATH + "Image.php";
-    public static String REGISTER_PATH = PATH + "Register.php";
-    public static String LOGIN_PATH = PATH + "Login.php";
-    public static String PUBLISH_PATH = PATH + "SaveMessage.php";
-    public static String MENU_PATH = PATH + "ShowMenu.php";
-    public static String ORDER_PATH = PATH + "AddOrder.php";
     public static String urlTemp;
-
     public HttpURLConnection urlConnection;
 
     /**

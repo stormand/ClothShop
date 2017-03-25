@@ -11,6 +11,8 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.clothshop.Info.PostInfo;
+import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 import com.example.clothshop.utils.HttpPostUtil;
 
@@ -65,10 +67,10 @@ public class PublishActivity extends AppCompatActivity {
             super.run();
             HttpPostUtil httpPostUtil=new HttpPostUtil();
             Map<String,String> params=new HashMap<String, String>();
-            params.put(getString(R.string.title),mPubTittle.getText().toString());
-            params.put(getString(R.string.content),mPubEditText.getText().toString());
-            params.put(getString(R.string.uid),"1");
-            String result=HttpPostUtil.sendPostMessage(params,"utf-8",HttpPostUtil.PUBLISH_PATH);
+            params.put(Model.TITLE,mPubTittle.getText().toString());
+            params.put(Model.CONTENT,mPubEditText.getText().toString());
+            params.put(Model.UID,"1");
+            String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.PUBLISH_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
                 if (jsonObject.getString("status").equals("0")){

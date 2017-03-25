@@ -30,6 +30,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.clothshop.Info.UserInfo;
+import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 import com.example.clothshop.utils.HttpPostUtil;
 
@@ -323,10 +325,10 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             HttpPostUtil httpPostUtil=new HttpPostUtil();
             //传入请求参数
             Map<String,String> myparams= new HashMap<String, String>();
-            myparams.put(getString(R.string.user_name),mEmail);
-            myparams.put(getString(R.string.password),mPassword);
+            myparams.put(Model.USER_NAME,mEmail);
+            myparams.put(Model.USER_PASSWORD,mPassword);
             myparams.put("num","1");
-            String result=httpPostUtil.sendPostMessage(myparams,"utf-8",httpPostUtil.REGISTER_PATH);
+            String result=httpPostUtil.sendPostMessage(myparams,"utf-8",Model.REGISTER_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
                 if (jsonObject.getString(("status")).equals("0")) return "success";

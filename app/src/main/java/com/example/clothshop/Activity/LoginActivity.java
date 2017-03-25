@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -36,6 +37,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.clothshop.Info.UserInfo;
+import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 import com.example.clothshop.utils.HttpPostUtil;
 
@@ -366,16 +369,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             HttpPostUtil httpPostUtil=new HttpPostUtil();
             //传入http请求参数
             Map<String,String> myparams=new HashMap<String,String>();
-            myparams.put(getString(R.string.user_name),mEmail);
-            myparams.put(getString(R.string.password),mPassword);
+            myparams.put(Model.USER_NAME,mEmail);
+            myparams.put(Model.USER_PASSWORD,mPassword);
             myparams.put("code",mConfirmCode);
-            String result=httpPostUtil.sendPostMessage(myparams,"utf-8",httpPostUtil.LOGIN_PATH);
+            String result=httpPostUtil.sendPostMessage(myparams,"utf-8",Model.LOGIN_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
                 if (jsonObject.getString("status").equals("0")){
 
-                    MainActivity.isLogin=true;
-                    MainActivity.mUserName=mEmail;
+                    Model.ISLOGIN=true;
+                    Model.MYUSER=new UserInfo();
+                    Model.MYUSER.setUname(mEmail);
+
+
+                    Model.MYUSER.setUage(jsonObject.getString("age"));
+                    Model.MYUSER.setUsex(jsonObject.getString("sex"));
+                    Model.MYUSER.setUheight(jsonObject.getString("height"));
+                    Model.MYUSER.setUweight(jsonObject.getString("weight"));
                     Intent intent=new Intent();
                     //跳转到person页面
                     intent.putExtra(LOGIN_TO_MAIN,MainActivity.TAB_PERSON);
@@ -419,8 +429,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onStop();
         // 保存用户名和密码
         SharedPreferences settings=getSharedPreferences("user_info",0);
-        settings.edit().putString(getString(R.string.user_name),mEmailView.getText().toString())
-        .putString(getString(R.string.password),mPasswordView.getText().toString()).commit();
+        settings.edit().putString(Model.USER_NAME,mEmailView.getText().toString())
+        .putString(Model.USER_PASSWORD,mPasswordView.getText().toString()).commit();
 
     }
 
@@ -440,7 +450,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         public void run() {
             HttpPostUtil httpPostUtil=new HttpPostUtil();
-            Bitmap bitmap=HttpPostUtil.getHttpBitmap(HttpPostUtil.IMAGE_PATH);
+            Bitmap bitmap=HttpPostUtil.getHttpBitmap(Model.IMAGE_PATH);
             showImage(bitmap);
         }
 

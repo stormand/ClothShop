@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 
 
@@ -80,7 +81,7 @@ public class PersonFragment extends Fragment {
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!MainActivity.isLogin){
+                if(!Model.ISLOGIN){
                     Intent intent=new Intent(getActivity(),LoginActivity.class);
                     startActivity(intent);
                 }else {
@@ -116,7 +117,7 @@ public class PersonFragment extends Fragment {
         super.onResume();
         //reset the username
         TextView username= (TextView) getView().findViewById(R.id.user_name_textview);
-         username.setText(getArguments().getString("username"));
+        username.setText(getArguments().getString("username"));
     }
 
     @Override

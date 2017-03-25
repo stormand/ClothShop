@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -12,13 +13,12 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.example.clothshop.Info.UserInfo;
+import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 
 public class MainActivity extends AppCompatActivity implements PersonFragment.OnFragmentInteractionListener,HomeFragment.OnFragmentInteractionListener{
 
-    public static boolean isLogin=false;
-
-    public static String mUserName;
     public static int TAB_HOME=1;
     public static int TAB_PERSON=3;
     private TextView mTextMessage;
@@ -67,8 +67,8 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
                 if(personFragment==null){
                     personFragment=new PersonFragment();
                     Bundle bundle = new Bundle();
-                    if (isLogin){
-                        bundle.putString("username",mUserName);
+                    if (Model.ISLOGIN){
+                        bundle.putString("username", Model.MYUSER.getUname());
                     }else{
                         bundle.putString("username",getString(R.string.not_login));
                     }

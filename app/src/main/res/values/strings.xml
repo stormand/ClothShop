@@ -25,16 +25,6 @@
     </string>
     <string name="title_activity_register">register</string>
 
-
-
-    <!-- DB -->
-    <!-- user -->
-    <string name="user_name">username</string>
-    <string name="password">password</string>
-    <!-- publish -->
-    <string name="title">title</string>
-    <string name="content">content</string>
-    <string name="uid">uid</string>
     <!-- person fragment -->
     <string name="not_login">Not login</string>
 

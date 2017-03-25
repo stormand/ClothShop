@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 import com.example.clothshop.adapter.RecyclerAdapter;
 
@@ -91,7 +92,7 @@ public class HomeFragment extends Fragment {
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.isLogin){
+                if (Model.ISLOGIN){
                   Intent intent=new Intent(getActivity(),PublishActivity.class);
                     startActivity(intent);
                 }else {
