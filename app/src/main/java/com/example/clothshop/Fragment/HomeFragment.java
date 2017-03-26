@@ -1,9 +1,12 @@
-package com.example.clothshop.Activity;
+package com.example.clothshop.Fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -15,12 +18,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.clothshop.Activity.PublishActivity;
+import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 import com.example.clothshop.adapter.RecyclerAdapter;
+import com.example.clothshop.utils.HttpPostUtil;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.StringTokenizer;
 
 
 /**
@@ -42,8 +57,11 @@ public class HomeFragment extends Fragment {
     private RecyclerView.Adapter mAdapter;
     private LinearLayoutManager mLayoutManager;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private List<String> stringList;
+    private static List<PostInfo> mHomeList=null;
     private int lastVisibleItem;
+    private boolean refreshLock=false;
+
+    private GetDataHandler handler=new GetDataHandler();
 
 
     // TODO: Rename and change types of parameters
@@ -102,7 +120,6 @@ public class HomeFragment extends Fragment {
         });
 
         mRecyclerview= (RecyclerView) view.findViewById(R.id.recycler_view);
-        mRecyclerview.setHasFixedSize(true);
         //创建线性布局
         mLayoutManager = new LinearLayoutManager(getContext());
         //垂直方向
@@ -110,20 +127,21 @@ public class HomeFragment extends Fragment {
         //给RecyclerView设置布局管理器
         mRecyclerview.setLayoutManager(mLayoutManager);
         //创建适配器，并且设置
-        stringList=new ArrayList<String>();
-        stringList.add("1");
-        stringList.add("2");
-        stringList.add("3");
-
-        mAdapter = new RecyclerAdapter(getContext(),stringList);
-        mRecyclerview.setAdapter(mAdapter);
-
+        if (mHomeList==null){
+            GetDataThread newPageThread=new GetDataThread(GetDataThread.NEW_PAGE);
+            newPageThread.start();
+        }else{
+            mAdapter = new RecyclerAdapter(getContext(),mHomeList);
+            mRecyclerview.setAdapter(mAdapter);
+            int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.list_item_margin);
+            mRecyclerview.addItemDecoration(new SpaceItemDecoration(spacingInPixels));
+        }
         mSwipeRefreshLayout= (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                stringList.add("下拉刷新");
-                mAdapter.notifyDataSetChanged();
+                GetDataThread topPullThread=new GetDataThread(GetDataThread.TOP_PULL);
+                topPullThread.start();
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
@@ -150,21 +168,24 @@ public class HomeFragment extends Fragment {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_IDLE
-                        && lastVisibleItem + 1 == mAdapter.getItemCount()) {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                    //实际项目中这里一般是用网络请求获取数据
-
-                    //为了有刷新的效果，延迟关闭刷新效果
-                    mSwipeRefreshLayout.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mSwipeRefreshLayout.setRefreshing(false);
-                            mAdapter.notifyDataSetChanged();
-
-                        }
-                    }, 2000);
-                }
+//                if (newState == RecyclerView.SCROLL_STATE_IDLE
+//                        && lastVisibleItem + 1 == mAdapter.getItemCount()
+//                        && !refreshLock) {
+//                    mSwipeRefreshLayout.setRefreshing(true);
+//                    //实际项目中这里一般是用网络请求获取数据
+//                    refreshLock=true;
+//                    //为了有刷新的效果，延迟关闭刷新效果
+////                    mSwipeRefreshLayout.postDelayed(new Runnable() {
+////                        @Override
+////                        public void run() {
+////                            stringList.add("上啦");
+////                            mSwipeRefreshLayout.setRefreshing(false);
+////                            mAdapter.notifyDataSetChanged();
+////                            refreshLock=false;
+////                        }
+////                    }, 4000);
+//
+//                }
             }
         });
 
@@ -208,5 +229,95 @@ public class HomeFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    class GetDataThread extends Thread{
+
+        public static final int NEW_PAGE=1;
+        public static final int TOP_PULL=2;
+        public static final int BOTTOM_PULL=3;
+
+        private int dataType;
+
+        GetDataThread(int type){
+            this.dataType=type;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            Map<String,String> params=new HashMap<String,String>();
+            String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.HOME_PATH);
+            getData(result);
+        }
+
+        private void getData(String result){
+            List<PostInfo> paramsList=new ArrayList<PostInfo>();
+            try {
+                JSONObject jsonObject=new JSONObject(result);
+                JSONArray jsonArray=jsonObject.getJSONArray("post");
+                for (int i=0;i<jsonArray.length();i++){
+                    PostInfo postInfo=new PostInfo();
+                    JSONObject jo= (JSONObject) jsonArray.get(i);
+                    postInfo.setPtitle(jo.getString("title"));
+                    postInfo.setUid(jo.getString("uid"));
+                    postInfo.setPdaytime(jo.getString("day_time"));
+                    paramsList.add(postInfo);
+                }
+
+                Message msg=Message.obtain(handler,dataType);
+                msg.obj=paramsList;
+                msg.sendToTarget();
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    class GetDataHandler extends Handler{
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case GetDataThread.NEW_PAGE:
+                    mHomeList=new ArrayList<PostInfo>();
+                    mHomeList.addAll((ArrayList<PostInfo>) msg.obj);
+                    mAdapter = new RecyclerAdapter(getContext(),mHomeList);
+                    mRecyclerview.setAdapter(mAdapter);
+                    int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.list_item_margin);
+                    mRecyclerview.addItemDecoration(new SpaceItemDecoration(spacingInPixels));
+                    break;
+                case GetDataThread.TOP_PULL:
+                    mHomeList.clear();
+                    mHomeList.addAll((ArrayList<PostInfo>) msg.obj);
+                    mAdapter.notifyDataSetChanged();
+                    break;
+                case GetDataThread.BOTTOM_PULL:
+                    List<PostInfo> list=new ArrayList<PostInfo>();
+                    list.addAll(mHomeList);
+                    mHomeList.clear();
+                    mHomeList.addAll(list);
+                    mAdapter.notifyDataSetChanged();
+                    break;
+            }
+        }
+    }
+
+    public class SpaceItemDecoration extends RecyclerView.ItemDecoration{
+
+        private int space;
+
+        public SpaceItemDecoration(int space) {
+            this.space = space;
+        }
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            outRect.top = space;
+            outRect.left=space;
+            outRect.right=space;
+        }
     }
 }

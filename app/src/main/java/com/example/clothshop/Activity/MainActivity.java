@@ -1,19 +1,17 @@
 package com.example.clothshop.Activity;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.example.clothshop.Info.UserInfo;
+import com.example.clothshop.Fragment.HomeFragment;
+import com.example.clothshop.Fragment.PersonFragment;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 

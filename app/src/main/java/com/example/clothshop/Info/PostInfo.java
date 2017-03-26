@@ -10,6 +10,16 @@ public class PostInfo {
     private String ptitle;      //帖子标题
     private String uid;         //帖子作者id
     private String pcontent;    //帖子内容
+    private String pdaytime;
+
+    public void setPdaytime(String pdaytime) {
+        this.pdaytime = pdaytime;
+    }
+
+    public String getPdaytime() {
+
+        return pdaytime;
+    }
 
     public void setPid(String pid) {
         this.pid = pid;

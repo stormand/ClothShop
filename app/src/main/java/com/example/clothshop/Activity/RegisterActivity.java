@@ -327,7 +327,6 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             Map<String,String> myparams= new HashMap<String, String>();
             myparams.put(Model.USER_NAME,mEmail);
             myparams.put(Model.USER_PASSWORD,mPassword);
-            myparams.put("num","1");
             String result=httpPostUtil.sendPostMessage(myparams,"utf-8",Model.REGISTER_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
@@ -335,7 +334,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                 return jsonObject.getString("mes");
             } catch (JSONException e) {
                 e.printStackTrace();
-                return "网络错误";
+                return e.toString();
             }
         }
 

@@ -6,9 +6,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.R;
 
 import java.util.List;
@@ -21,7 +23,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private LayoutInflater mInflater;
     private Context mContext;
-    private List<String> mDatas;
+    private List<PostInfo> mDatas;
     private static final int TYPE_ITEM = 0;  //普通Item View
     private static final int TYPE_FOOTER = 1;  //底部FootView
     //已经到底了
@@ -31,7 +33,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     //上拉加载状态-默认为0
     private int load_more_status = 0;
 
-    public RecyclerAdapter(Context mContext, List<String> mDatas) {
+    public RecyclerAdapter(Context mContext, List<PostInfo> mDatas) {
         this.mContext = mContext;
         this.mDatas = mDatas;
     }
@@ -46,7 +48,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             ItemHolder itemHolder = (ItemHolder) holder;
-            itemHolder.textView.setText(mDatas.get(position));
+            itemHolder.textView.setText(mDatas.get(position).getPtitle());
     }
 
     @Override
@@ -56,10 +58,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     class ItemHolder extends RecyclerView.ViewHolder {
         public TextView textView;
-
+        public ImageView imageView;
         public ItemHolder(View itemView) {
             super(itemView);
-            textView = (TextView) itemView.findViewById(R.id.tv_item_recycler_refresh);
+            imageView= (ImageView) itemView.findViewById(R.id.home_list_image_item);
+            textView = (TextView) itemView.findViewById(R.id.home_list_title_item);
         }
     }
 

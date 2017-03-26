@@ -381,7 +381,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Model.MYUSER=new UserInfo();
                     Model.MYUSER.setUname(mEmail);
 
-
+                    Model.MYUSER.setUserid(jsonObject.getString("id"));
                     Model.MYUSER.setUage(jsonObject.getString("age"));
                     Model.MYUSER.setUsex(jsonObject.getString("sex"));
                     Model.MYUSER.setUheight(jsonObject.getString("height"));

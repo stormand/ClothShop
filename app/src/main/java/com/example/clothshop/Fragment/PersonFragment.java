@@ -1,4 +1,4 @@
-package com.example.clothshop.Activity;
+package com.example.clothshop.Fragment;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.clothshop.Activity.LoginActivity;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 

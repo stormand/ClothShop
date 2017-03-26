@@ -16,10 +16,11 @@ public class Model {
     public static final String PUBLISH_PATH = PATH + "SaveMessage.php";
     public static final String MENU_PATH = PATH + "ShowMenu.php";
     public static final String ORDER_PATH = PATH + "AddOrder.php";
+    public static final String HOME_PATH = PATH + "ShowHome.php";
 
     //user
     public static final String USER_NAME="username";
-    public static final String USER_PASSWORD="pasword";
+    public static final String USER_PASSWORD="password";
     public static final String USER_PHONE="phone";
     public static final String USER_EMAIL="email";
     public static final String USER_AGE="age";

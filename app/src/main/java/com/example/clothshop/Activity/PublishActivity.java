@@ -36,8 +36,8 @@ public class PublishActivity extends AppCompatActivity {
         setContentView(R.layout.activity_publish);
 
         handler=new SendHandler();
-        mPubEditText= (EditText) findViewById(R.id.pub_tittle);
-        mPubTittle= (EditText) findViewById(R.id.pub_edit_text);
+        mPubEditText= (EditText) findViewById(R.id.pub_edit_text);
+        mPubTittle= (EditText) findViewById(R.id.pub_tittle);
 
     }
 
@@ -69,7 +69,7 @@ public class PublishActivity extends AppCompatActivity {
             Map<String,String> params=new HashMap<String, String>();
             params.put(Model.TITLE,mPubTittle.getText().toString());
             params.put(Model.CONTENT,mPubEditText.getText().toString());
-            params.put(Model.UID,"1");
+            params.put(Model.UID,Model.MYUSER.getUserid());
             String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.PUBLISH_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
