@@ -33,7 +33,8 @@ public class Model {
     public static final String CONTENT="content";
     public static final String UID="uid";
 
-
+    public static int SCREEMWIDTH;
+    public static int LISTMARGIN;
     //islogin
     public static boolean ISLOGIN=false;
     //my user

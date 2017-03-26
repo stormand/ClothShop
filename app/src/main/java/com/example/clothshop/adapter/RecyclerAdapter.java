@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.clothshop.Info.PostInfo;
+import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 
 import java.util.List;
@@ -21,21 +22,15 @@ import java.util.List;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
-    private LayoutInflater mInflater;
     private Context mContext;
     private List<PostInfo> mDatas;
-    private static final int TYPE_ITEM = 0;  //普通Item View
-    private static final int TYPE_FOOTER = 1;  //底部FootView
-    //已经到底了
-    public static final int PULLUP_LOAD_MORE = 0;
-    //正在加载中
-    public static final int LOADING_MORE = 1;
-    //上拉加载状态-默认为0
-    private int load_more_status = 0;
+    private int mImageWidth;
+
 
     public RecyclerAdapter(Context mContext, List<PostInfo> mDatas) {
         this.mContext = mContext;
         this.mDatas = mDatas;
+        mImageWidth= Model.SCREEMWIDTH-2*Model.LISTMARGIN;
     }
 
     @Override
@@ -63,12 +58,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             super(itemView);
             imageView= (ImageView) itemView.findViewById(R.id.home_list_image_item);
             textView = (TextView) itemView.findViewById(R.id.home_list_title_item);
+            ViewGroup.LayoutParams lp=imageView.getLayoutParams();
+            lp.width=mImageWidth;
+            lp.height=mImageWidth;
+            imageView.setLayoutParams(lp);
         }
     }
 
 
-    public void changeMoreStatus(int status) {
-        load_more_status = status;
-        notifyDataSetChanged();
-    }
 }

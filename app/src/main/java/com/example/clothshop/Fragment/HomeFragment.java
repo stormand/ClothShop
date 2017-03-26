@@ -133,8 +133,7 @@ public class HomeFragment extends Fragment {
         }else{
             mAdapter = new RecyclerAdapter(getContext(),mHomeList);
             mRecyclerview.setAdapter(mAdapter);
-            int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.list_item_margin);
-            mRecyclerview.addItemDecoration(new SpaceItemDecoration(spacingInPixels));
+            mRecyclerview.addItemDecoration(new SpaceItemDecoration());
         }
         mSwipeRefreshLayout= (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -287,8 +286,7 @@ public class HomeFragment extends Fragment {
                     mHomeList.addAll((ArrayList<PostInfo>) msg.obj);
                     mAdapter = new RecyclerAdapter(getContext(),mHomeList);
                     mRecyclerview.setAdapter(mAdapter);
-                    int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.list_item_margin);
-                    mRecyclerview.addItemDecoration(new SpaceItemDecoration(spacingInPixels));
+                    mRecyclerview.addItemDecoration(new SpaceItemDecoration());
                     break;
                 case GetDataThread.TOP_PULL:
                     mHomeList.clear();
@@ -307,15 +305,10 @@ public class HomeFragment extends Fragment {
     }
 
     public class SpaceItemDecoration extends RecyclerView.ItemDecoration{
-
-        private int space;
-
-        public SpaceItemDecoration(int space) {
-            this.space = space;
-        }
+        int space=Model.LISTMARGIN;
         @Override
         public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            outRect.top = space;
+            outRect.top = space*3/2;
             outRect.left=space;
             outRect.right=space;
         }

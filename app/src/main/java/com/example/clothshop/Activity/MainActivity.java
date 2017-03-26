@@ -1,5 +1,6 @@
 package com.example.clothshop.Activity;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,12 +9,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.example.clothshop.Fragment.HomeFragment;
 import com.example.clothshop.Fragment.PersonFragment;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
+
+import static java.security.AccessController.getContext;
 
 public class MainActivity extends AppCompatActivity implements PersonFragment.OnFragmentInteractionListener,HomeFragment.OnFragmentInteractionListener{
 
@@ -91,7 +95,9 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        WindowManager wm = this.getWindowManager();
+        Model.SCREEMWIDTH=wm.getDefaultDisplay().getWidth();
+        Model.LISTMARGIN=Model.SCREEMWIDTH/30;
         fragmentManager=getSupportFragmentManager();
 
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
