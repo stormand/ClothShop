@@ -9,4 +9,10 @@
     <dimen name="fab_margin">20dp</dimen>
 
     <dimen name="list_item_margin">15dp</dimen>
+    <dimen name="app_bar_height">180dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+
+    <dimen name="avatar_username_margin">5dp</dimen>
+
+    <dimen name="person_layout_height">70dp</dimen>
 </resources>

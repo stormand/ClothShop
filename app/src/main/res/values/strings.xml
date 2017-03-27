@@ -30,4 +30,12 @@
 
     <!-- publish activity -->
     <string name="pub_title">title</string>
+    <string name="title_activity_user_info">UserInfoActivity</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="user_info">user infomation</string>
+
+
+
 </resources>

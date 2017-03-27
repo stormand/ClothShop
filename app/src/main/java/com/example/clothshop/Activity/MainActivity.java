@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -94,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         WindowManager wm = this.getWindowManager();
         Model.SCREEMWIDTH=wm.getDefaultDisplay().getWidth();
@@ -109,7 +111,9 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
     @Override
     protected void onResume() {
         int id = getIntent().getIntExtra(LoginActivity.LOGIN_TO_MAIN, TAB_HOME);
-        chooseNav(id);
+        if (id==TAB_PERSON){
+            chooseNav(id);
+        }
         super.onResume();
     }
 

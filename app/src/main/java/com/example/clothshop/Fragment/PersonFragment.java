@@ -4,13 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.clothshop.Activity.LoginActivity;
 import com.example.clothshop.Model.Model;
@@ -38,6 +41,7 @@ public class PersonFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    private FloatingActionButton mLoginFab;
 
     public PersonFragment() {
         // Required empty public constructor
@@ -76,20 +80,42 @@ public class PersonFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-
         View view = inflater.inflate(R.layout.fragment_person, container, false);
-        Button loginBtn= (Button) view.findViewById(R.id.login_btn);
-        loginBtn.setOnClickListener(new View.OnClickListener() {
+
+        ConstraintLayout mUserInfoLayout= (ConstraintLayout) view.findViewById(R.id.user_info_layout);
+        mUserInfoLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "aaaa", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mLoginFab= (FloatingActionButton) view.findViewById(R.id.login_fab);
+        mLoginFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!Model.ISLOGIN){
                     Intent intent=new Intent(getActivity(),LoginActivity.class);
                     startActivity(intent);
                 }else {
-                    // TODO: 2017/3/24  退出登陆，个人信息 
+                    // TODO: 2017/3/24  退出登陆
                 }
             }
         });
+
+
+
+//        Button loginBtn= (Button) view.findViewById(R.id.login_btn);
+//        loginBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(!Model.ISLOGIN){
+//                    Intent intent=new Intent(getActivity(),LoginActivity.class);
+//                    startActivity(intent);
+//                }else {
+//                    // TODO: 2017/3/24  退出登陆
+//                }
+//            }
+//        });
 
         return view;
 
@@ -117,8 +143,14 @@ public class PersonFragment extends Fragment {
     public void onResume() {
         super.onResume();
         //reset the username
-        TextView username= (TextView) getView().findViewById(R.id.user_name_textview);
-        username.setText(getArguments().getString("username"));
+        // TODO: 2017/3/27 change
+        if (Model.ISLOGIN){
+            CollapsingToolbarLayout mCollapsingToolbarLayout = (CollapsingToolbarLayout) getView().findViewById(R.id.toolbar_layout);
+            mCollapsingToolbarLayout.setTitle(Model.MYUSER.getUname());
+            mLoginFab.hide();
+        }
+
+
     }
 
     @Override
