@@ -321,13 +321,11 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
         @Override
         protected String doInBackground(Void... params) {
-
-            HttpPostUtil httpPostUtil=new HttpPostUtil();
             //传入请求参数
             Map<String,String> myparams= new HashMap<String, String>();
-            myparams.put(Model.USER_NAME,mEmail);
-            myparams.put(Model.USER_PASSWORD,mPassword);
-            String result=httpPostUtil.sendPostMessage(myparams,"utf-8",Model.REGISTER_PATH);
+            myparams.put(Model.USER_NAME_ATTR,mEmail);
+            myparams.put(Model.USER_PASSWORD_ATTR,mPassword);
+            String result=HttpPostUtil.sendPostMessage(myparams,"utf-8",Model.REGISTER_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
                 if (jsonObject.getString(("status")).equals("0")) return "success";

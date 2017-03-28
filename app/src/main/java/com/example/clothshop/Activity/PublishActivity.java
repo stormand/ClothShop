@@ -65,11 +65,10 @@ public class PublishActivity extends AppCompatActivity {
         @Override
         public void run() {
             super.run();
-            HttpPostUtil httpPostUtil=new HttpPostUtil();
             Map<String,String> params=new HashMap<String, String>();
-            params.put(Model.TITLE,mPubTittle.getText().toString());
-            params.put(Model.CONTENT,mPubEditText.getText().toString());
-            params.put(Model.UID,Model.MYUSER.getUserid());
+            params.put(Model.TITLE_ATTR,mPubTittle.getText().toString());
+            params.put(Model.CONTENT_ATTR,mPubEditText.getText().toString());
+            params.put(Model.UID_ATTR,Model.MYUSER.getUserid());
             String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.PUBLISH_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);

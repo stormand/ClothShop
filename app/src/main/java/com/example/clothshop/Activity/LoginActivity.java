@@ -366,13 +366,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
          */
         @Override
         protected Boolean doInBackground(Void... params) {
-            HttpPostUtil httpPostUtil=new HttpPostUtil();
             //传入http请求参数
             Map<String,String> myparams=new HashMap<String,String>();
-            myparams.put(Model.USER_NAME,mEmail);
-            myparams.put(Model.USER_PASSWORD,mPassword);
+            myparams.put(Model.USER_NAME_ATTR,mEmail);
+            myparams.put(Model.USER_PASSWORD_ATTR,mPassword);
+            myparams.put(Model.LOGIN_MODE,Model.USER_AGE_ATTR);
             myparams.put("code",mConfirmCode);
-            String result=httpPostUtil.sendPostMessage(myparams,"utf-8",Model.LOGIN_PATH);
+            String result=HttpPostUtil.sendPostMessage(myparams,"utf-8",Model.LOGIN_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
                 if (jsonObject.getString("status").equals("0")){
@@ -428,9 +428,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onStop() {
         super.onStop();
         // 保存用户名和密码
-        SharedPreferences settings=getSharedPreferences("user_info",0);
-        settings.edit().putString(Model.USER_NAME,mEmailView.getText().toString())
-        .putString(Model.USER_PASSWORD,mPasswordView.getText().toString()).commit();
+        SharedPreferences settings=getSharedPreferences(Model.SP_NAME_PASSWD,MODE_PRIVATE);
+        settings.edit().putString(Model.USER_NAME_ATTR,mEmailView.getText().toString())
+        .putString(Model.USER_PASSWORD_ATTR,mPasswordView.getText().toString()).commit();
 
     }
 

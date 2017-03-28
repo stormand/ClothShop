@@ -16,6 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.clothshop.Activity.LoginActivity;
+import com.example.clothshop.Activity.UserInfoActivity;
+import com.example.clothshop.Info.UserInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 
@@ -86,14 +88,15 @@ public class PersonFragment extends Fragment {
         mUserInfoLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "aaaa", Toast.LENGTH_SHORT).show();
+                Intent intent=new Intent(getActivity(), UserInfoActivity.class);
+                startActivity(intent);
             }
         });
         mLoginFab= (FloatingActionButton) view.findViewById(R.id.login_fab);
         mLoginFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!Model.ISLOGIN){
+                if(Model.MYUSER==null){
                     Intent intent=new Intent(getActivity(),LoginActivity.class);
                     startActivity(intent);
                 }else {
@@ -144,7 +147,7 @@ public class PersonFragment extends Fragment {
         super.onResume();
         //reset the username
         // TODO: 2017/3/27 change
-        if (Model.ISLOGIN){
+        if (Model.MYUSER!=null){
             CollapsingToolbarLayout mCollapsingToolbarLayout = (CollapsingToolbarLayout) getView().findViewById(R.id.toolbar_layout);
             mCollapsingToolbarLayout.setTitle(Model.MYUSER.getUname());
             mLoginFab.hide();

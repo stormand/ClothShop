@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.example.clothshop.Activity.LoginActivity;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -108,6 +110,7 @@ public class HttpPostUtil {
                     outPutStream.write(data,0,len);
                 }
                 result=new String(outPutStream.toByteArray(),encode);
+                Log.e("net_result",result);
             } catch (IOException e) {
                 e.printStackTrace();
             }
