@@ -8,8 +8,8 @@
     tools:context="com.example.clothshop.Fragment.PersonFragment"
     tools:showIn="@layout/fragment_person">
 
-
     <LinearLayout
+        android:id="@+id/person_login_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">

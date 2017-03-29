@@ -388,10 +388,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Model.MYUSER.setUweight(jsonObject.getString("weight"));
                     Intent intent=new Intent();
                     //跳转到person页面
-                    intent.putExtra(LOGIN_TO_MAIN,MainActivity.TAB_PERSON);
-                    intent.setClass(LoginActivity.this,MainActivity.class);
-                    startActivity(intent);
-
                     return true;
                 }else {
                     mes=jsonObject.getString("mes");
@@ -409,7 +405,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                finish();
+                LoginActivity.this.finish();
             } else {
                 Toast.makeText(LoginActivity.this, mes, Toast.LENGTH_SHORT).show();
                 mPasswordView.setError(getString(R.string.error_incorrect_password));

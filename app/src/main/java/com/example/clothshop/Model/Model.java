@@ -33,6 +33,10 @@ public class Model {
     public static final String TITLE_ATTR="title";
     public static final String CONTENT_ATTR="content";
     public static final String UID_ATTR="uid";
+    public static final String UAGE_ATTR="uage";
+    public static final String USEX_ATTR="usex";
+    public static final String UHEIGHT_ATTR="uheight";
+    public static final String UWEIGHT_ATTR="uweight";
 
     public static final String FEMALE_TEXT="女";
     public static final String MALE_TEXT="男";

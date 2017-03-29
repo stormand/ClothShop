@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
 
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
+        chooseNav(1);
 
         SharedPreferences sp=getSharedPreferences(Model.SP_NAME_PASSWD,MODE_PRIVATE);
         if (!sp.getString(Model.USER_NAME_ATTR,"").equals("") && Model.MYUSER==null){

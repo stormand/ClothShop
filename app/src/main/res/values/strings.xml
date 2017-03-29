@@ -30,12 +30,17 @@
 
     <!-- publish activity -->
     <string name="pub_title">title</string>
+    <string name="pub_content">请输入正文</string>
     <string name="title_activity_user_info">UserInfoActivity</string>
+
+    <string name="action_setting">设置</string>
+    <string name="logout_button">退出登陆</string>
 
     <string name="action_send">保存</string>
 
     <string name="user_info">user infomation</string>
     <string name="edit_user_name">昵称</string>
+    <string name="edit_sex">性别</string>
     <string name="radio_sex_female">女</string>
     <string name="radio_sex_male">男</string>
     <string name="edit_height">身高</string>

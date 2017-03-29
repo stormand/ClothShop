@@ -26,6 +26,10 @@ public class PublishActivity extends AppCompatActivity {
 
     private EditText mPubTittle;
     private EditText mPubEditText;
+    private EditText mPubSexEditText;
+    private EditText mPubAgeEditText;
+    private EditText mPubHeightEditText;
+    private EditText mPubWeightEditText;
 
     private SendHandler handler;
 
@@ -38,6 +42,14 @@ public class PublishActivity extends AppCompatActivity {
         handler=new SendHandler();
         mPubEditText= (EditText) findViewById(R.id.pub_edit_text);
         mPubTittle= (EditText) findViewById(R.id.pub_tittle);
+        mPubSexEditText= (EditText) findViewById(R.id.pub_sex_edit_text);
+        mPubSexEditText.setText(Model.MYUSER.getUsex());
+        mPubAgeEditText= (EditText) findViewById(R.id.pub_age_edit_text);
+        mPubAgeEditText.setText(Model.MYUSER.getUage());
+        mPubHeightEditText= (EditText) findViewById(R.id.pub_height_edit_text);
+        mPubHeightEditText.setText(Model.MYUSER.getUheight());
+        mPubWeightEditText= (EditText) findViewById(R.id.pub_weight_edit_text);
+        mPubWeightEditText.setText(Model.MYUSER.getUweight());
 
     }
 
@@ -69,28 +81,28 @@ public class PublishActivity extends AppCompatActivity {
             params.put(Model.TITLE_ATTR,mPubTittle.getText().toString());
             params.put(Model.CONTENT_ATTR,mPubEditText.getText().toString());
             params.put(Model.UID_ATTR,Model.MYUSER.getUserid());
+            params.put(Model.UAGE_ATTR,mPubAgeEditText.getText().toString());
+            params.put(Model.USEX_ATTR,mPubSexEditText.getText().toString());
+            params.put(Model.UHEIGHT_ATTR,mPubHeightEditText.getText().toString());
+            params.put(Model.UWEIGHT_ATTR,mPubWeightEditText.getText().toString());
             String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.PUBLISH_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
                 if (jsonObject.getString("status").equals("0")){
-
-                    Intent intent=new Intent();
-                    intent.setClass(PublishActivity.this,MainActivity.class);
-                    startActivity(intent);
-                    showMessage(jsonObject.getString("mes"));
+                    showMessage(jsonObject.getString("mes"),SendHandler.SUCCESS);
                     finish();
                 }else {
-                    showMessage(jsonObject.getString("mes"));
+                    showMessage(jsonObject.getString("mes"),SendHandler.FAILURE);
                 }
             } catch (JSONException e) {
-                showMessage(e.toString());
+                showMessage(e.toString(),SendHandler.FAILURE);
                 e.printStackTrace();
             }
 
         }
 
-        private void showMessage(String message){
-            Message msg=Message.obtain(handler,SendHandler.MESSAGE);
+        private void showMessage(String message,int status){
+            Message msg=Message.obtain(handler,status);
             msg.obj=message;
             msg.sendToTarget();
             msg.setTarget(handler);
@@ -99,13 +111,22 @@ public class PublishActivity extends AppCompatActivity {
 
     class SendHandler extends Handler{
 
-        public static final int MESSAGE=0x0001;
+        public static final int FAILURE=0x0002;
+        public static final int SUCCESS=0x0001;
 
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if (msg.what==MESSAGE){
-                Toast.makeText(PublishActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+            switch (msg.what){
+                case SUCCESS:
+                    Toast.makeText(PublishActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                    PublishActivity.this.finish();
+                    break;
+                case FAILURE:
+                    Toast.makeText(PublishActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    break;
             }
         }
     }

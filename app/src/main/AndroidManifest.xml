@@ -36,7 +36,8 @@
         <activity
             android:name=".Activity.PublishActivity"
             android:windowSoftInputMode="stateVisible|adjustResize" />
-        <activity android:name=".Activity.UserInfoActivity"></activity>
+        <activity android:name=".Activity.UserInfoActivity" />
+        <activity android:name=".Activity.SettingActivity"></activity>
     </application>
 
 </manifest>
