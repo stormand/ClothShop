@@ -30,6 +30,9 @@ import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 import com.example.clothshop.utils.HttpPostUtil;
 
+import net.yazeed44.imagepicker.util.ImageEntry;
+import net.yazeed44.imagepicker.util.Picker;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -122,9 +125,8 @@ public class PublishActivity extends AppCompatActivity {
                 if(position == imageItem.size()-1) { //点击图片位置为+ 0对应0张图片
                     Toast.makeText(PublishActivity.this, "添加图片", Toast.LENGTH_SHORT).show();
                     //选择图片
-                    Intent intent = new Intent(Intent.ACTION_PICK,
-                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    startActivityForResult(intent, IMAGE_OPEN);
+                    //You can change many settings in builder like limit , Pick mode and colors
+                    new Picker.Builder(PublishActivity.this,new MyPickListener()).build().startActivity();
                     //通过onResume()刷新数据
                 }
                 else {
@@ -134,6 +136,27 @@ public class PublishActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private class MyPickListener implements Picker.PickListener
+    {
+        @Override
+        public void onPickedSuccessfully(String[] paths) {
+            Bitmap addbmp=null;
+            imageItem.remove(imageItem.size()-1);
+        for (int i=0;i<paths.length;i++){
+            addbmp=BitmapFactory.decodeFile(paths[i]);
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            map.put("itemImage", addbmp);
+            imageItem.add(map);
+        }
+            imageItem.add(mAddIconItem);
+            simpleAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onCancel(){
+        }
     }
 
     /*
@@ -161,47 +184,7 @@ public class PublishActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(!TextUtils.isEmpty(pathImage)){
-            Bitmap addbmp=BitmapFactory.decodeFile(pathImage);
-            HashMap<String, Object> map = new HashMap<String, Object>();
-            map.put("itemImage", addbmp);
-            imageItem.remove(imageItem.size()-1);
-            imageItem.add(map);
-            imageItem.add(mAddIconItem);
-            simpleAdapter.notifyDataSetChanged();
-            //刷新后释放防止手机休眠后自动添加
-            pathImage = null;
-        }
-    }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        //打开图片
-        if(resultCode==RESULT_OK && requestCode==IMAGE_OPEN) {
-            Uri uri = data.getData();
-            if (!TextUtils.isEmpty(uri.getAuthority())) {
-                //查询选择图片
-                Cursor cursor = getContentResolver().query(
-                        uri,
-                        new String[] { MediaStore.Images.Media.DATA },
-                        null,
-                        null,
-                        null);
-                //返回 没找到选择图片
-                if (null == cursor) {
-                    return;
-                }
-                //光标移动至开头 获取图片路径
-                cursor.moveToFirst();
-                pathImage = cursor.getString(cursor
-                        .getColumnIndex(MediaStore.Images.Media.DATA));
-            }
-        }  //end if 打开图片
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
