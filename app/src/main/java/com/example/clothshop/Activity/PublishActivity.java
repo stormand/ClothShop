@@ -1,14 +1,28 @@
 package com.example.clothshop.Activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.example.clothshop.Info.PostInfo;
@@ -19,6 +33,7 @@ import com.example.clothshop.utils.HttpPostUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +45,15 @@ public class PublishActivity extends AppCompatActivity {
     private EditText mPubAgeEditText;
     private EditText mPubHeightEditText;
     private EditText mPubWeightEditText;
+
+    private GridView mImageGridView;              //网格显示缩略图
+    private final int IMAGE_OPEN = 1;        //打开图片标记
+    private String pathImage;                //选择图片路径
+    private Bitmap bmp;                      //导入临时图片
+    private ArrayList<HashMap<String, Object>> imageItem;
+    private SimpleAdapter simpleAdapter;
+    private int mImageWidth;
+    private HashMap<String, Object> mAddIconItem;
 
     private SendHandler handler;
 
@@ -50,7 +74,133 @@ public class PublishActivity extends AppCompatActivity {
         mPubHeightEditText.setText(Model.MYUSER.getUheight());
         mPubWeightEditText= (EditText) findViewById(R.id.pub_weight_edit_text);
         mPubWeightEditText.setText(Model.MYUSER.getUweight());
+        mImageWidth=Model.SCREEMWIDTH/5;
+        initImageGrid();
 
+    }
+
+    private void initImageGrid(){
+        bmp = BitmapFactory.decodeResource(getResources(), R.drawable.add_image);
+        mImageGridView= (GridView) findViewById(R.id.image_grid_view);
+        imageItem = new ArrayList<HashMap<String, Object>>();
+        mAddIconItem = new HashMap<String, Object>();
+        mAddIconItem.put("itemImage", bmp);
+        imageItem.add(mAddIconItem);
+
+        simpleAdapter = new SimpleAdapter(this,
+                imageItem, R.layout.item_grid_add_image,
+                new String[] { "itemImage"}, new int[] { R.id.add_image_view_item});
+
+        simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(View view, Object data,
+                                        String textRepresentation) {
+                // TODO Auto-generated method stub
+                if(view instanceof ImageView && data instanceof Bitmap){
+                    ImageView i = (ImageView)view;
+                    int width=Model.SCREEMWIDTH/5;
+                    final ViewGroup.LayoutParams lp=i.getLayoutParams();
+                    lp.height=mImageWidth;
+                    lp.width=mImageWidth;
+                    i.setLayoutParams(lp);
+                    i.setImageBitmap((Bitmap) data);
+                    return true;
+                }
+                return false;
+            }
+        });
+        mImageGridView.setAdapter(simpleAdapter);
+
+                /*
+         * 监听GridView点击事件
+         * 报错:该函数必须抽象方法 故需要手动导入import android.view.View;
+         */
+        mImageGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id)
+            {
+                if(position == imageItem.size()-1) { //点击图片位置为+ 0对应0张图片
+                    Toast.makeText(PublishActivity.this, "添加图片", Toast.LENGTH_SHORT).show();
+                    //选择图片
+                    Intent intent = new Intent(Intent.ACTION_PICK,
+                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(intent, IMAGE_OPEN);
+                    //通过onResume()刷新数据
+                }
+                else {
+                    dialog(position);
+                    //Toast.makeText(MainActivity.this, "点击第"+(position + 1)+" 号图片",
+                    //      Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    /*
+ * Dialog对话框提示用户删除操作
+ * position为删除图片位置
+ */
+    protected void dialog(final int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(PublishActivity.this);
+        builder.setMessage("确认移除已添加图片吗？");
+        builder.setTitle("提示");
+        builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                imageItem.remove(position);
+                simpleAdapter.notifyDataSetChanged();
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(!TextUtils.isEmpty(pathImage)){
+            Bitmap addbmp=BitmapFactory.decodeFile(pathImage);
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            map.put("itemImage", addbmp);
+            imageItem.remove(imageItem.size()-1);
+            imageItem.add(map);
+            imageItem.add(mAddIconItem);
+            simpleAdapter.notifyDataSetChanged();
+            //刷新后释放防止手机休眠后自动添加
+            pathImage = null;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //打开图片
+        if(resultCode==RESULT_OK && requestCode==IMAGE_OPEN) {
+            Uri uri = data.getData();
+            if (!TextUtils.isEmpty(uri.getAuthority())) {
+                //查询选择图片
+                Cursor cursor = getContentResolver().query(
+                        uri,
+                        new String[] { MediaStore.Images.Media.DATA },
+                        null,
+                        null,
+                        null);
+                //返回 没找到选择图片
+                if (null == cursor) {
+                    return;
+                }
+                //光标移动至开头 获取图片路径
+                cursor.moveToFirst();
+                pathImage = cursor.getString(cursor
+                        .getColumnIndex(MediaStore.Images.Media.DATA));
+            }
+        }  //end if 打开图片
     }
 
     @Override
