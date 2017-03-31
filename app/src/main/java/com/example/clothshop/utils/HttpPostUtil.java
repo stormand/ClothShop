@@ -11,6 +11,9 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,6 +26,9 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.UUID;
+
+import static android.provider.ContactsContract.CommonDataKinds.StructuredName.PREFIX;
 
 /**
  * Created by 一凡 on 2017/3/21.
@@ -34,6 +40,11 @@ public class HttpPostUtil {
     public static String[] sessionId = null;
     public static String urlTemp;
     public HttpURLConnection urlConnection;
+
+    static String BOUNDARY = java.util.UUID.randomUUID().toString();
+    static String PREFIX = "--", LINEND = "\r\n";
+    static String MULTIPART_FROM_DATA = "multipart/form-data";
+    static String CHARSET = "UTF-8";
 
     /**
      * @param params
@@ -90,6 +101,80 @@ public class HttpPostUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return "";
+    }
+
+
+    public static String sendPostMessage(Map<String, String> params, String encode, String url_path,File[] pictureFile){
+        URL url = null;
+        try {
+            url = new URL(url_path);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            conn.setDoInput(true);// 允许输入
+            conn.setDoOutput(true);// 允许输出
+            conn.setUseCaches(false);
+            conn.setReadTimeout(10 * 1000); // 缓存的最长时间
+            conn.setRequestMethod("POST");
+
+            conn.setRequestProperty("Charset", "UTF-8");
+            conn.setRequestProperty("Connection", "Keep-Alive");
+            conn.setRequestProperty("Content-Type", MULTIPART_FROM_DATA + ";boundary=" + BOUNDARY);
+
+
+            DataOutputStream os =  new DataOutputStream(conn.getOutputStream());
+
+            StringBuilder sb = new StringBuilder(); //用StringBuilder拼接报文，用于上传图片数据
+            // TODO: 2017/4/1 for 循环，多张照片的name？
+            sb.append(PREFIX);
+            sb.append(BOUNDARY);
+            sb.append(LINEND);
+            sb.append("Content-Disposition: form-data; name=\"picture\"; filename=\"" + pictureFile[0].getName() + "\"" + LINEND);
+            sb.append("Content-Type: image/jpg; charset=" + CHARSET + LINEND);
+            sb.append(LINEND);
+            os.write(sb.toString().getBytes());
+            InputStream is = new FileInputStream(pictureFile[0]);
+
+            byte[] buffer = new byte[1024];
+            int len = 0;
+            while ((len = is.read(buffer)) != -1) {
+                os.write(buffer, 0, len); //写入图片数据
+            }
+            is.close();
+            os.write(LINEND.getBytes());
+
+            StringBuilder text = new StringBuilder();
+            for(Map.Entry<String,String> entry : params.entrySet()) { //在for循环中拼接报文，上传文本数据
+                text.append(PREFIX);
+                text.append(BOUNDARY);
+                text.append(LINEND);
+                text.append("Content-Disposition: form-data; name=\""+ entry.getKey() + "\"\r\n\r\n");
+                text.append(entry.getValue());
+                text.append(LINEND);
+            }
+            os.write(text.toString().getBytes("utf-8")); //写入文本数据
+
+            // 请求结束标志
+            byte[] end_data = (PREFIX + BOUNDARY + PREFIX + LINEND).getBytes();
+            os.write(end_data);
+            os.flush();
+            os.close();
+
+            // 得到响应码
+            int res = conn.getResponseCode();
+            if (res == 200) {
+                return changeInputStream(conn.getInputStream(), encode);
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return "";
     }
 
@@ -151,6 +236,18 @@ public class HttpPostUtil {
             e.printStackTrace();
         }
         return bitmap;
+    }
+
+    private static String getFileName(String pathandname){
+
+        int start=pathandname.lastIndexOf("/");
+        int end=pathandname.lastIndexOf(".");
+        if(start!=-1 && end!=-1){
+            return pathandname.substring(start+1,end);
+        }else{
+            return null;
+        }
+
     }
 
 
