@@ -13,6 +13,18 @@ public class PostInfo implements Serializable{
     private String uid;         //帖子作者id
     private String pcontent;    //帖子内容
     private String pdaytime;
+    private String pimage;
+
+    public void setPimage(String pimage) {
+        this.pimage = pimage;
+    }
+
+    public String getPimage() {
+
+        return pimage;
+    }
+
+
 
     public void setPdaytime(String pdaytime) {
         this.pdaytime = pdaytime;

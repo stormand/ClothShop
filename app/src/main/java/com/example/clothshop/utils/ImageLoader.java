@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.widget.ImageView;
 
+import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
@@ -69,27 +71,11 @@ public class ImageLoader {
         if (b!=null){
             return b;
         }
-
-        try {
-            Bitmap bitmap=null;
-            URL imageUrl= null;
-            imageUrl = new URL(url);
-            HttpURLConnection conn= (HttpURLConnection) imageUrl.openConnection();
-            conn.setConnectTimeout(30000);
-            conn.setReadTimeout(30000);
-            conn.setInstanceFollowRedirects(true);
-            InputStream is=conn.getInputStream();
-            OutputStream os=new FileOutputStream(f);
-            copyStream(is,os);
-            os.close();
-            bitmap=decodeFile(f);
-            return bitmap;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        Bitmap bitmap=null;
+        Map<String,String> params=new HashMap<String, String>();
+        params.put(Model.IMAGE_ATTR,url);
+        bitmap=HttpPostUtil.getImage(params,"utf-8",Model.POST_IMAGE_PATH);
+        return bitmap;
     }
 
     /**

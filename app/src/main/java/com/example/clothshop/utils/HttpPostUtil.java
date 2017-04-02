@@ -263,7 +263,7 @@ public class HttpPostUtil {
             System.out.println("->" + buffer.toString());
 
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setConnectTimeout(3000);
+            urlConnection.setConnectTimeout(30000);
             urlConnection.setRequestMethod("POST");
             urlConnection.setDoInput(true);
             urlConnection.setDoOutput(true);

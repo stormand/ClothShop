@@ -37,6 +37,7 @@ public class Model {
     public static final String UHEIGHT_ATTR="uheight";
     public static final String UWEIGHT_ATTR="uweight";
     public static final String IMAGE_ATTR="image";
+    public static final String DAY_TIME_ATTR="day_time";
 
     public static final String FEMALE_TEXT="女";
     public static final String MALE_TEXT="男";
