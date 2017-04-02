@@ -25,7 +25,6 @@ import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
-import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 import com.example.clothshop.utils.HttpPostUtil;
@@ -36,6 +35,7 @@ import net.yazeed44.imagepicker.util.Picker;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +51,7 @@ public class PublishActivity extends AppCompatActivity {
 
     private GridView mImageGridView;              //网格显示缩略图
     private final int IMAGE_OPEN = 1;        //打开图片标记
-    private String pathImage;                //选择图片路径
+    private ArrayList<String> imagePaths;                //选择图片路径
     private Bitmap bmp;                      //导入临时图片
     private ArrayList<HashMap<String, Object>> imageItem;
     private SimpleAdapter simpleAdapter;
@@ -79,6 +79,7 @@ public class PublishActivity extends AppCompatActivity {
         mPubWeightEditText.setText(Model.MYUSER.getUweight());
         mImageWidth=Model.SCREEMWIDTH/5;
         initImageGrid();
+        imagePaths=new ArrayList<String>();
 
     }
 
@@ -148,6 +149,7 @@ public class PublishActivity extends AppCompatActivity {
             addbmp=BitmapFactory.decodeFile(paths[i]);
             HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("itemImage", addbmp);
+            imagePaths.add(paths[i]);
             imageItem.add(map);
         }
             imageItem.add(mAddIconItem);
@@ -172,6 +174,7 @@ public class PublishActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
                 imageItem.remove(position);
+                imagePaths.remove(position);
                 simpleAdapter.notifyDataSetChanged();
             }
         });
@@ -206,6 +209,7 @@ public class PublishActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
     class SendThread extends Thread{
         @Override
         public void run() {
@@ -218,7 +222,12 @@ public class PublishActivity extends AppCompatActivity {
             params.put(Model.USEX_ATTR,mPubSexEditText.getText().toString());
             params.put(Model.UHEIGHT_ATTR,mPubHeightEditText.getText().toString());
             params.put(Model.UWEIGHT_ATTR,mPubWeightEditText.getText().toString());
-            String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.PUBLISH_PATH);
+            File[] imageFile=new File[imagePaths.size()];
+            for (int i=0;i<imagePaths.size();i++){
+                imageFile[i]=new File(imagePaths.get(i));
+            }
+            String result=HttpPostUtil.sendPostMessageWithImg(params,"utf-8",Model.PUBLISH_PATH,imageFile);
+            //String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.PUBLISH_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
                 if (jsonObject.getString("status").equals("0")){

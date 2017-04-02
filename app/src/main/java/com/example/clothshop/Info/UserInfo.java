@@ -2,11 +2,13 @@ package com.example.clothshop.Info;
 
 import android.graphics.Bitmap;
 
+import java.io.Serializable;
+
 /**
  * Created by 一凡 on 2017/3/25.
  */
 
-public class UserInfo {
+public class UserInfo implements Serializable{
 
     private String userid;      //用户id
     private String uname;       //昵称

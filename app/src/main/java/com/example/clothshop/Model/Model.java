@@ -15,9 +15,8 @@ public class Model {
     public static final String LOGIN_PATH = PATH + "Login.php";
     public static final String PUBLISH_PATH = PATH + "SaveMessage.php";
     public static final String USER_INFO_UPLOAD_PATH = PATH + "UserInfoUpload.php";
-    public static final String MENU_PATH = PATH + "ShowMenu.php";
-    public static final String ORDER_PATH = PATH + "AddOrder.php";
     public static final String HOME_PATH = PATH + "ShowHome.php";
+    public static final String POST_IMAGE_PATH = PATH + "PostImage.php";
     //DB
     //user
     public static final String USER_NAME_ATTR="username";
@@ -37,6 +36,7 @@ public class Model {
     public static final String USEX_ATTR="usex";
     public static final String UHEIGHT_ATTR="uheight";
     public static final String UWEIGHT_ATTR="uweight";
+    public static final String IMAGE_ATTR="image";
 
     public static final String FEMALE_TEXT="女";
     public static final String MALE_TEXT="男";

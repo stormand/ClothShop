@@ -1,10 +1,12 @@
 package com.example.clothshop.Info;
 
+import java.io.Serializable;
+
 /**
  * Created by 一凡 on 2017/3/25.
  */
 
-public class PostInfo {
+public class PostInfo implements Serializable{
 
     private String pid;         //帖子id
     private String ptitle;      //帖子标题

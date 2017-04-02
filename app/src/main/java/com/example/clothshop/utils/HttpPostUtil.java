@@ -105,8 +105,9 @@ public class HttpPostUtil {
     }
 
 
-    public static String sendPostMessage(Map<String, String> params, String encode, String url_path,File[] pictureFile){
-        URL url = null;
+    public static String sendPostMessageWithImg(Map<String, String> params, String encode, String url_path,File[] pictureFile){
+        URL url;
+
         try {
             url = new URL(url_path);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -124,24 +125,27 @@ public class HttpPostUtil {
 
             DataOutputStream os =  new DataOutputStream(conn.getOutputStream());
 
-            StringBuilder sb = new StringBuilder(); //用StringBuilder拼接报文，用于上传图片数据
+             //用StringBuilder拼接报文，用于上传图片数据
             // TODO: 2017/4/1 for 循环，多张照片的name？
-            sb.append(PREFIX);
-            sb.append(BOUNDARY);
-            sb.append(LINEND);
-            sb.append("Content-Disposition: form-data; name=\"picture\"; filename=\"" + pictureFile[0].getName() + "\"" + LINEND);
-            sb.append("Content-Type: image/jpg; charset=" + CHARSET + LINEND);
-            sb.append(LINEND);
-            os.write(sb.toString().getBytes());
-            InputStream is = new FileInputStream(pictureFile[0]);
-
-            byte[] buffer = new byte[1024];
-            int len = 0;
-            while ((len = is.read(buffer)) != -1) {
-                os.write(buffer, 0, len); //写入图片数据
+            for(int i=0;i<pictureFile.length;i++){
+                StringBuilder sb = new StringBuilder();
+                sb.append(PREFIX);
+                sb.append(BOUNDARY);
+                sb.append(LINEND);
+                sb.append("Content-Disposition: form-data; name=\"picture[]\"; filename=\"" + pictureFile[i].getName() + "\"" + LINEND);
+                sb.append("Content-Type: application/octet-stream; charset=" + CHARSET + LINEND);
+                sb.append(LINEND);
+                os.write(sb.toString().getBytes());
+                InputStream is = new FileInputStream(pictureFile[i]);
+                byte[] buffer = new byte[1024];
+                int len = 0;
+                while ((len = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, len); //写入图片数据
+                }
+                is.close();
+                os.write(LINEND.getBytes());
             }
-            is.close();
-            os.write(LINEND.getBytes());
+
 
             StringBuilder text = new StringBuilder();
             for(Map.Entry<String,String> entry : params.entrySet()) { //在for循环中拼接报文，上传文本数据
@@ -178,7 +182,7 @@ public class HttpPostUtil {
         return "";
     }
 
-    /**
+        /**
      * 将一个输入流转换为制定编码的字符串
      * @param inputStream
      * @param encode
@@ -238,17 +242,60 @@ public class HttpPostUtil {
         return bitmap;
     }
 
-    private static String getFileName(String pathandname){
+    public static Bitmap getImage(Map<String, String> params, String encode, String url_path){
+        URL url;
+        StringBuffer buffer = new StringBuffer();
+        Bitmap bitmap=null;
 
-        int start=pathandname.lastIndexOf("/");
-        int end=pathandname.lastIndexOf(".");
-        if(start!=-1 && end!=-1){
-            return pathandname.substring(start+1,end);
-        }else{
-            return null;
+        try {
+            url = new URL(url_path);
+
+            //转码操作
+            if (params != null && !params.isEmpty()) {
+                for (Map.Entry<String, String> entry : params.entrySet()) {
+                    buffer.append(entry.getKey()).append("=")
+                            .append(URLEncoder.encode(entry.getValue(), encode))
+                            .append("&");
+                }
+                buffer.deleteCharAt(buffer.length() - 1);
+                // TODO: 2017/3/21 为什么删去最后一个？
+            }
+            System.out.println("->" + buffer.toString());
+
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setConnectTimeout(3000);
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setDoInput(true);
+            urlConnection.setDoOutput(true);
+
+            if (sessionId != null) {
+                urlConnection.setRequestProperty("cookie", sessionId[0]);
+            }
+            //获得上传信息的字节大小和长度
+            byte[] mydata = buffer.toString().getBytes();
+            //请求体类型是文本类型
+            urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            urlConnection.setRequestProperty("Content-Length", String.valueOf(mydata.length));
+            //获得输出流，向服务器输出数据
+            OutputStream outputStream=urlConnection.getOutputStream();
+            outputStream.write(mydata,0,mydata.length);
+            outputStream.close();
+            int responseCode = urlConnection.getResponseCode();
+            if (responseCode == 200) {
+                InputStream is=urlConnection.getInputStream();
+                //解析为图片
+                //changeInputStream(is,"utf-8");
+                bitmap = BitmapFactory.decodeStream(is);
+                is.close();
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
+        return bitmap;
     }
-
 
 }
