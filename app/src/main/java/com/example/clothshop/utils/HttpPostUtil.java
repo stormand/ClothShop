@@ -2,6 +2,7 @@ package com.example.clothshop.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.Log;
 
 import com.example.clothshop.Activity.LoginActivity;
@@ -230,7 +231,6 @@ public class HttpPostUtil {
 
             InputStream is=conn.getInputStream();
             //解析为图片
-            //changeInputStream(is,"utf-8");
             bitmap = BitmapFactory.decodeStream(is);
             is.close();
 
@@ -261,7 +261,7 @@ public class HttpPostUtil {
                 // TODO: 2017/3/21 为什么删去最后一个？
             }
             System.out.println("->" + buffer.toString());
-
+            Log.e("post_params",params.toString());
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setConnectTimeout(30000);
             urlConnection.setRequestMethod("POST");
@@ -282,10 +282,18 @@ public class HttpPostUtil {
             outputStream.close();
             int responseCode = urlConnection.getResponseCode();
             if (responseCode == 200) {
+                urlConnection.connect();
                 InputStream is=urlConnection.getInputStream();
                 //解析为图片
                 //changeInputStream(is,"utf-8");
-                bitmap = BitmapFactory.decodeStream(is);
+//                String result=changeInputStream(is,"utf-8");
+//                Log.e("image_post_getImage_re",result);
+//                JSONObject jsonObject=new JSONObject(result);
+//                Log.e("image_post_getImage",jsonObject.toString());
+//                String st=jsonObject.getString("image");
+//                bitmap = BitmapFactory.decodeByteArray(Base64.decode(st, Base64.DEFAULT), 0,
+//                                Base64.decode(st, Base64.DEFAULT).length);
+                bitmap=BitmapFactory.decodeStream(is);
                 is.close();
             }
         } catch (MalformedURLException e) {

@@ -124,6 +124,7 @@ public class HomeFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         //垂直方向
         mLayoutManager.setOrientation(OrientationHelper.VERTICAL);
+        mLayoutManager.setAutoMeasureEnabled(true);
         //给RecyclerView设置布局管理器
         mRecyclerview.setLayoutManager(mLayoutManager);
         //创建适配器，并且设置
@@ -261,7 +262,8 @@ public class HomeFragment extends Fragment {
                     postInfo.setPtitle(jo.getString(Model.TITLE_ATTR));
                     postInfo.setUid(jo.getString(Model.UID_ATTR));
                     postInfo.setPdaytime(jo.getString(Model.DAY_TIME_ATTR));
-                    postInfo.setPimage(jo.getString(Model.IMAGE_ATTR));
+
+                    postInfo.setPimage(jo.getString(Model.IMAGE_ATTR).split("@")[0]);
                     paramsList.add(postInfo);
                 }
 

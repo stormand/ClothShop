@@ -38,7 +38,11 @@
             android:name=".Activity.PublishActivity"
             android:windowSoftInputMode="stateVisible|adjustResize" />
         <activity android:name=".Activity.UserInfoActivity" />
-        <activity android:name=".Activity.SettingActivity"></activity>
+        <activity android:name=".Activity.SettingActivity" />
+        <activity
+            android:name=".Activity.DetailActivity"
+            android:label="@string/title_activity_detail"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

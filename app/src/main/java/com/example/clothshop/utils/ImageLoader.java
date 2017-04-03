@@ -1,10 +1,13 @@
 package com.example.clothshop.utils;
 
+import android.accounts.OnAccountsUpdateListener;
 import android.app.Activity;
+import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.clothshop.Model.Model;
@@ -55,12 +58,14 @@ public class ImageLoader {
             imageView.setImageBitmap(bitmap);
         }else {
             queuePhoto(url,imageView);
+            Log.e("image_post_DisplayImage",url+"aaa");
             imageView.setImageResource(stub_id);
         }
     }
 
     private void queuePhoto(String url,ImageView imageView){
         PhotoToLoad p=new PhotoToLoad(url,imageView);
+        Log.e("image_post_queuePhoto",url+"aaa");
         executorService.submit(new PhotosLoader(p));
 
     }
@@ -72,10 +77,23 @@ public class ImageLoader {
             return b;
         }
         Bitmap bitmap=null;
-        Map<String,String> params=new HashMap<String, String>();
-        params.put(Model.IMAGE_ATTR,url);
-        bitmap=HttpPostUtil.getImage(params,"utf-8",Model.POST_IMAGE_PATH);
-        return bitmap;
+        try {
+            URL imageUrl=new URL(url);
+            HttpURLConnection conn= (HttpURLConnection) imageUrl.openConnection();
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(30000);
+            conn.setInstanceFollowRedirects(true);
+            InputStream is=conn.getInputStream();
+            OutputStream os=new FileOutputStream(f);
+            copyStream(is,os);
+            bitmap=decodeFile(f);
+            return bitmap;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -89,7 +107,7 @@ public class ImageLoader {
             o.inJustDecodeBounds=true;
             BitmapFactory.decodeStream(new FileInputStream(f),null,o);
 
-            final int REQUIRED_SIZE=70;
+            final int REQUIRED_SIZE=500;
             int width_tmp=o.outWidth,height_tmp=o.outHeight;
             int scale=1;
             while (true){
@@ -134,6 +152,7 @@ public class ImageLoader {
             if (imageViewReused(photoToLoad)){
                 return;
             }
+            Log.e("image_post_PhotosLoader",photoToLoad.url+"aaa");
             Bitmap bitmap=getBitmap(photoToLoad.url);
             memoryCache.put(photoToLoad.url,bitmap);
             if (imageViewReused(photoToLoad)){

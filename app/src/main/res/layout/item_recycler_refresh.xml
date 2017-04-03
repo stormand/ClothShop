@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white"
 
@@ -10,9 +10,9 @@
     <ImageView
         android:id="@+id/home_list_image_item"
         android:layout_width="fill_parent"
-        android:layout_height="320dp"
+        android:layout_height="wrap_content"
         android:src="@color/white"
-        android:scaleType="fitXY"
+        android:scaleType="centerCrop"
        />
 
     <TextView

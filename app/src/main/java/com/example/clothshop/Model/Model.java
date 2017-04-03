@@ -9,6 +9,7 @@ import com.example.clothshop.Info.UserInfo;
 public class Model {
 
     //http
+    public static final String IMAGE_SAVE_PATH = "http://122.112.247.7:8080/Order/";
     public static final String PATH = "http://122.112.247.7:8080/Order/Main/";
     public static final String IMAGE_PATH = PATH + "Image.php";
     public static final String REGISTER_PATH = PATH + "Register.php";
