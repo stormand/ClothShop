@@ -51,13 +51,19 @@ public class ImageLoader {
     final int stub_id= R.drawable.add_image;
 
     public void DisplayImage(String url,ImageView imageView){
-        imageViews.put(imageView,url);
+        StringBuilder sb=new StringBuilder();
+        if (url.length()>2){
+            sb.append(Model.IMAGE_SAVE_PATH)
+                    .append(url.substring(2));
+        }
+        String imageurl = sb.toString();
 
-        Bitmap bitmap=memoryCache.get(url);
+        imageViews.put(imageView,imageurl);
+        Bitmap bitmap=memoryCache.get(imageurl);
         if (bitmap!=null){
             imageView.setImageBitmap(bitmap);
         }else {
-            queuePhoto(url,imageView);
+            queuePhoto(imageurl,imageView);
             Log.e("image_post_DisplayImage",url+"aaa");
             imageView.setImageResource(stub_id);
         }

@@ -17,7 +17,7 @@ public class Model {
     public static final String PUBLISH_PATH = PATH + "SaveMessage.php";
     public static final String USER_INFO_UPLOAD_PATH = PATH + "UserInfoUpload.php";
     public static final String HOME_PATH = PATH + "ShowHome.php";
-    public static final String POST_IMAGE_PATH = PATH + "PostImage.php";
+    public static final String DETAIL_POST_PATH = PATH + "DetailPost.php";
     //DB
     //user
     public static final String USER_NAME_ATTR="username";
@@ -30,15 +30,16 @@ public class Model {
     public static final String USER_HEIGHT_ATTR="height";
     public static final String USER_AVATAR_ATTR="avatar";
     //post
-    public static final String TITLE_ATTR="title";
-    public static final String CONTENT_ATTR="content";
-    public static final String UID_ATTR="uid";
-    public static final String UAGE_ATTR="uage";
-    public static final String USEX_ATTR="usex";
-    public static final String UHEIGHT_ATTR="uheight";
-    public static final String UWEIGHT_ATTR="uweight";
-    public static final String IMAGE_ATTR="image";
-    public static final String DAY_TIME_ATTR="day_time";
+    public static final String POST_ID_ATTR="pid";
+    public static final String POST_TITLE_ATTR="title";
+    public static final String POST_CONTENT_ATTR="content";
+    public static final String POST_UID_ATTR="uid";
+    public static final String POST_UAGE_ATTR="uage";
+    public static final String POST_USEX_ATTR="usex";
+    public static final String POST_UHEIGHT_ATTR="uheight";
+    public static final String POST_UWEIGHT_ATTR="uweight";
+    public static final String POST_IMAGE_ATTR="image";
+    public static final String POST_DAY_TIME_ATTR="day_time";
 
     public static final String FEMALE_TEXT="女";
     public static final String MALE_TEXT="男";

@@ -14,6 +14,35 @@ public class PostInfo implements Serializable{
     private String pcontent;    //帖子内容
     private String pdaytime;
     private String pimage;
+    private String uweight;
+    private String uheight;
+
+
+    public void setUweight(String uweight) {
+        this.uweight = uweight;
+    }
+
+    public void setUheight(String uheight) {
+        this.uheight = uheight;
+    }
+
+    public void setUsex(String usex) {
+        this.usex = usex;
+    }
+
+    public String getUweight() {
+        return uweight;
+    }
+
+    public String getUheight() {
+        return uheight;
+    }
+
+    public String getUsex() {
+        return usex;
+    }
+
+    private String usex;
 
     public void setPimage(String pimage) {
         this.pimage = pimage;
@@ -51,7 +80,6 @@ public class PostInfo implements Serializable{
     }
 
     public String getPid() {
-
         return pid;
     }
 

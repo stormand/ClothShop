@@ -215,13 +215,13 @@ public class PublishActivity extends AppCompatActivity {
         public void run() {
             super.run();
             Map<String,String> params=new HashMap<String, String>();
-            params.put(Model.TITLE_ATTR,mPubTittle.getText().toString());
-            params.put(Model.CONTENT_ATTR,mPubEditText.getText().toString());
-            params.put(Model.UID_ATTR,Model.MYUSER.getUserid());
-            params.put(Model.UAGE_ATTR,mPubAgeEditText.getText().toString());
-            params.put(Model.USEX_ATTR,mPubSexEditText.getText().toString());
-            params.put(Model.UHEIGHT_ATTR,mPubHeightEditText.getText().toString());
-            params.put(Model.UWEIGHT_ATTR,mPubWeightEditText.getText().toString());
+            params.put(Model.POST_TITLE_ATTR,mPubTittle.getText().toString());
+            params.put(Model.POST_CONTENT_ATTR,mPubEditText.getText().toString());
+            params.put(Model.POST_UID_ATTR,Model.MYUSER.getUserid());
+            params.put(Model.POST_UAGE_ATTR,mPubAgeEditText.getText().toString());
+            params.put(Model.POST_USEX_ATTR,mPubSexEditText.getText().toString());
+            params.put(Model.POST_UHEIGHT_ATTR,mPubHeightEditText.getText().toString());
+            params.put(Model.POST_UWEIGHT_ATTR,mPubWeightEditText.getText().toString());
             File[] imageFile=new File[imagePaths.size()];
             for (int i=0;i<imagePaths.size();i++){
                 imageFile[i]=new File(imagePaths.get(i));

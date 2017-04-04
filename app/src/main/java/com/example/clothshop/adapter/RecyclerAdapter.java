@@ -49,17 +49,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             itemHolder.textView.setText(mDatas.get(position).getPtitle());
         StringBuilder sb=new StringBuilder();
         String imageUrl=mDatas.get(position).getPimage();
-        if (imageUrl.length()>2){
-            sb.append(Model.IMAGE_SAVE_PATH)
-                    .append(imageUrl.substring(2));
-            imageLoader.DisplayImage(sb.toString(),itemHolder.imageView);
-        }
+
+            imageLoader.DisplayImage(imageUrl,itemHolder.imageView);
         // TODO: 2017/4/3 不用new？ 
         itemHolder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(mContext, DetailPostActivity.class);
-                intent.putExtra("position",position);
+                intent.putExtra("pid",mDatas.get(position).getPid());
                 mContext.startActivity(intent);
             }
         });

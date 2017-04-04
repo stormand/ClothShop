@@ -258,11 +258,11 @@ public class HomeFragment extends Fragment {
                 for (int i=0;i<jsonArray.length();i++){
                     PostInfo postInfo=new PostInfo();
                     JSONObject jo= (JSONObject) jsonArray.get(i);
-                    postInfo.setPtitle(jo.getString(Model.TITLE_ATTR));
-                    postInfo.setUid(jo.getString(Model.UID_ATTR));
-                    postInfo.setPdaytime(jo.getString(Model.DAY_TIME_ATTR));
-
-                    postInfo.setPimage(jo.getString(Model.IMAGE_ATTR).split("@")[0]);
+                    postInfo.setPtitle(jo.getString(Model.POST_TITLE_ATTR));
+                    postInfo.setPid(jo.getString(Model.POST_ID_ATTR));
+                    postInfo.setUid(jo.getString(Model.POST_UID_ATTR));
+                    postInfo.setPdaytime(jo.getString(Model.POST_DAY_TIME_ATTR));
+                    postInfo.setPimage(jo.getString(Model.POST_IMAGE_ATTR).split("@")[0]);
                     paramsList.add(postInfo);
                 }
 

@@ -100,6 +100,7 @@ public class HttpPostUtil {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            Log.e("IOException",e.toString());
             e.printStackTrace();
         }
         return "";
