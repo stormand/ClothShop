@@ -1,16 +1,15 @@
 package com.example.clothshop.adapter;
 
 import android.content.Context;
-import android.support.v4.os.ResultReceiver;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.clothshop.Activity.DetailPostActivity;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
@@ -45,7 +44,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
             ItemHolder itemHolder = (ItemHolder) holder;
             itemHolder.textView.setText(mDatas.get(position).getPtitle());
         StringBuilder sb=new StringBuilder();
@@ -55,6 +54,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     .append(imageUrl.substring(2));
             imageLoader.DisplayImage(sb.toString(),itemHolder.imageView);
         }
+        // TODO: 2017/4/3 不用new？ 
+        itemHolder.imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(mContext, DetailPostActivity.class);
+                intent.putExtra("position",position);
+                mContext.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -74,6 +82,5 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             imageView.setLayoutParams(lp);
         }
     }
-
 
 }

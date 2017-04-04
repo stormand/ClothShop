@@ -30,12 +30,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.StringTokenizer;
 
 
 /**
@@ -127,6 +124,7 @@ public class HomeFragment extends Fragment {
         mLayoutManager.setAutoMeasureEnabled(true);
         //给RecyclerView设置布局管理器
         mRecyclerview.setLayoutManager(mLayoutManager);
+
         //创建适配器，并且设置
         if (mHomeList==null){
             GetDataThread newPageThread=new GetDataThread(GetDataThread.NEW_PAGE);
@@ -135,6 +133,7 @@ public class HomeFragment extends Fragment {
             mAdapter = new RecyclerAdapter(getContext(),mHomeList);
             mRecyclerview.setAdapter(mAdapter);
             mRecyclerview.addItemDecoration(new SpaceItemDecoration());
+
         }
         mSwipeRefreshLayout= (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

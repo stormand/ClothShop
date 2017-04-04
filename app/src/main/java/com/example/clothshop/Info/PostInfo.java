@@ -25,7 +25,6 @@ public class PostInfo implements Serializable{
     }
 
 
-
     public void setPdaytime(String pdaytime) {
         this.pdaytime = pdaytime;
     }

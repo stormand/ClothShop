@@ -39,9 +39,7 @@
             android:windowSoftInputMode="stateVisible|adjustResize" />
         <activity android:name=".Activity.UserInfoActivity" />
         <activity android:name=".Activity.SettingActivity" />
-        <activity
-            android:name=".Activity.DetailActivity"
-            android:label="@string/title_activity_detail"
+        <activity android:name=".Activity.DetailPostActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
