@@ -16,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.clothshop.Activity.PublishActivity;
@@ -109,7 +110,6 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
-
     private void initRefreshLayout(View view){
         mSwipeRefreshLayout= (SwipeRefreshLayout) view.findViewById(R.id.home_refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -199,9 +199,13 @@ public class HomeFragment extends Fragment {
     }
 
     public void refresh(){
-        mSwipeRefreshLayout.setRefreshing(true);
-        GetDataThread topPullThread=new GetDataThread(GetDataHandler.TOP_PULL);
-        topPullThread.start();
+        if (mLayoutManager.findFirstCompletelyVisibleItemPosition()!=0){
+            mRecyclerview.smoothScrollToPosition(0);
+        }else {
+            mSwipeRefreshLayout.setRefreshing(true);
+            GetDataThread topPullThread=new GetDataThread(GetDataHandler.TOP_PULL);
+            topPullThread.start();
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -299,7 +303,7 @@ public class HomeFragment extends Fragment {
             super.handleMessage(msg);
             switch (msg.what){
                 case TOP_PULL:
-                    //mHomeList.clear();
+                    mHomeList.clear();
                     mHomeList.addAll((ArrayList<PostInfo>) msg.obj);
                     mAdapter.notifyDataSetChanged();
                     break;

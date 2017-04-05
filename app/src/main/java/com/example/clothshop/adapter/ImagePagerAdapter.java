@@ -1,22 +1,16 @@
 package com.example.clothshop.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
-import com.example.clothshop.utils.ImageLoader;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.squareup.picasso.Picasso;
 
 /**
  * Created by 一凡 on 2017/4/4.
@@ -25,7 +19,6 @@ import java.util.List;
 public class ImagePagerAdapter extends PagerAdapter {
     private String[] mImageList;
     private Context mContext;
-    private ImageLoader imageLoader;
 
     public ImagePagerAdapter(String[] imageList,Context context) {
         this.mImageList = imageList;
@@ -42,9 +35,18 @@ public class ImagePagerAdapter extends PagerAdapter {
 
         View imageLayout = LayoutInflater.from(mContext).inflate(R.layout.item_pager_image, container, false);
         ImageView imageView = (ImageView) imageLayout.findViewById(R.id.item_detail_image);
-        imageLoader=new ImageLoader(mContext);
-        imageLoader.DisplayImage(mImageList[position],imageView);
-        imageView.setImageResource(R.drawable.test);
+        StringBuilder sb=new StringBuilder();
+        if (mImageList[position].length()>2){
+            sb.append(Model.IMAGE_SAVE_PATH)
+                    .append(mImageList[position].substring(2));
+            String imageurl = sb.toString();
+            Picasso.with(mContext).load(imageurl).placeholder(R.drawable.empty_image).error(R.drawable.error_image).resize(80, 80).into(imageView);
+        }else {
+            Picasso.with(mContext).load(R.drawable.empty_image).into(imageView);
+        }
+
+
+        //imageView.setImageResource(R.drawable.test);
         ((ViewPager) container).addView(imageLayout,0);
         return imageLayout;
     }

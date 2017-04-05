@@ -13,7 +13,7 @@ import com.example.clothshop.Activity.DetailPostActivity;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
-import com.example.clothshop.utils.ImageLoader;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -26,14 +26,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private Context mContext;
     private List<PostInfo> mDatas;
     private int mImageWidth;
-    private ImageLoader imageLoader;
 
 
     public RecyclerAdapter(Context mContext, List<PostInfo> mDatas) {
         this.mContext = mContext;
         this.mDatas = mDatas;
         mImageWidth= Model.SCREEMWIDTH-2*Model.LISTMARGIN;
-        imageLoader=new ImageLoader(mContext);
     }
 
     @Override
@@ -45,12 +43,21 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
-            ItemHolder itemHolder = (ItemHolder) holder;
-            itemHolder.textView.setText(mDatas.get(position).getPtitle());
-        StringBuilder sb=new StringBuilder();
-        String imageUrl=mDatas.get(position).getPimage();
+        ItemHolder itemHolder = (ItemHolder) holder;
+        itemHolder.textView.setText(mDatas.get(position).getPtitle());
 
-            imageLoader.DisplayImage(imageUrl,itemHolder.imageView);
+        String imageUrl=mDatas.get(position).getPimage();
+        StringBuilder sb=new StringBuilder();
+        if (imageUrl.length()>2){
+            sb.append(Model.IMAGE_SAVE_PATH)
+                    .append(imageUrl.substring(2));
+            imageUrl = sb.toString();
+            Picasso.with(mContext).load(imageUrl).placeholder(R.drawable.empty_image).error(R.drawable.error_image).resize(200,200).into(itemHolder.imageView);
+        }else {
+            Picasso.with(mContext).load(R.drawable.empty_image).into(itemHolder.imageView);
+        }
+
+            //imageLoader.DisplayImage(imageUrl,itemHolder.imageView);
         // TODO: 2017/4/3 不用new？ 
         itemHolder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,6 +83,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             textView = (TextView) itemView.findViewById(R.id.home_list_title_item);
             ViewGroup.LayoutParams lp=imageView.getLayoutParams();
             lp.width= mImageWidth;
+            lp.height=mImageWidth;
             imageView.setLayoutParams(lp);
         }
     }

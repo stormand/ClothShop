@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -12,6 +13,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
@@ -24,10 +26,13 @@ import com.example.clothshop.Info.UserInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 import com.example.clothshop.utils.HttpPostUtil;
+import com.squareup.picasso.OkHttpDownloader;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
     private Loginhandler handler;
 
     private int NaviClickRecord;
+
+    private final String CACHE_DIR_NAME ="/ClothShop/picasso";
 
 
 
@@ -120,6 +127,9 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        initFileCache();
+        loadImageCache();
+
         setContentView(R.layout.activity_main);
         WindowManager wm = this.getWindowManager();
         Model.SCREEMWIDTH=wm.getDefaultDisplay().getWidth();
@@ -137,6 +147,21 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
             loginThread.start();
         }
 
+    }
+
+    //创建缓存路径
+    public void initFileCache() {
+        File file = new File(Environment.getExternalStorageDirectory(), CACHE_DIR_NAME);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+    }
+    //
+    private void loadImageCache() {
+        final String imageCacheDir = Environment.getExternalStorageDirectory() + CACHE_DIR_NAME;
+        Picasso picasso = new Picasso.Builder(this).downloader(
+                new OkHttpDownloader(new File(imageCacheDir))).build();
+        Picasso.setSingletonInstance(picasso);
 
     }
 
