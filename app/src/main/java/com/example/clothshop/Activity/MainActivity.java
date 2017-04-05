@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
 
     private Loginhandler handler;
 
+    private int NaviClickRecord;
+
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -79,7 +81,11 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
                     transaction.add(R.id.content,homeFragment);
                 }else{
                     transaction.show(homeFragment);
-                }break;
+                    if (num==NaviClickRecord){
+                        homeFragment.refresh();
+                    }
+                }
+                break;
             case 2:
 
                 break;
@@ -98,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
                     transaction.show(personFragment);
                 }break;
         }
+        NaviClickRecord=num;
         transaction.commit();
     }
 

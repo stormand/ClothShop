@@ -16,7 +16,17 @@ public class PostInfo implements Serializable{
     private String pimage;
     private String uweight;
     private String uheight;
+    private String uage;
+    private String usex;
 
+    public void setUage(String uage) {
+        this.uage = uage;
+    }
+
+    public String getUage() {
+
+        return uage;
+    }
 
     public void setUweight(String uweight) {
         this.uweight = uweight;
@@ -42,7 +52,7 @@ public class PostInfo implements Serializable{
         return usex;
     }
 
-    private String usex;
+
 
     public void setPimage(String pimage) {
         this.pimage = pimage;

@@ -103,19 +103,38 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+        initRefreshLayout(view);
+        initFab(view);
+        initRecyclerView(view);
+        return view;
+    }
+
+
+    private void initRefreshLayout(View view){
+        mSwipeRefreshLayout= (SwipeRefreshLayout) view.findViewById(R.id.home_refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                GetDataThread topPullThread=new GetDataThread(GetDataHandler.TOP_PULL);
+                topPullThread.start();
+            }
+        });
+    }
+    private void initFab(View view){
         mFab= (FloatingActionButton) view.findViewById(R.id.fab);
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (Model.ISLOGIN){
-                  Intent intent=new Intent(getActivity(),PublishActivity.class);
+                    Intent intent=new Intent(getActivity(),PublishActivity.class);
                     startActivity(intent);
                 }else {
                     Toast.makeText(getContext(), "请登录", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
+    }
+    private void initRecyclerView(View view){
         mRecyclerview= (RecyclerView) view.findViewById(R.id.recycler_view);
         //创建线性布局
         mLayoutManager = new LinearLayoutManager(getContext());
@@ -125,25 +144,16 @@ public class HomeFragment extends Fragment {
         //给RecyclerView设置布局管理器
         mRecyclerview.setLayoutManager(mLayoutManager);
 
+        mHomeList=new ArrayList<PostInfo>();
+        mAdapter = new RecyclerAdapter(getContext(),mHomeList);
+        mRecyclerview.setAdapter(mAdapter);
+        mRecyclerview.addItemDecoration(new SpaceItemDecoration());
         //创建适配器，并且设置
-        if (mHomeList==null){
-            GetDataThread newPageThread=new GetDataThread(GetDataThread.NEW_PAGE);
+        if (mHomeList.isEmpty()){
+            mSwipeRefreshLayout.setRefreshing(true);
+            GetDataThread newPageThread=new GetDataThread(GetDataHandler.TOP_PULL);
             newPageThread.start();
-        }else{
-            mAdapter = new RecyclerAdapter(getContext(),mHomeList);
-            mRecyclerview.setAdapter(mAdapter);
-            mRecyclerview.addItemDecoration(new SpaceItemDecoration());
-
         }
-        mSwipeRefreshLayout= (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                GetDataThread topPullThread=new GetDataThread(GetDataThread.TOP_PULL);
-                topPullThread.start();
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        });
 
         mRecyclerview.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -156,13 +166,12 @@ public class HomeFragment extends Fragment {
                     lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
 
                 }
-
-
                 if (dy > 0 && mFab.isShown()) mFab.hide();
                 if (dy < 0 && !mFab.isShown()) mFab.show();
 
-
             }
+
+
 
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -187,8 +196,12 @@ public class HomeFragment extends Fragment {
 //                }
             }
         });
+    }
 
-        return view;
+    public void refresh(){
+        mSwipeRefreshLayout.setRefreshing(true);
+        GetDataThread topPullThread=new GetDataThread(GetDataHandler.TOP_PULL);
+        topPullThread.start();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -232,10 +245,6 @@ public class HomeFragment extends Fragment {
 
     class GetDataThread extends Thread{
 
-        public static final int NEW_PAGE=1;
-        public static final int TOP_PULL=2;
-        public static final int BOTTOM_PULL=3;
-
         private int dataType;
 
         GetDataThread(int type){
@@ -272,37 +281,41 @@ public class HomeFragment extends Fragment {
 
 
             } catch (JSONException e) {
+                Message msg=Message.obtain(handler,GetDataHandler.ERROR);
+                msg.obj=e.toString();
+                msg.sendToTarget();
                 e.printStackTrace();
             }
-
         }
     }
 
     class GetDataHandler extends Handler{
+
+        public static final int TOP_PULL=0x0001;
+        public static final int BOTTOM_PULL=0x0002;
+        public static final int ERROR=0x0003;
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what){
-                case GetDataThread.NEW_PAGE:
-                    mHomeList=new ArrayList<PostInfo>();
-                    mHomeList.addAll((ArrayList<PostInfo>) msg.obj);
-                    mAdapter = new RecyclerAdapter(getContext(),mHomeList);
-                    mRecyclerview.setAdapter(mAdapter);
-                    mRecyclerview.addItemDecoration(new SpaceItemDecoration());
-                    break;
-                case GetDataThread.TOP_PULL:
-                    mHomeList.clear();
+                case TOP_PULL:
+                    //mHomeList.clear();
                     mHomeList.addAll((ArrayList<PostInfo>) msg.obj);
                     mAdapter.notifyDataSetChanged();
                     break;
-                case GetDataThread.BOTTOM_PULL:
+                case BOTTOM_PULL:
                     List<PostInfo> list=new ArrayList<PostInfo>();
                     list.addAll(mHomeList);
                     mHomeList.clear();
                     mHomeList.addAll(list);
                     mAdapter.notifyDataSetChanged();
                     break;
+                case ERROR:
+                    Toast.makeText(getActivity(), msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                default:
+                    break;
             }
+            mSwipeRefreshLayout.setRefreshing(false);
         }
     }
 

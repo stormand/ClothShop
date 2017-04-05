@@ -8,6 +8,7 @@ import android.os.Message;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -23,10 +24,12 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.example.clothshop.Activity.ScrollView.DetailScrollView;
+import com.example.clothshop.Fragment.HomeFragment;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
@@ -50,8 +53,20 @@ public class DetailPostActivity extends AppCompatActivity{
     private ImageView imageView;
     private ImageView[] imageViews;
     private PostInfo mPostInfo;
+
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
     //包裹点点的LinearLayout
     private ViewGroup mPointGroup;
+
+    private TextView mDetailTitle;
+    private TextView mDetailContent;
+    private TextView mDetailUname;
+    private TextView mDetailUage;
+    private TextView mDetailUweight;
+    private TextView mDetailUheight;
+    private TextView mDetailDateTime;
+    private TextView mDetailUsex;
 
     private GetDataHandler handler;
     private GetDataThread mGetDataThread;
@@ -62,6 +77,7 @@ public class DetailPostActivity extends AppCompatActivity{
         initStatusBar();
         setContentView(R.layout.activity_detail_post);
         initToolbar();
+        initRefreshLayout();
         getData();
 
 
@@ -84,13 +100,25 @@ public class DetailPostActivity extends AppCompatActivity{
         }
     }
 
-    public void initScrollView(){
+    private void initScrollView(){
         mDetailScrollView= (DetailScrollView) findViewById(R.id.detail_scroll_view);
         mDetailScrollView.setGestureDetector(detector);
         mDetailScrollView.setmViewPager(mImageViewPager);
     }
 
-    public void initToolbar(){
+    private void initRefreshLayout(){
+        mSwipeRefreshLayout= (SwipeRefreshLayout)findViewById(R.id.detail_refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                GetDataThread getDataThread=new GetDataThread();
+                getDataThread.start();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+    }
+
+    private void initToolbar(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         AppBarLayout.LayoutParams lp = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
         lp.setMargins(0,getStatusBarHeight(), 0, 0);
@@ -98,7 +126,7 @@ public class DetailPostActivity extends AppCompatActivity{
         setSupportActionBar(toolbar);
     }
 
-    public int getStatusBarHeight() {
+    private int getStatusBarHeight() {
         int result = 0;
         int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
         if (resourceId > 0) {
@@ -113,7 +141,27 @@ public class DetailPostActivity extends AppCompatActivity{
         mPostInfo.setPid(intent.getStringExtra("pid"));
         handler=new GetDataHandler();
         mGetDataThread=new GetDataThread();
+        mSwipeRefreshLayout.setRefreshing(true);
         mGetDataThread.start();
+    }
+
+    private void iniPostInfo(){
+        mDetailTitle= (TextView) findViewById(R.id.detail_title);
+        mDetailContent= (TextView) findViewById(R.id.detail_content);
+        mDetailUname= (TextView) findViewById(R.id.detail_uname);
+        mDetailUage= (TextView) findViewById(R.id.detail_uage);
+        mDetailUweight= (TextView) findViewById(R.id.detail_uweight);
+        mDetailUheight= (TextView) findViewById(R.id.detail_uheight);
+        mDetailDateTime= (TextView) findViewById(R.id.detail_date_time);
+        mDetailUsex=(TextView) findViewById(R.id.detail_usex);
+
+        mDetailTitle.setText(mPostInfo.getPtitle());
+        mDetailContent.setText(mPostInfo.getPcontent());
+        mDetailUweight.setText(mPostInfo.getUweight());
+        mDetailUheight.setText(mPostInfo.getUheight());
+        mDetailDateTime.setText(mPostInfo.getPdaytime());
+        mDetailUage.setText(mPostInfo.getUage());
+        mDetailUsex.setText(mPostInfo.getUsex());
     }
 
     private void initViewPager(){
@@ -195,14 +243,17 @@ public class DetailPostActivity extends AppCompatActivity{
                 mPostInfo.setUheight(jsonObject.getString(Model.POST_UHEIGHT_ATTR));
                 mPostInfo.setUweight(jsonObject.getString(Model.POST_UWEIGHT_ATTR));
                 mPostInfo.setUsex(jsonObject.getString(Model.POST_USEX_ATTR));
+                mPostInfo.setUage(jsonObject.getString(Model.POST_UAGE_ATTR));
                 if (jsonObject.getString("status").equals("0")){
                     showMessage(jsonObject.getString("mes"), PublishActivity.SendHandler.SUCCESS);
                 }else {
                     showMessage(jsonObject.getString("mes"), PublishActivity.SendHandler.FAILURE);
                 }
             } catch (JSONException e) {
+                showMessage(e.toString(), PublishActivity.SendHandler.FAILURE);
                 e.printStackTrace();
             }
+
 
         }
 
@@ -224,14 +275,18 @@ public class DetailPostActivity extends AppCompatActivity{
             super.handleMessage(msg);
             switch (msg.what){
                 case SUCCESS:
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    iniPostInfo();
                     initViewPager();
                     initScrollView();
                     initPointer();
                     break;
                 case FAILURE:
+                    mSwipeRefreshLayout.setRefreshing(false);
                     Toast.makeText(DetailPostActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                     break;
                 default:
+                    mSwipeRefreshLayout.setRefreshing(false);
                     break;
             }
         }

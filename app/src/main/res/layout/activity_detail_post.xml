@@ -20,69 +20,173 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="#10ffffff"
-            app:popupTheme="@style/AppTheme.PopupOverlay"/>
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
     </android.support.design.widget.AppBarLayout>
 
-
-    <com.example.clothshop.Activity.ScrollView.DetailScrollView
-        android:id="@+id/detail_scroll_view"
+    <android.support.v4.widget.SwipeRefreshLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:id="@+id/detail_refresh_layout"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+        <com.example.clothshop.Activity.ScrollView.DetailScrollView
+            android:id="@+id/detail_scroll_view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            >
 
-            <android.support.constraint.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="300dp">
-
-
-
-                <android.support.v4.view.ViewPager
-                    android:id="@+id/detail_view_pager"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_centerInParent="true"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                </android.support.v4.view.ViewPager>
-
-                <LinearLayout
-                    android:id="@+id/detail_point_view_Group"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="30dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    >
-
-                </LinearLayout>
-
-
-            </android.support.constraint.ConstraintLayout>
-
-
-            <TextView
-                android:id="@+id/textView"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/large_text" />
-        </LinearLayout>
+                android:orientation="vertical">
 
 
-    </com.example.clothshop.Activity.ScrollView.DetailScrollView>
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp">
+
+
+
+                    <android.support.v4.view.ViewPager
+                        android:id="@+id/detail_view_pager"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_centerInParent="true"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                    </android.support.v4.view.ViewPager>
+
+                    <LinearLayout
+                        android:id="@+id/detail_point_view_Group"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="30dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        >
+
+                    </LinearLayout>
+
+
+                </android.support.constraint.ConstraintLayout>
+
+
+                <TextView
+                    android:id="@+id/detail_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="20dp"
+                    />
+
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/imageView3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/common_google_signin_btn_icon_dark_normal_background"
+                        tools:layout_editor_absoluteY="25dp"
+                        tools:layout_editor_absoluteX="0dp" />
+
+                    <TextView
+                        android:id="@+id/detail_uname"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TextView"
+                        app:layout_constraintLeft_toRightOf="@+id/imageView3"
+                        android:layout_marginLeft="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginBottom="8dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginStart="8dp" />
+
+                    <TextView
+                        android:id="@+id/detail_date_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TextView"
+                        android:layout_marginRight="8dp"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginBottom="8dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="8dp" />
+
+                </android.support.constraint.ConstraintLayout>
+
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/detail_uweight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TextView"
+                        tools:layout_editor_absoluteY="25dp"
+                        tools:layout_editor_absoluteX="0dp" />
+
+                    <TextView
+                        android:id="@+id/detail_uheight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TextView"
+                        tools:layout_editor_absoluteY="25dp"
+                        android:layout_marginLeft="8dp"
+                        app:layout_constraintLeft_toRightOf="@+id/detail_uweight"
+                        android:layout_marginStart="8dp" />
+
+                    <TextView
+                        android:id="@+id/detail_usex"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TextView"
+                        tools:layout_editor_absoluteY="25dp"
+                        app:layout_constraintLeft_toRightOf="@+id/detail_uheight"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginStart="8dp" />
+
+                    <TextView
+                        android:id="@+id/detail_uage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TextView"
+                        tools:layout_editor_absoluteY="25dp"
+                        app:layout_constraintLeft_toRightOf="@+id/detail_usex"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginStart="8dp" />
+                </android.support.constraint.ConstraintLayout>
+
+                <TextView
+                    android:id="@+id/detail_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TextView" />
+
+            </LinearLayout>
+
+
+        </com.example.clothshop.Activity.ScrollView.DetailScrollView>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+
+
 </android.support.constraint.ConstraintLayout>
