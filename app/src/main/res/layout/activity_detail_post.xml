@@ -23,7 +23,7 @@
             app:popupTheme="@style/AppTheme.PopupOverlay" />
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <com.example.clothshop.Activity.ScrollView.DetailRefreshLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:id="@+id/detail_refresh_layout"
@@ -50,7 +50,7 @@
 
                 <android.support.constraint.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="300dp">
+                    android:layout_height="400dp">
 
 
 
@@ -107,7 +107,6 @@
                         android:id="@+id/detail_uname"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView"
                         app:layout_constraintLeft_toRightOf="@+id/imageView3"
                         android:layout_marginLeft="8dp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -120,7 +119,6 @@
                         android:id="@+id/detail_date_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView"
                         android:layout_marginRight="8dp"
                         app:layout_constraintRight_toRightOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -139,7 +137,6 @@
                         android:id="@+id/detail_uweight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView"
                         tools:layout_editor_absoluteY="25dp"
                         tools:layout_editor_absoluteX="0dp" />
 
@@ -147,7 +144,6 @@
                         android:id="@+id/detail_uheight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView"
                         tools:layout_editor_absoluteY="25dp"
                         android:layout_marginLeft="8dp"
                         app:layout_constraintLeft_toRightOf="@+id/detail_uweight"
@@ -157,7 +153,6 @@
                         android:id="@+id/detail_usex"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView"
                         tools:layout_editor_absoluteY="25dp"
                         app:layout_constraintLeft_toRightOf="@+id/detail_uheight"
                         android:layout_marginLeft="8dp"
@@ -167,7 +162,6 @@
                         android:id="@+id/detail_uage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView"
                         tools:layout_editor_absoluteY="25dp"
                         app:layout_constraintLeft_toRightOf="@+id/detail_usex"
                         android:layout_marginLeft="8dp"
@@ -178,14 +172,14 @@
                     android:id="@+id/detail_content"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="TextView" />
+                     />
 
             </LinearLayout>
 
 
         </com.example.clothshop.Activity.ScrollView.DetailScrollView>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </com.example.clothshop.Activity.ScrollView.DetailRefreshLayout>
 
 
 

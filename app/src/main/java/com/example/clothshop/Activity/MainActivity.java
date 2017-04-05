@@ -126,10 +126,8 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         initFileCache();
         loadImageCache();
-
         setContentView(R.layout.activity_main);
         WindowManager wm = this.getWindowManager();
         Model.SCREEMWIDTH=wm.getDefaultDisplay().getWidth();

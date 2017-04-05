@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.example.clothshop.Activity.ScrollView.DetailRefreshLayout;
 import com.example.clothshop.Activity.ScrollView.DetailScrollView;
 import com.example.clothshop.Fragment.HomeFragment;
 import com.example.clothshop.Info.PostInfo;
@@ -47,17 +48,18 @@ import java.util.Map;
 public class DetailPostActivity extends AppCompatActivity{
 
     private ViewPager mImageViewPager;
-    private GestureDetector detector;
     private DetailScrollView mDetailScrollView;
     private String[] imageList;
     private ImageView imageView;
     private ImageView[] imageViews;
     private PostInfo mPostInfo;
 
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private DetailRefreshLayout mSwipeRefreshLayout;
 
     //包裹点点的LinearLayout
     private ViewGroup mPointGroup;
+
+    private ImagePagerAdapter mImagePagerAdapter;
 
     private TextView mDetailTitle;
     private TextView mDetailContent;
@@ -79,7 +81,9 @@ public class DetailPostActivity extends AppCompatActivity{
         initToolbar();
         initRefreshLayout();
         getData();
-
+        iniPostInfoView();
+        initViewPager();
+        initScrollView();
 
     }
 
@@ -102,12 +106,11 @@ public class DetailPostActivity extends AppCompatActivity{
 
     private void initScrollView(){
         mDetailScrollView= (DetailScrollView) findViewById(R.id.detail_scroll_view);
-        mDetailScrollView.setGestureDetector(detector);
         mDetailScrollView.setmViewPager(mImageViewPager);
     }
 
     private void initRefreshLayout(){
-        mSwipeRefreshLayout= (SwipeRefreshLayout)findViewById(R.id.detail_refresh_layout);
+        mSwipeRefreshLayout= (DetailRefreshLayout)findViewById(R.id.detail_refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -145,7 +148,7 @@ public class DetailPostActivity extends AppCompatActivity{
         mGetDataThread.start();
     }
 
-    private void iniPostInfo(){
+    private void iniPostInfoView(){
         mDetailTitle= (TextView) findViewById(R.id.detail_title);
         mDetailContent= (TextView) findViewById(R.id.detail_content);
         mDetailUname= (TextView) findViewById(R.id.detail_uname);
@@ -154,7 +157,9 @@ public class DetailPostActivity extends AppCompatActivity{
         mDetailUheight= (TextView) findViewById(R.id.detail_uheight);
         mDetailDateTime= (TextView) findViewById(R.id.detail_date_time);
         mDetailUsex=(TextView) findViewById(R.id.detail_usex);
+    }
 
+    private void setPostInfoView(){
         mDetailTitle.setText(mPostInfo.getPtitle());
         mDetailContent.setText(mPostInfo.getPcontent());
         mDetailUweight.setText(mPostInfo.getUweight());
@@ -166,15 +171,23 @@ public class DetailPostActivity extends AppCompatActivity{
 
     private void initViewPager(){
         mImageViewPager= (ViewPager) findViewById(R.id.detail_view_pager);
+        imageList=new String[]{};
+        mImagePagerAdapter=new ImagePagerAdapter(imageList,DetailPostActivity.this);
+        mImageViewPager.setAdapter(mImagePagerAdapter);
+        mPointGroup= (ViewGroup) findViewById(R.id.detail_point_view_Group);
+    }
+
+    private void setViewPager(){
         imageList = mPostInfo.getPimage().split("@");
-        mImageViewPager.setAdapter(new ImagePagerAdapter(imageList,DetailPostActivity.this));
+        mImagePagerAdapter=new ImagePagerAdapter(imageList,DetailPostActivity.this);
+        mImageViewPager.setAdapter(mImagePagerAdapter);
         mImageViewPager.setOnPageChangeListener(new GuidePageChangeListener());
     }
 
     //导航小白点
     private void initPointer() {
         //有多少个界面就new多长的数组
-        mPointGroup= (ViewGroup) findViewById(R.id.detail_point_view_Group);
+        mPointGroup.removeAllViews();
         imageViews = new ImageView[imageList.length];
         for (int i = 0; i < imageViews.length; i++) {
             imageView = new ImageView(this);
@@ -276,10 +289,11 @@ public class DetailPostActivity extends AppCompatActivity{
             switch (msg.what){
                 case SUCCESS:
                     mSwipeRefreshLayout.setRefreshing(false);
-                    iniPostInfo();
-                    initViewPager();
-                    initScrollView();
-                    initPointer();
+                    setPostInfoView();
+                    setViewPager();
+                    initPointer(); //获取数据后初始化小白点
+                    mSwipeRefreshLayout.setmViewPager(mImageViewPager);
+                    mSwipeRefreshLayout.setmDetailScrollView(mDetailScrollView);
                     break;
                 case FAILURE:
                     mSwipeRefreshLayout.setRefreshing(false);

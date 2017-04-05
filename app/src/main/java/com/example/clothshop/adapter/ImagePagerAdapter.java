@@ -40,7 +40,7 @@ public class ImagePagerAdapter extends PagerAdapter {
             sb.append(Model.IMAGE_SAVE_PATH)
                     .append(mImageList[position].substring(2));
             String imageurl = sb.toString();
-            Picasso.with(mContext).load(imageurl).placeholder(R.drawable.empty_image).error(R.drawable.error_image).resize(80, 80).into(imageView);
+            Picasso.with(mContext).load(imageurl).placeholder(R.drawable.empty_image).error(R.drawable.error_image).resize(800, 800).into(imageView);
         }else {
             Picasso.with(mContext).load(R.drawable.empty_image).into(imageView);
         }
