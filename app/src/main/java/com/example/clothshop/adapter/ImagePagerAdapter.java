@@ -43,6 +43,7 @@ public class ImagePagerAdapter extends PagerAdapter {
             Picasso.with(mContext).load(imageurl).placeholder(R.drawable.empty_image).error(R.drawable.error_image).resize(80, 80).into(imageView);
         }else {
             Picasso.with(mContext).load(R.drawable.empty_image).into(imageView);
+            //aaa
         }
 
 
