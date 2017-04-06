@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -31,12 +32,14 @@ import android.widget.ViewFlipper;
 import com.example.clothshop.Activity.ScrollView.DetailRefreshLayout;
 import com.example.clothshop.Activity.ScrollView.DetailScrollView;
 import com.example.clothshop.Fragment.HomeFragment;
+import com.example.clothshop.Info.CommentsInfo;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 import com.example.clothshop.adapter.ImagePagerAdapter;
 import com.example.clothshop.utils.HttpPostUtil;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,6 +48,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ *
+ */
 public class DetailPostActivity extends AppCompatActivity{
 
     private ViewPager mImageViewPager;
@@ -53,6 +59,7 @@ public class DetailPostActivity extends AppCompatActivity{
     private ImageView imageView;
     private ImageView[] imageViews;
     private PostInfo mPostInfo;
+    private ArrayList<CommentsInfo> mCommentsInfoList;
 
     private DetailRefreshLayout mSwipeRefreshLayout;
 
@@ -70,8 +77,13 @@ public class DetailPostActivity extends AppCompatActivity{
     private TextView mDetailDateTime;
     private TextView mDetailUsex;
 
+    private RecyclerView mDetailCommentRecyclerView;
+
     private GetDataHandler handler;
     private GetDataThread mGetDataThread;
+
+    private GetCommentHanlder mCommentHandler;
+    private GetCommentThread mGetCommentThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,12 +91,8 @@ public class DetailPostActivity extends AppCompatActivity{
         initStatusBar();
         setContentView(R.layout.activity_detail_post);
         initToolbar();
-        initRefreshLayout();
         getData();
-        iniPostInfoView();
-        initViewPager();
-        initScrollView();
-
+        initLayout();
     }
 
     public void initStatusBar(){
@@ -104,22 +112,6 @@ public class DetailPostActivity extends AppCompatActivity{
         }
     }
 
-    private void initScrollView(){
-        mDetailScrollView= (DetailScrollView) findViewById(R.id.detail_scroll_view);
-        mDetailScrollView.setmViewPager(mImageViewPager);
-    }
-
-    private void initRefreshLayout(){
-        mSwipeRefreshLayout= (DetailRefreshLayout)findViewById(R.id.detail_refresh_layout);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                GetDataThread getDataThread=new GetDataThread();
-                getDataThread.start();
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        });
-    }
 
     private void initToolbar(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
@@ -138,17 +130,24 @@ public class DetailPostActivity extends AppCompatActivity{
         return result;
     }
 
-    private void getData(){
-        mPostInfo=new PostInfo();
-        Intent intent=getIntent();
-        mPostInfo.setPid(intent.getStringExtra("pid"));
-        handler=new GetDataHandler();
-        mGetDataThread=new GetDataThread();
-        mSwipeRefreshLayout.setRefreshing(true);
-        mGetDataThread.start();
-    }
-
-    private void iniPostInfoView(){
+    private void initLayout(){
+        //refreshlayout
+        mSwipeRefreshLayout= (DetailRefreshLayout)findViewById(R.id.detail_refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                GetDataThread getDataThread=new GetDataThread();
+                getDataThread.start();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+        //viewPager
+        mImageViewPager= (ViewPager) findViewById(R.id.detail_view_pager);
+        imageList=new String[]{};
+        mImagePagerAdapter=new ImagePagerAdapter(imageList,DetailPostActivity.this);
+        mImageViewPager.setAdapter(mImagePagerAdapter);
+        mPointGroup= (ViewGroup) findViewById(R.id.detail_point_view_Group);
+        //text
         mDetailTitle= (TextView) findViewById(R.id.detail_title);
         mDetailContent= (TextView) findViewById(R.id.detail_content);
         mDetailUname= (TextView) findViewById(R.id.detail_uname);
@@ -157,7 +156,14 @@ public class DetailPostActivity extends AppCompatActivity{
         mDetailUheight= (TextView) findViewById(R.id.detail_uheight);
         mDetailDateTime= (TextView) findViewById(R.id.detail_date_time);
         mDetailUsex=(TextView) findViewById(R.id.detail_usex);
+        //scrollView
+        mDetailScrollView= (DetailScrollView) findViewById(R.id.detail_scroll_view);
+        mDetailScrollView.setmViewPager(mImageViewPager);
+        //commentList
+        mDetailCommentRecyclerView= (RecyclerView) findViewById(R.id.detail_comment_recycler_view);
+
     }
+
 
     private void setPostInfoView(){
         mDetailTitle.setText(mPostInfo.getPtitle());
@@ -169,14 +175,6 @@ public class DetailPostActivity extends AppCompatActivity{
         mDetailUsex.setText(mPostInfo.getUsex());
     }
 
-    private void initViewPager(){
-        mImageViewPager= (ViewPager) findViewById(R.id.detail_view_pager);
-        imageList=new String[]{};
-        mImagePagerAdapter=new ImagePagerAdapter(imageList,DetailPostActivity.this);
-        mImageViewPager.setAdapter(mImagePagerAdapter);
-        mPointGroup= (ViewGroup) findViewById(R.id.detail_point_view_Group);
-    }
-
     private void setViewPager(){
         imageList = mPostInfo.getPimage().split("@");
         mImagePagerAdapter=new ImagePagerAdapter(imageList,DetailPostActivity.this);
@@ -184,7 +182,9 @@ public class DetailPostActivity extends AppCompatActivity{
         mImageViewPager.setOnPageChangeListener(new GuidePageChangeListener());
     }
 
-    //导航小白点
+    /**
+     * 初始化导航小白点，根据getData的图片数目设置小白点数目
+     */
     private void initPointer() {
         //有多少个界面就new多长的数组
         mPointGroup.removeAllViews();
@@ -215,29 +215,88 @@ public class DetailPostActivity extends AppCompatActivity{
         }
     }
 
+    /**
+     * 获取帖子（post）的数据
+     */
+    private void getData(){
+        mPostInfo=new PostInfo();
+        Intent intent=getIntent();
+        mPostInfo.setPid(intent.getStringExtra("pid"));
+        handler=new GetDataHandler();
+        mGetDataThread=new GetDataThread();
+        mSwipeRefreshLayout.setRefreshing(true);
+        mGetDataThread.start();
+    }
 
-    public class GuidePageChangeListener implements ViewPager.OnPageChangeListener {
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+    /**
+     * 获取评论数据
+     */
+    private void getCommentData(){
+        mCommentsInfoList=new ArrayList<CommentsInfo>();
+        if (mPostInfo.getPid().isEmpty()){
+            // TODO: 2017/4/6 other oeration? 
+            return;
         }
+        mCommentHandler=new GetCommentHanlder();
+        mGetCommentThread=new GetCommentThread();
+        // TODO: 2017/4/6 refresh?
+        mGetCommentThread.start();
 
-        //页面滑动完成后执行
+    }
+
+    class GetCommentThread extends Thread{
         @Override
-        public void onPageSelected(int position) {
-            //判断当前是在那个page，就把对应下标的ImageView原点设置为选中状态的图片
-            for (int i = 0; i < imageViews.length; i++) {
-                imageViews[position].setBackgroundResource(R.drawable.point_focused);
-                if (position != i) {
-                    imageViews[i].setBackgroundResource(R.drawable.point_not_focused);
+        public void run() {
+            super.run();
+            Map<String,String> params=new HashMap<String, String>();
+            params.put(Model.POST_ID_ATTR,mPostInfo.getPid());
+            String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.DETAIL_POST_PATH);
+            try {
+                JSONObject jsonObject=new JSONObject(result);
+                if (!jsonObject.getString("status").equals("0")){
+                    showMessage(jsonObject.getString("mes"), GetCommentHanlder.FAILURE);
                 }
+                JSONArray jsonArray=jsonObject.getJSONArray("post");
+                for (int i=0;i<jsonArray.length();i++){
+                    JSONObject jo= (JSONObject) jsonArray.get(i);
+                    CommentsInfo commentsInfo=new CommentsInfo();
+                    commentsInfo.setCcontent(jo.getString(Model.COMMENT_CONTENT));
+                    commentsInfo.setCtime(jo.getString(Model.COMMENT_TIME));
+                    mCommentsInfoList.add(commentsInfo);
+                }
+                showMessage(jsonObject.getString("mes"),GetCommentHanlder.SUCCESS);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                showMessage(e.toString(),GetCommentHanlder.FAILURE);
             }
         }
-
-        @Override
-        public void onPageScrollStateChanged(int state) {
-
+        private void showMessage(String message,int status){
+            Message msg=Message.obtain(mCommentHandler,status);
+            msg.obj=message;
+            msg.sendToTarget();
+            msg.setTarget(mCommentHandler);
         }
     }
+
+    public class GetCommentHanlder extends Handler{
+        public static final int FAILURE=0x0002;
+        public static final int SUCCESS=0x0001;
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case SUCCESS:
+                    break;
+                case FAILURE:
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+
 
     class GetDataThread extends Thread{
         @Override
@@ -258,18 +317,23 @@ public class DetailPostActivity extends AppCompatActivity{
                 mPostInfo.setUsex(jsonObject.getString(Model.POST_USEX_ATTR));
                 mPostInfo.setUage(jsonObject.getString(Model.POST_UAGE_ATTR));
                 if (jsonObject.getString("status").equals("0")){
-                    showMessage(jsonObject.getString("mes"), PublishActivity.SendHandler.SUCCESS);
+                    showMessage(jsonObject.getString("mes"), GetDataHandler.SUCCESS);
                 }else {
-                    showMessage(jsonObject.getString("mes"), PublishActivity.SendHandler.FAILURE);
+                    showMessage(jsonObject.getString("mes"), GetDataHandler.FAILURE);
                 }
             } catch (JSONException e) {
-                showMessage(e.toString(), PublishActivity.SendHandler.FAILURE);
+                showMessage(e.toString(), GetDataHandler.FAILURE);
                 e.printStackTrace();
             }
 
 
         }
 
+        /**
+         * 获取帖子数据的thread
+         * @param message
+         * @param status
+         */
         private void showMessage(String message,int status){
             Message msg=Message.obtain(handler,status);
             msg.obj=message;
@@ -278,7 +342,10 @@ public class DetailPostActivity extends AppCompatActivity{
         }
     }
 
-    class GetDataHandler extends Handler {
+    /**
+     * 帖子数据的handler
+     */
+    public class GetDataHandler extends Handler {
 
         public static final int FAILURE=0x0002;
         public static final int SUCCESS=0x0001;
@@ -303,6 +370,29 @@ public class DetailPostActivity extends AppCompatActivity{
                     mSwipeRefreshLayout.setRefreshing(false);
                     break;
             }
+        }
+    }
+
+    public class GuidePageChangeListener implements ViewPager.OnPageChangeListener {
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        }
+
+        //页面滑动完成后执行
+        @Override
+        public void onPageSelected(int position) {
+            //判断当前是在那个page，就把对应下标的ImageView原点设置为选中状态的图片
+            for (int i = 0; i < imageViews.length; i++) {
+                imageViews[position].setBackgroundResource(R.drawable.point_focused);
+                if (position != i) {
+                    imageViews[i].setBackgroundResource(R.drawable.point_not_focused);
+                }
+            }
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
         }
     }
 }

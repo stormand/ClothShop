@@ -10,7 +10,7 @@ public class PostInfo implements Serializable{
 
     private String pid;         //帖子id
     private String ptitle;      //帖子标题
-    private String uid;         //帖子作者id
+    private String uid;         //帖子作者id  // TODO: 2017/4/6 不用把？
     private String pcontent;    //帖子内容
     private String pdaytime;
     private String pimage;
@@ -18,6 +18,16 @@ public class PostInfo implements Serializable{
     private String uheight;
     private String uage;
     private String usex;
+    private String uname;
+
+    public void setUname(String uname) {
+        this.uname = uname;
+    }
+
+    public String getUname() {
+
+        return uname;
+    }
 
     public void setUage(String uage) {
         this.uage = uage;
