@@ -11,6 +11,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
@@ -36,6 +38,7 @@ import com.example.clothshop.Info.CommentsInfo;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
+import com.example.clothshop.adapter.CommentRecyclerAdapter;
 import com.example.clothshop.adapter.ImagePagerAdapter;
 import com.example.clothshop.utils.HttpPostUtil;
 
@@ -44,6 +47,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,41 +88,32 @@ public class DetailPostActivity extends AppCompatActivity{
 
     private GetCommentHanlder mCommentHandler;
     private GetCommentThread mGetCommentThread;
+    private CommentRecyclerAdapter mCommentadapter;
+    private LinearLayoutManager mLayoutManager;
+    private SendCommentThread mSendCommentThread;
+    private SendCommentHandler mSendCommentHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initStatusBar();
         setContentView(R.layout.activity_detail_post);
         initToolbar();
         getData();
         initLayout();
+        getCommentData();
     }
-
-    public void initStatusBar(){
-        //状态栏透明
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-                    | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.TRANSPARENT);
-            window.setNavigationBarColor(Color.TRANSPARENT);
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        }
-    }
-
 
     private void initToolbar(){
-        Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
-        AppBarLayout.LayoutParams lp = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-        lp.setMargins(0,getStatusBarHeight(), 0, 0);
-        toolbar.setLayoutParams(lp);
-        setSupportActionBar(toolbar);
+        //refreshlayout
+        mSwipeRefreshLayout= (DetailRefreshLayout)findViewById(R.id.detail_refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                GetDataThread getDataThread=new GetDataThread();
+                getDataThread.start();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
     }
 
     private int getStatusBarHeight() {
@@ -131,16 +126,6 @@ public class DetailPostActivity extends AppCompatActivity{
     }
 
     private void initLayout(){
-        //refreshlayout
-        mSwipeRefreshLayout= (DetailRefreshLayout)findViewById(R.id.detail_refresh_layout);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                GetDataThread getDataThread=new GetDataThread();
-                getDataThread.start();
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        });
         //viewPager
         mImageViewPager= (ViewPager) findViewById(R.id.detail_view_pager);
         imageList=new String[]{};
@@ -159,8 +144,6 @@ public class DetailPostActivity extends AppCompatActivity{
         //scrollView
         mDetailScrollView= (DetailScrollView) findViewById(R.id.detail_scroll_view);
         mDetailScrollView.setmViewPager(mImageViewPager);
-        //commentList
-        mDetailCommentRecyclerView= (RecyclerView) findViewById(R.id.detail_comment_recycler_view);
 
     }
 
@@ -173,6 +156,7 @@ public class DetailPostActivity extends AppCompatActivity{
         mDetailDateTime.setText(mPostInfo.getPdaytime());
         mDetailUage.setText(mPostInfo.getUage());
         mDetailUsex.setText(mPostInfo.getUsex());
+        mDetailUname.setText(mPostInfo.getUname());
     }
 
     private void setViewPager(){
@@ -232,7 +216,23 @@ public class DetailPostActivity extends AppCompatActivity{
      * 获取评论数据
      */
     private void getCommentData(){
+        mDetailCommentRecyclerView= (RecyclerView) findViewById(R.id.detail_comment_recycler_view);
+        //创建线性布局
+        mLayoutManager = new LinearLayoutManager(DetailPostActivity.this){
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+
+        //垂直方向
+        mLayoutManager.setOrientation(OrientationHelper.VERTICAL);
+        //mLayoutManager.setAutoMeasureEnabled(true);
+        //给RecyclerView设置布局管理器
+        mDetailCommentRecyclerView.setLayoutManager(mLayoutManager);
         mCommentsInfoList=new ArrayList<CommentsInfo>();
+        mCommentadapter=new CommentRecyclerAdapter(DetailPostActivity.this,mCommentsInfoList);
+        mDetailCommentRecyclerView.setAdapter(mCommentadapter);
         if (mPostInfo.getPid().isEmpty()){
             // TODO: 2017/4/6 other oeration? 
             return;
@@ -250,18 +250,21 @@ public class DetailPostActivity extends AppCompatActivity{
             super.run();
             Map<String,String> params=new HashMap<String, String>();
             params.put(Model.POST_ID_ATTR,mPostInfo.getPid());
-            String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.DETAIL_POST_PATH);
+            String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.GET_COMMENT_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
-                if (!jsonObject.getString("status").equals("0")){
+                if (jsonObject.getString("status").equals("0")){
                     showMessage(jsonObject.getString("mes"), GetCommentHanlder.FAILURE);
+                    return;
                 }
-                JSONArray jsonArray=jsonObject.getJSONArray("post");
+                JSONArray jsonArray=jsonObject.getJSONArray("comment");
+                mCommentsInfoList.clear();
                 for (int i=0;i<jsonArray.length();i++){
                     JSONObject jo= (JSONObject) jsonArray.get(i);
                     CommentsInfo commentsInfo=new CommentsInfo();
                     commentsInfo.setCcontent(jo.getString(Model.COMMENT_CONTENT));
                     commentsInfo.setCtime(jo.getString(Model.COMMENT_TIME));
+                    commentsInfo.setUname(jo.getString(Model.COMMENT_UNAME));
                     mCommentsInfoList.add(commentsInfo);
                 }
                 showMessage(jsonObject.getString("mes"),GetCommentHanlder.SUCCESS);
@@ -287,16 +290,18 @@ public class DetailPostActivity extends AppCompatActivity{
             super.handleMessage(msg);
             switch (msg.what){
                 case SUCCESS:
+                    CommentRecyclerAdapter adapter=new CommentRecyclerAdapter(DetailPostActivity.this,mCommentsInfoList);
+                    mDetailCommentRecyclerView.setAdapter(adapter);
                     break;
                 case FAILURE:
+                    CommentRecyclerAdapter adapter1=new CommentRecyclerAdapter(DetailPostActivity.this,mCommentsInfoList);
+                    mDetailCommentRecyclerView.setAdapter(adapter1);
                     break;
                 default:
                     break;
             }
         }
     }
-
-
 
     class GetDataThread extends Thread{
         @Override
@@ -309,13 +314,14 @@ public class DetailPostActivity extends AppCompatActivity{
                 JSONObject jsonObject=new JSONObject(result);
                 mPostInfo.setPimage(jsonObject.getString(Model.POST_IMAGE_ATTR));
                 mPostInfo.setPtitle(jsonObject.getString(Model.POST_TITLE_ATTR));
-                mPostInfo.setUid(jsonObject.getString(Model.POST_UID_ATTR));
+                mPostInfo.setUname(jsonObject.getString(Model.POST_UNAME_ATTR));
                 mPostInfo.setPdaytime(jsonObject.getString(Model.POST_DAY_TIME_ATTR));
                 mPostInfo.setPcontent(jsonObject.getString(Model.POST_CONTENT_ATTR));
                 mPostInfo.setUheight(jsonObject.getString(Model.POST_UHEIGHT_ATTR));
                 mPostInfo.setUweight(jsonObject.getString(Model.POST_UWEIGHT_ATTR));
                 mPostInfo.setUsex(jsonObject.getString(Model.POST_USEX_ATTR));
                 mPostInfo.setUage(jsonObject.getString(Model.POST_UAGE_ATTR));
+                mPostInfo.setPid(jsonObject.getString(Model.POST_ID_ATTR));
                 if (jsonObject.getString("status").equals("0")){
                     showMessage(jsonObject.getString("mes"), GetDataHandler.SUCCESS);
                 }else {
@@ -342,9 +348,6 @@ public class DetailPostActivity extends AppCompatActivity{
         }
     }
 
-    /**
-     * 帖子数据的handler
-     */
     public class GetDataHandler extends Handler {
 
         public static final int FAILURE=0x0002;
@@ -368,6 +371,65 @@ public class DetailPostActivity extends AppCompatActivity{
                     break;
                 default:
                     mSwipeRefreshLayout.setRefreshing(false);
+                    break;
+            }
+        }
+    }
+
+    public void sendComment(String content){
+        mSendCommentHandler = new SendCommentHandler();
+        mSendCommentThread=new SendCommentThread(content);
+        mSendCommentThread.start();
+    }
+
+    class SendCommentThread extends Thread{
+        private String cContent;
+        public SendCommentThread(String content) {
+            this.cContent=content;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            Map<String,String> params=new HashMap<String, String>();
+            params.put(Model.COMMENT_CONTENT,cContent);
+            params.put(Model.COMMENT_UID,Model.MYUSER.getUserid());
+            params.put(Model.COMMENT_PID,mPostInfo.getPid());
+            String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.SEND_COMMENT_PATH);
+            try {
+                JSONObject jsonObject=new JSONObject(result);
+                if (jsonObject.getString("status").equals("0")){
+                    showMessage(jsonObject.getString("mes"), SendCommentHandler.SUCCESS);
+                }else {
+                    showMessage(jsonObject.getString("mes"), SendCommentHandler.FAILURE);
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                showMessage(e.toString(),GetCommentHanlder.FAILURE);
+            }
+        }
+        private void showMessage(String message,int status){
+            Message msg=Message.obtain(mSendCommentHandler,status);
+            msg.obj=message;
+            msg.sendToTarget();
+            msg.setTarget(mSendCommentHandler);
+        }
+    }
+
+    public class SendCommentHandler extends Handler{
+        public static final int FAILURE=0x0002;
+        public static final int SUCCESS=0x0001;
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case SUCCESS:
+                    GetCommentThread getCommentThread=new GetCommentThread();
+                    getCommentThread.start();
+                    break;
+                case FAILURE:
+                    break;
+                default:
                     break;
             }
         }

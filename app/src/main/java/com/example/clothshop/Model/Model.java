@@ -18,7 +18,8 @@ public class Model {
     public static final String USER_INFO_UPLOAD_PATH = PATH + "UserInfoUpload.php";
     public static final String HOME_PATH = PATH + "ShowHome.php";
     public static final String DETAIL_POST_PATH = PATH + "DetailPost.php";
-    public static final String GET_COMMENT = PATH + "GetComment.php";
+    public static final String GET_COMMENT_PATH = PATH + "GetComment.php";
+    public static final String SEND_COMMENT_PATH = PATH + "SendComment.php";
     //DB
     //user
     public static final String USER_NAME_ATTR="username";
@@ -35,6 +36,7 @@ public class Model {
     public static final String POST_TITLE_ATTR="title";
     public static final String POST_CONTENT_ATTR="content";
     public static final String POST_UID_ATTR="uid";
+    public static final String POST_UNAME_ATTR="uname";
     public static final String POST_UAGE_ATTR="uage";
     public static final String POST_USEX_ATTR="usex";
     public static final String POST_UHEIGHT_ATTR="uheight";
@@ -43,7 +45,9 @@ public class Model {
     public static final String POST_DAY_TIME_ATTR="day_time";
     //pcomment
     public static final String COMMENT_UID="uid";
-    public static final String COMMENT_TIME="ctime";
+    public static final String COMMENT_PID="pid";
+    public static final String COMMENT_UNAME="uname";
+    public static final String COMMENT_TIME="date_time";
     public static final String COMMENT_CONTENT="ccontent";
 
     public static final String FEMALE_TEXT="女";
