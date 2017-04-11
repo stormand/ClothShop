@@ -25,6 +25,7 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -33,6 +34,8 @@ import android.widget.ViewFlipper;
 
 import com.example.clothshop.Activity.ScrollView.DetailRefreshLayout;
 import com.example.clothshop.Activity.ScrollView.DetailScrollView;
+import com.example.clothshop.DB.DBHelper;
+import com.example.clothshop.DB.DatabaseUtil;
 import com.example.clothshop.Fragment.HomeFragment;
 import com.example.clothshop.Info.CommentsInfo;
 import com.example.clothshop.Info.PostInfo;
@@ -42,6 +45,7 @@ import com.example.clothshop.adapter.CommentRecyclerAdapter;
 import com.example.clothshop.adapter.ImagePagerAdapter;
 import com.example.clothshop.utils.HttpPostUtil;
 
+import org.apache.http.conn.MultihomePlainSocketFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,6 +85,10 @@ public class DetailPostActivity extends AppCompatActivity{
     private TextView mDetailDateTime;
     private TextView mDetailUsex;
 
+    private Button mLoveButton;
+    private Button mCollectionButton;
+    private DatabaseUtil mDatabaseUtil;
+
     private RecyclerView mDetailCommentRecyclerView;
 
     private GetDataHandler handler;
@@ -101,6 +109,7 @@ public class DetailPostActivity extends AppCompatActivity{
         getData();
         initLayout();
         getCommentData();
+        loveAndCollect();
     }
 
     private void initToolbar(){
@@ -114,15 +123,6 @@ public class DetailPostActivity extends AppCompatActivity{
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
-    }
-
-    private int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
     }
 
     private void initLayout(){
@@ -141,12 +141,14 @@ public class DetailPostActivity extends AppCompatActivity{
         mDetailUheight= (TextView) findViewById(R.id.detail_uheight);
         mDetailDateTime= (TextView) findViewById(R.id.detail_date_time);
         mDetailUsex=(TextView) findViewById(R.id.detail_usex);
+        //love&collection
+        mLoveButton= (Button) findViewById(R.id.love_button);
+        mCollectionButton= (Button) findViewById(R.id.collection_button);
         //scrollView
         mDetailScrollView= (DetailScrollView) findViewById(R.id.detail_scroll_view);
         mDetailScrollView.setmViewPager(mImageViewPager);
 
     }
-
 
     private void setPostInfoView(){
         mDetailTitle.setText(mPostInfo.getPtitle());
@@ -199,13 +201,64 @@ public class DetailPostActivity extends AppCompatActivity{
         }
     }
 
+    private void setLCText(){
+        if(mPostInfo.isMyLove()){
+            mLoveButton.setText(mPostInfo.getLoveNum());
+            //mLoveButton.setTextColor(101010); // TODO: 2017/4/11 change the color
+        }else{
+            mLoveButton.setText(mPostInfo.getLoveNum());
+            //mLoveButton.setTextColor(0);
+        }
+        if (mPostInfo.isMyCollection()){
+            mCollectionButton.setText(getString(R.string.collected));
+        }else {
+            mCollectionButton.setText(getString(R.string.collection));
+        }
+    }
+
+    private void loveAndCollect(){
+        setLCText();
+        mLoveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //local
+                int loveNum=Integer.valueOf(mPostInfo.getLoveNum()).intValue();
+                if (mPostInfo.isMyLove() && loveNum>0){
+                    mPostInfo.setLoveNum(Integer.toString(loveNum-1));
+                    mDatabaseUtil.deleteFav(mPostInfo.getPid(),DatabaseUtil.ATTR_LOVE);
+                }else if(!mPostInfo.isMyLove()){
+                    mPostInfo.setLoveNum(Integer.toString(loveNum+1));
+                    mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_LOVE);
+                }
+                mPostInfo.setMyLove(!mPostInfo.isMyLove());
+                setLCText();
+
+            }
+        });
+        mCollectionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mPostInfo.isMyCollection()){
+                    mDatabaseUtil.deleteFav(mPostInfo.getPid(),DatabaseUtil.ATTR_COLLECTION);
+                }else if(!mPostInfo.isMyCollection()){
+                    mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_COLLECTION);
+                }
+                mPostInfo.setMyCollection(!mPostInfo.isMyCollection());
+                setLCText();
+            }
+        });
+    }
+
     /**
      * 获取帖子（post）的数据
      */
     private void getData(){
+        mDatabaseUtil=DatabaseUtil.getInstance(DetailPostActivity.this);
         mPostInfo=new PostInfo();
         Intent intent=getIntent();
         mPostInfo.setPid(intent.getStringExtra("pid"));
+        mPostInfo.setMyCollection(mDatabaseUtil.isCollected(mPostInfo.getPid()));
+        mPostInfo.setMyLove(mDatabaseUtil.isLoved(mPostInfo.getPid()));
         handler=new GetDataHandler();
         mGetDataThread=new GetDataThread();
         mSwipeRefreshLayout.setRefreshing(true);
@@ -322,6 +375,7 @@ public class DetailPostActivity extends AppCompatActivity{
                 mPostInfo.setUsex(jsonObject.getString(Model.POST_USEX_ATTR));
                 mPostInfo.setUage(jsonObject.getString(Model.POST_UAGE_ATTR));
                 mPostInfo.setPid(jsonObject.getString(Model.POST_ID_ATTR));
+                mPostInfo.setLoveNum(jsonObject.getString(Model.POST_LOVE_NUM));
                 if (jsonObject.getString("status").equals("0")){
                     showMessage(jsonObject.getString("mes"), GetDataHandler.SUCCESS);
                 }else {
@@ -362,6 +416,7 @@ public class DetailPostActivity extends AppCompatActivity{
                     setPostInfoView();
                     setViewPager();
                     initPointer(); //获取数据后初始化小白点
+                    mLoveButton.setText(mPostInfo.getLoveNum());
                     mSwipeRefreshLayout.setmViewPager(mImageViewPager);
                     mSwipeRefreshLayout.setmDetailScrollView(mDetailScrollView);
                     break;

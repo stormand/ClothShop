@@ -10,7 +10,7 @@ public class PostInfo implements Serializable{
 
     private String pid;         //帖子id
     private String ptitle;      //帖子标题
-    private String uid;         //帖子作者id  // TODO: 2017/4/6 不用把？
+    private String uid;         //帖子作者id
     private String pcontent;    //帖子内容
     private String pdaytime;
     private String pimage;
@@ -19,6 +19,35 @@ public class PostInfo implements Serializable{
     private String uage;
     private String usex;
     private String uname;
+    private String loveNum;
+
+    private boolean myCollection=false;
+    private boolean myLove=false;
+
+    public void setLoveNum(String loveNum) {
+        this.loveNum = loveNum;
+    }
+
+    public String getLoveNum() {
+
+        return loveNum;
+    }
+
+    public void setMyCollection(boolean myCollection) {
+        this.myCollection = myCollection;
+    }
+
+    public void setMyLove(boolean myLove) {
+        this.myLove = myLove;
+    }
+
+    public boolean isMyCollection() {
+        return myCollection;
+    }
+
+    public boolean isMyLove() {
+        return myLove;
+    }
 
     public void setUname(String uname) {
         this.uname = uname;

@@ -43,6 +43,7 @@ public class Model {
     public static final String POST_UWEIGHT_ATTR="uweight";
     public static final String POST_IMAGE_ATTR="image";
     public static final String POST_DAY_TIME_ATTR="day_time";
+    public static final String POST_LOVE_NUM="love_num";
     //pcomment
     public static final String COMMENT_UID="uid";
     public static final String COMMENT_PID="pid";
