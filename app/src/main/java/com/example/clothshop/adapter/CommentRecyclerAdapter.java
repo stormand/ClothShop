@@ -60,7 +60,6 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter {
 
         }else {
             final AddCommentHolder itemHolder = (AddCommentHolder) holder;
-
             itemHolder.mSendCommentButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

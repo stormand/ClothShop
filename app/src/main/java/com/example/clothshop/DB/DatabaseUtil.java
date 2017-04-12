@@ -78,10 +78,12 @@ public class DatabaseUtil {
             if (deleteLove && loved==1){
                 if (collected==0){
                     dbHelper.delete(DBHelper.TABLE_NAME, where, null); //既不收藏也不点赞，删除
+                    Log.e("love_test","delete all "+loved+"  "+collected);
                 }else {
                     ContentValues cv = new ContentValues(); //只更改点赞
                     cv.put(DBHelper.FavTable.IS_LOVE, 0);
                     dbHelper.update(DBHelper.TABLE_NAME, cv, where, null);
+                    Log.e("love_test","delete love "+loved+"  "+collected);
                 }
             }else if (deleteCollection && collected==1){
                 if (loved==0){
@@ -145,6 +147,7 @@ public class DatabaseUtil {
                 conv.put(DBHelper.FavTable.IS_COLLECTION, 1);
             }else if(attribute.equals(ATTR_LOVE)){
                 conv.put(DBHelper.FavTable.IS_LOVE, 1);
+                Log.e("love_test","add love 1 "+postInfo.isMyLove());
             }
             dbHelper.update(DBHelper.TABLE_NAME, conv, where, null);
         } else {
@@ -153,6 +156,7 @@ public class DatabaseUtil {
             cv.put(DBHelper.FavTable.OBJECT_ID, postInfo.getPid());
             cv.put(DBHelper.FavTable.IS_LOVE, postInfo.isMyLove() == true ? 1 : 0);
             cv.put(DBHelper.FavTable.IS_COLLECTION, postInfo.isMyCollection() == true ? 1 : 0);
+            Log.e("love_test","add both "+postInfo.isMyLove()+" "+postInfo.isMyCollection());
             uri = dbHelper.insert(DBHelper.TABLE_NAME, null, cv);
         }
         if (cursor != null) {
@@ -242,7 +246,6 @@ public class DatabaseUtil {
         ArrayList<PostInfo> contents = null;
         // ContentResolver resolver = context.getContentResolver();
         Cursor cursor = dbHelper.query(DBHelper.TABLE_NAME, null, null, null, null, null, null);
-        Log.i("queryFav","queryFav"+"--1--"+cursor.getCount() + "");
         if (cursor == null) {
             return null;
         }
@@ -267,6 +270,43 @@ public class DatabaseUtil {
                 content.setPid(id);
                 contents.add(content);
             }
+            for (int i=0;i<contents.size();i++){
+                Log.i("queryFav",i+1+"--->"+contents.get(i).getPid());
+            }
+
+        }
+        if (cursor != null) {
+            cursor.close();
+        }
+        return contents;
+    }
+
+    public ArrayList<PostInfo> query() {
+        ArrayList<PostInfo> contents = null;
+        // ContentResolver resolver = context.getContentResolver();
+        Cursor cursor = dbHelper.query(DBHelper.TABLE_NAME, null, null, null, null, null, null);
+        if (cursor == null) {
+            return null;
+        }
+        contents = new ArrayList<PostInfo>();
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            PostInfo content = new PostInfo();
+            UserInfo user=new UserInfo();
+            content.setMyCollection(cursor.getInt(3) == 1 ? true : false);
+            content.setMyLove(cursor.getInt(4) == 1 ? true : false);
+
+            String id=cursor.getString(cursor.getColumnIndex(DBHelper.FavTable.OBJECT_ID));
+            String nameId=cursor.getString(cursor.getColumnIndex(DBHelper.FavTable.USER_ID));
+            String col=cursor.getString(cursor.getColumnIndex(DBHelper.FavTable.IS_COLLECTION));
+            String lo=cursor.getString(cursor.getColumnIndex(DBHelper.FavTable.IS_LOVE));
+
+                content.setUid(nameId);
+                content.setPid(id);
+                content.setMyCollection(col.equals("1")?true:false);
+                content.setMyLove(lo.equals("1")?true:false);
+
+                contents.add(content);
+
             for (int i=0;i<contents.size();i++){
                 Log.i("queryFav",i+1+"--->"+contents.get(i).getPid());
             }

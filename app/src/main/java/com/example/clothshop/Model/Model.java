@@ -20,6 +20,8 @@ public class Model {
     public static final String DETAIL_POST_PATH = PATH + "DetailPost.php";
     public static final String GET_COMMENT_PATH = PATH + "GetComment.php";
     public static final String SEND_COMMENT_PATH = PATH + "SendComment.php";
+    public static final String ADD_LOVE_PATH = PATH + "AddLove.php";
+    public static final String ADD_COLLECTION_PATH = PATH + "AddCollection.php";
     //DB
     //user
     public static final String USER_NAME_ATTR="username";
@@ -50,6 +52,9 @@ public class Model {
     public static final String COMMENT_UNAME="uname";
     public static final String COMMENT_TIME="date_time";
     public static final String COMMENT_CONTENT="ccontent";
+    //love collection
+    public static final String LOVE="love";
+    public static final String COLLECTION="collection";
 
     public static final String FEMALE_TEXT="女";
     public static final String MALE_TEXT="男";

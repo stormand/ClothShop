@@ -15,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -95,11 +96,10 @@ public class DetailPostActivity extends AppCompatActivity{
     private GetDataThread mGetDataThread;
 
     private GetCommentHanlder mCommentHandler;
-    private GetCommentThread mGetCommentThread;
     private CommentRecyclerAdapter mCommentadapter;
     private LinearLayoutManager mLayoutManager;
-    private SendCommentThread mSendCommentThread;
     private SendCommentHandler mSendCommentHandler;
+    private AddLCHandler mAddLCHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -216,38 +216,6 @@ public class DetailPostActivity extends AppCompatActivity{
         }
     }
 
-    private void loveAndCollect(){
-        setLCText();
-        mLoveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //local
-                int loveNum=Integer.valueOf(mPostInfo.getLoveNum()).intValue();
-                if (mPostInfo.isMyLove() && loveNum>0){
-                    mPostInfo.setLoveNum(Integer.toString(loveNum-1));
-                    mDatabaseUtil.deleteFav(mPostInfo.getPid(),DatabaseUtil.ATTR_LOVE);
-                }else if(!mPostInfo.isMyLove()){
-                    mPostInfo.setLoveNum(Integer.toString(loveNum+1));
-                    mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_LOVE);
-                }
-                mPostInfo.setMyLove(!mPostInfo.isMyLove());
-                setLCText();
-
-            }
-        });
-        mCollectionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mPostInfo.isMyCollection()){
-                    mDatabaseUtil.deleteFav(mPostInfo.getPid(),DatabaseUtil.ATTR_COLLECTION);
-                }else if(!mPostInfo.isMyCollection()){
-                    mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_COLLECTION);
-                }
-                mPostInfo.setMyCollection(!mPostInfo.isMyCollection());
-                setLCText();
-            }
-        });
-    }
 
     /**
      * 获取帖子（post）的数据
@@ -259,6 +227,7 @@ public class DetailPostActivity extends AppCompatActivity{
         mPostInfo.setPid(intent.getStringExtra("pid"));
         mPostInfo.setMyCollection(mDatabaseUtil.isCollected(mPostInfo.getPid()));
         mPostInfo.setMyLove(mDatabaseUtil.isLoved(mPostInfo.getPid()));
+        Log.e("love_test","postinfo:"+mPostInfo.isMyLove()+"  "+mPostInfo.isMyCollection());
         handler=new GetDataHandler();
         mGetDataThread=new GetDataThread();
         mSwipeRefreshLayout.setRefreshing(true);
@@ -291,7 +260,7 @@ public class DetailPostActivity extends AppCompatActivity{
             return;
         }
         mCommentHandler=new GetCommentHanlder();
-        mGetCommentThread=new GetCommentThread();
+        GetCommentThread mGetCommentThread=new GetCommentThread();
         // TODO: 2017/4/6 refresh?
         mGetCommentThread.start();
 
@@ -356,6 +325,9 @@ public class DetailPostActivity extends AppCompatActivity{
         }
     }
 
+    /**
+     * 获取帖子数据
+     */
     class GetDataThread extends Thread{
         @Override
         public void run() {
@@ -431,9 +403,13 @@ public class DetailPostActivity extends AppCompatActivity{
         }
     }
 
+    /**
+     * 评论
+     * @param content
+     */
     public void sendComment(String content){
         mSendCommentHandler = new SendCommentHandler();
-        mSendCommentThread=new SendCommentThread(content);
+        SendCommentThread mSendCommentThread=new SendCommentThread(content);
         mSendCommentThread.start();
     }
 
@@ -483,6 +459,114 @@ public class DetailPostActivity extends AppCompatActivity{
                     getCommentThread.start();
                     break;
                 case FAILURE:
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    /**
+     * LC:love & collection
+     */
+    private void loveAndCollect(){
+        setLCText();
+        mAddLCHandler=new AddLCHandler();
+        mLoveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //local
+                int loveNum=Integer.valueOf(mPostInfo.getLoveNum()).intValue();
+                if (mPostInfo.isMyLove() && loveNum>0){
+                    mPostInfo.setLoveNum(Integer.toString(loveNum-1));
+                    mPostInfo.setMyLove(!mPostInfo.isMyLove());
+                    mDatabaseUtil.deleteFav(mPostInfo.getPid(),DatabaseUtil.ATTR_LOVE);
+                }else if(!mPostInfo.isMyLove()){
+                    mPostInfo.setLoveNum(Integer.toString(loveNum+1));
+                    mPostInfo.setMyLove(!mPostInfo.isMyLove());
+                    mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_LOVE);
+                }
+
+                Log.e("love_test","click postinfo:"+mPostInfo.isMyLove()+"  "+mPostInfo.isMyCollection());
+                setLCText();
+                AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_LOVE);
+                mAddLCThread.start();
+
+            }
+        });
+        mCollectionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mPostInfo.isMyCollection()){
+                    mDatabaseUtil.deleteFav(mPostInfo.getPid(),DatabaseUtil.ATTR_COLLECTION);
+                }else if(!mPostInfo.isMyCollection()){
+                    mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_COLLECTION);
+                }
+                mPostInfo.setMyCollection(!mPostInfo.isMyCollection());
+                setLCText();
+                AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_COLLECTION);
+                mAddLCThread.start();
+            }
+        });
+    }
+
+    class AddLCThread extends Thread{
+        String attribute;
+        public AddLCThread(String attr) {
+            this.attribute=attr;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            Map<String,String> params=new HashMap<String, String>();
+            params.put(Model.COMMENT_UID,Model.MYUSER.getUserid());
+            params.put(Model.COMMENT_PID,mPostInfo.getPid());
+            String result="";
+            if (attribute.equals(DatabaseUtil.ATTR_LOVE)){
+                params.put(Model.LOVE, String.valueOf(mPostInfo.isMyLove()?1:0));
+                result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.ADD_LOVE_PATH);
+            }else if (attribute.equals(DatabaseUtil.ATTR_COLLECTION)){
+                params.put(Model.COLLECTION, String.valueOf(mPostInfo.isMyCollection()?1:0));
+                result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.ADD_COLLECTION_PATH);
+            }
+            Log.e("sendLC",params.toString());
+//            if (result.equals("")){ //为空返回
+//                showMessage("",GetCommentHanlder.FAILURE);
+//                return;
+//            }
+            try {
+                JSONObject jsonObject=new JSONObject(result);
+                if (jsonObject.getString("status").equals("0")){
+                    showMessage(jsonObject.getString("mes"), AddLCHandler.SUCCESS);
+                }else {
+                    showMessage(jsonObject.getString("mes"), AddLCHandler.FAILURE);
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                showMessage(e.toString(),GetCommentHanlder.FAILURE);
+            }
+        }
+        private void showMessage(String message,int status){
+            Message msg=Message.obtain(mAddLCHandler,status);
+            msg.obj=message;
+            msg.sendToTarget();
+            msg.setTarget(mAddLCHandler);
+        }
+    }
+
+    public class AddLCHandler extends Handler{
+        public static final int FAILURE=0x0002;
+        public static final int SUCCESS=0x0001;
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case SUCCESS:
+                    Toast.makeText(DetailPostActivity.this, "success", Toast.LENGTH_SHORT).show();
+                    break;
+                case FAILURE:
+                    Toast.makeText(DetailPostActivity.this, "failure", Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
