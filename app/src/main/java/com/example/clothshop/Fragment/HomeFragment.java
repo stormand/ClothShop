@@ -273,8 +273,9 @@ public class HomeFragment extends Fragment {
                     JSONObject jo= (JSONObject) jsonArray.get(i);
                     postInfo.setPtitle(jo.getString(Model.POST_TITLE_ATTR));
                     postInfo.setPid(jo.getString(Model.POST_ID_ATTR));
-                    postInfo.setUid(jo.getString(Model.POST_UID_ATTR));
+                    postInfo.setUname(jo.getString(Model.USER_NAME_ATTR));
                     postInfo.setPdaytime(jo.getString(Model.POST_DAY_TIME_ATTR));
+                    postInfo.setLoveNum(jo.getString(Model.POST_LOVE_NUM));
                     postInfo.setPimage(jo.getString(Model.POST_IMAGE_ATTR).split("@")[0]);
                     paramsList.add(postInfo);
                 }

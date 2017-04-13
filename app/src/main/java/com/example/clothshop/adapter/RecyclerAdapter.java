@@ -2,14 +2,17 @@ package com.example.clothshop.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.clothshop.Activity.DetailPostActivity;
+import com.example.clothshop.DB.DatabaseUtil;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
@@ -18,6 +21,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 /**
+ * 主页homeFragment 的 recyclerview 的adapter
  * Created by 一凡 on 2017/3/24.
  */
 
@@ -26,12 +30,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private Context mContext;
     private List<PostInfo> mDatas;
     private int mImageWidth;
+    private DatabaseUtil mDatabaseUtil;
 
 
     public RecyclerAdapter(Context mContext, List<PostInfo> mDatas) {
         this.mContext = mContext;
         this.mDatas = mDatas;
         mImageWidth= Model.SCREEMWIDTH-2*Model.LISTMARGIN;
+        mDatabaseUtil=DatabaseUtil.getInstance(mContext);
+
     }
 
     @Override
@@ -43,12 +50,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
-        ItemHolder itemHolder = (ItemHolder) holder;
-        itemHolder.textView.setText(mDatas.get(position).getPtitle());
+        final ItemHolder itemHolder = (ItemHolder) holder;
+        itemHolder.titleTextView.setText(mDatas.get(position).getPtitle());
+        itemHolder.userNameTextView.setText(mDatas.get(position).getUname());
 
+        //读取图片路径，用picasso显示图片
         String imageUrl=mDatas.get(position).getPimage();
         StringBuilder sb=new StringBuilder();
-        if (imageUrl.length()>2){
+        if (imageUrl.length()>2){ //去掉前面的 ..
             sb.append(Model.IMAGE_SAVE_PATH)
                     .append(imageUrl.substring(2));
             imageUrl = sb.toString();
@@ -56,9 +65,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }else {
             Picasso.with(mContext).load(R.drawable.empty_image).into(itemHolder.imageView);
         }
-
-            //imageLoader.DisplayImage(imageUrl,itemHolder.imageView);
-        // TODO: 2017/4/3 不用new？ 
         itemHolder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,6 +73,41 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 mContext.startActivity(intent);
             }
         });
+        //点赞和收藏
+        mDatas.get(position).setMyCollection(mDatabaseUtil.isCollected(mDatas.get(position).getPid()));
+        mDatas.get(position).setMyLove(mDatabaseUtil.isLoved(mDatas.get(position).getPid()));
+        itemHolder.loveButton.setText(mDatas.get(position).getLoveNum());
+        itemHolder.loveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int loveNum=Integer.valueOf(mDatas.get(position).getLoveNum()).intValue();
+                if (mDatas.get(position).isMyLove() && loveNum>0){
+                    mDatas.get(position).setLoveNum(Integer.toString(loveNum-1));
+                    mDatas.get(position).setMyLove(!mDatas.get(position).isMyLove());
+                    mDatabaseUtil.deleteFav(mDatas.get(position).getPid(), DatabaseUtil.ATTR_LOVE);
+                }else if(!mDatas.get(position).isMyLove()){
+                    mDatas.get(position).setLoveNum(Integer.toString(loveNum+1));
+                    mDatas.get(position).setMyLove(!mDatas.get(position).isMyLove());
+                    mDatabaseUtil.insertFav(mDatas.get(position), DatabaseUtil.ATTR_LOVE);
+                }
+                itemHolder.loveButton.setText(mDatas.get(position).getLoveNum());
+            }
+        });
+        itemHolder.collectionButton.setText(mDatas.get(position).isMyCollection()?mContext.getString(R.string.collected):mContext.getString(R.string.collection));
+        itemHolder.collectionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mDatas.get(position).isMyCollection()){
+                    mDatas.get(position).setMyCollection(false);
+                    mDatabaseUtil.deleteFav(mDatas.get(position).getPid(),DatabaseUtil.ATTR_COLLECTION);
+                }else if(!mDatas.get(position).isMyCollection()){
+                    mDatas.get(position).setMyCollection(true);
+                    mDatabaseUtil.insertFav(mDatas.get(position), DatabaseUtil.ATTR_COLLECTION);
+                }
+                itemHolder.collectionButton.setText(mDatas.get(position).isMyCollection()?mContext.getString(R.string.collected):mContext.getString(R.string.collection));
+            }
+        });
+
     }
     @Override
     public int getItemCount() {
@@ -74,16 +115,20 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     class ItemHolder extends RecyclerView.ViewHolder {
-        public TextView textView;
+        public TextView titleTextView;
         public ImageView imageView;
+        public TextView userNameTextView;
+        public ImageView userAvatar;
+        public Button loveButton;
+        public Button collectionButton;
         public ItemHolder(View itemView) {
             super(itemView);
             imageView= (ImageView) itemView.findViewById(R.id.home_list_image_item);
-            textView = (TextView) itemView.findViewById(R.id.home_list_title_item);
-            ViewGroup.LayoutParams lp=imageView.getLayoutParams();
-            lp.width= mImageWidth;
-            lp.height=mImageWidth;
-            imageView.setLayoutParams(lp);
+            titleTextView = (TextView) itemView.findViewById(R.id.home_list_title_item);
+            userNameTextView= (TextView) itemView.findViewById(R.id.home_list_user_name);
+            userAvatar= (ImageView) itemView.findViewById(R.id.home_list_avatar);
+            loveButton= (Button) itemView.findViewById(R.id.home_list_love_button);
+            collectionButton= (Button) itemView.findViewById(R.id.home_list_collect_button);
         }
     }
 

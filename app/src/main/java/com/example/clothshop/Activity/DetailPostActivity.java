@@ -486,8 +486,6 @@ public class DetailPostActivity extends AppCompatActivity{
                     mPostInfo.setMyLove(!mPostInfo.isMyLove());
                     mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_LOVE);
                 }
-
-                Log.e("love_test","click postinfo:"+mPostInfo.isMyLove()+"  "+mPostInfo.isMyCollection());
                 setLCText();
                 AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_LOVE);
                 mAddLCThread.start();
@@ -498,8 +496,10 @@ public class DetailPostActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 if (mPostInfo.isMyCollection()){
+                    mPostInfo.setMyCollection(!mPostInfo.isMyCollection());
                     mDatabaseUtil.deleteFav(mPostInfo.getPid(),DatabaseUtil.ATTR_COLLECTION);
                 }else if(!mPostInfo.isMyCollection()){
+                    mPostInfo.setMyCollection(!mPostInfo.isMyCollection());
                     mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_COLLECTION);
                 }
                 mPostInfo.setMyCollection(!mPostInfo.isMyCollection());
