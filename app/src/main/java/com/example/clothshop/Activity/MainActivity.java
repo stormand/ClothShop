@@ -20,6 +20,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.clothshop.Fragment.HomeAllFragment;
 import com.example.clothshop.Fragment.HomeFragment;
 import com.example.clothshop.Fragment.PersonFragment;
 import com.example.clothshop.Info.UserInfo;
@@ -38,7 +39,7 @@ import java.util.Map;
 
 import static java.security.AccessController.getContext;
 
-public class MainActivity extends AppCompatActivity implements PersonFragment.OnFragmentInteractionListener,HomeFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements PersonFragment.OnFragmentInteractionListener,HomeAllFragment.OnFragmentInteractionListener{
 
     public static int TAB_HOME=1;
     public static int TAB_PERSON=3;
@@ -47,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
 
     private FragmentManager fragmentManager;
     private PersonFragment personFragment;
-    private HomeFragment homeFragment;
+    private HomeAllFragment homeFragment;
 
     private Loginhandler handler;
 
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
         switch (num){
             case 1:
                 if(homeFragment==null){
-                    homeFragment=new HomeFragment();
+                    homeFragment=new HomeAllFragment();
                     transaction.add(R.id.content,homeFragment);
                 }else{
                     transaction.show(homeFragment);
