@@ -59,7 +59,7 @@ public class HomeAllFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private ViewPager mViewPager;
     private TabLayout mTabLayout;
-    private RecyclerView mRecyclerview;
+
     private static List<List<PostInfo>> mHomeList= new ArrayList<List<PostInfo>>();;
 
     private ViewPager viewPager;
@@ -67,6 +67,7 @@ public class HomeAllFragment extends Fragment {
     private List<LinearLayoutManager> mLayoutManager=new ArrayList<LinearLayoutManager>();
     private List<RecyclerAdapter> mAdapter= new ArrayList<RecyclerAdapter>();
     private List<SwipeRefreshLayout> mSwipeRefreshLayout =new ArrayList<SwipeRefreshLayout>();
+    private List<RecyclerView> mRecyclerview=new ArrayList<RecyclerView>();
 
     private FloatingActionButton mFab;
 
@@ -116,7 +117,7 @@ public class HomeAllFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home_all, container, false);
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.home_all_toolbar);
+
         //toolbar.inflateMenu(R.menu.menu_message);
         mViewPager = (ViewPager) view.findViewById(R.id.home_all_viewpager);
         handler=new GetDataHandler();
@@ -127,13 +128,12 @@ public class HomeAllFragment extends Fragment {
 
     private void initViewPager(View view, final int page) {
 
-        mTabLayout = (TabLayout) view.findViewById(R.id.home_all_tabs);
         List<String> titles = new ArrayList<>();
         titles.add("全部"); // TODO: 2017/4/13 改成资源引用
         titles.add("身材");
         for(int i=0;i<titles.size();i++){
             View myView= LayoutInflater.from(getActivity()).inflate(R.layout.fragment_home,null);
-            mRecyclerview= (RecyclerView) myView.findViewById(R.id.recycler_view);
+            RecyclerView recyclerview= (RecyclerView) myView.findViewById(R.id.recycler_view);
 
             List<PostInfo> data=new ArrayList<PostInfo>();
             mHomeList.add(data);
@@ -142,10 +142,10 @@ public class HomeAllFragment extends Fragment {
             final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
             manager.setOrientation(LinearLayoutManager.VERTICAL);
             mLayoutManager.add(manager);
-            mRecyclerview.setLayoutManager(mLayoutManager.get(i));
-            mRecyclerview.setAdapter(mAdapter.get(i));
-            mRecyclerview.addItemDecoration(new SpaceItemDecoration());
-            mRecyclerview.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            recyclerview.setLayoutManager(mLayoutManager.get(i));
+            recyclerview.setAdapter(mAdapter.get(i));
+            recyclerview.addItemDecoration(new SpaceItemDecoration());
+            recyclerview.setOnScrollListener(new RecyclerView.OnScrollListener() {
                 int lastVisibleItem=0;
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -172,7 +172,8 @@ public class HomeAllFragment extends Fragment {
                     }
                 }
             });
-            myView.setTag(mRecyclerview);
+            mRecyclerview.add(recyclerview);
+            myView.setTag(mRecyclerview.get(i));
             views.add(myView);
 
             //add swiprefreshlayout
@@ -197,14 +198,15 @@ public class HomeAllFragment extends Fragment {
         viewPager.setOnPageChangeListener(new viewPageListener());
 
         TabLayout tabLayout= (TabLayout)view.findViewById(R.id.home_all_tabs);
-        tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
         tabLayout.setupWithViewPager(viewPager);
 
     }
 
     private void refreshViewPager(int page){
-        GetDataThread newPageThread=new GetDataThread(GetDataHandler.TOP_PULL,page);
-        newPageThread.start();
+        if (mHomeList.get(page).isEmpty()){
+            GetDataThread newPageThread=new GetDataThread(GetDataHandler.NEW_PAGE,page);
+            newPageThread.start();
+        }
     }
 
     private void initFab(View view){
@@ -227,7 +229,7 @@ public class HomeAllFragment extends Fragment {
      */
     public void refresh(){
         if (mLayoutManager.get(pageSelect).findFirstCompletelyVisibleItemPosition()!=0){
-            mRecyclerview.smoothScrollToPosition(0);
+            mRecyclerview.get(pageSelect).smoothScrollToPosition(0);
         }else {
             mSwipeRefreshLayout.get(pageSelect).setRefreshing(true);
             GetDataThread topPullThread=new GetDataThread(GetDataHandler.TOP_PULL,pageSelect);
@@ -284,6 +286,8 @@ public class HomeAllFragment extends Fragment {
         private void getData(String result){
             List<PostInfo> paramsList=new ArrayList<PostInfo>();
             try {
+                Log.e("datatype",Integer.toString(dataType));
+
                 JSONObject jsonObject=new JSONObject(result);
                 JSONArray jsonArray=jsonObject.getJSONArray("post");
                 for (int i=0;i<jsonArray.length();i++){
@@ -301,8 +305,12 @@ public class HomeAllFragment extends Fragment {
                 Message msg=Message.obtain(handler,dataType);
                 msg.arg1=page;
                 msg.obj=paramsList;
-                msg.sendToTarget();
-
+                //点击新tab的涟漪效果会提前结束，如果不延迟发送
+                if (dataType==GetDataHandler.NEW_PAGE){
+                    handler.sendMessageDelayed(msg,300);
+                }else {
+                    msg.sendToTarget();
+                }
 
             } catch (JSONException e) {
                 Message msg=Message.obtain(handler,GetDataHandler.ERROR);
@@ -316,6 +324,7 @@ public class HomeAllFragment extends Fragment {
 
     class GetDataHandler extends Handler {
 
+        public static final int NEW_PAGE=0x0004;
         public static final int TOP_PULL=0x0001;
         public static final int BOTTOM_PULL=0x0002;
         public static final int ERROR=0x0003;
@@ -323,6 +332,7 @@ public class HomeAllFragment extends Fragment {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what){
+                case NEW_PAGE:
                 case TOP_PULL:
                     mHomeList.get(msg.arg1).clear();
                     mHomeList.get(msg.arg1).addAll((ArrayList<PostInfo>) msg.obj);

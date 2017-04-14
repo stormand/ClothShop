@@ -16,7 +16,6 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlways"
-            android:title="HOME"
             app:title="@string/title_home"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
@@ -25,7 +24,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:tabIndicatorColor="#ADBE107E"
-            app:tabMode="scrollable"
+            app:tabMode="fixed"
+            app:tabGravity="fill"
             app:layout_scrollFlags="scroll|enterAlways"/>
     </android.support.design.widget.AppBarLayout>
 
