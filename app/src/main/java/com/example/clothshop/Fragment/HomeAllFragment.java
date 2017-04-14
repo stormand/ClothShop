@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.IntegerRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -18,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -123,7 +125,7 @@ public class HomeAllFragment extends Fragment {
         return view;
     }
 
-    private void initViewPager(View view,int page) {
+    private void initViewPager(View view, final int page) {
 
         mTabLayout = (TabLayout) view.findViewById(R.id.home_all_tabs);
         List<String> titles = new ArrayList<>();
@@ -137,21 +139,22 @@ public class HomeAllFragment extends Fragment {
             mHomeList.add(data);
             RecyclerAdapter adapter=new RecyclerAdapter(getContext(),mHomeList.get(i));
             mAdapter.add(adapter);
-            LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+            final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
             manager.setOrientation(LinearLayoutManager.VERTICAL);
             mLayoutManager.add(manager);
             mRecyclerview.setLayoutManager(mLayoutManager.get(i));
             mRecyclerview.setAdapter(mAdapter.get(i));
             mRecyclerview.addItemDecoration(new SpaceItemDecoration());
             mRecyclerview.setOnScrollListener(new RecyclerView.OnScrollListener() {
+                int lastVisibleItem=0;
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
-                    //判断是当前layoutManager是否为LinearLayoutManager
-                    // 只有LinearLayoutManager才有查找第一个和最后一个可见view位置的方法
-                    if (mLayoutManager instanceof LinearLayoutManager) {
+
+                    if (mLayoutManager.get(pageSelect) instanceof LinearLayoutManager) {
                         //获取最后一个可见view的位置
-                        //lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
+                        lastVisibleItem = mLayoutManager.get(pageSelect).findLastVisibleItemPosition();
+                        Log.e("lastVisibleItem_scroll", Integer.toString(lastVisibleItem)+"  "+mAdapter.get(pageSelect).getItemCount());
                     }
                     if (dy > 0 && mFab.isShown()) mFab.hide();
                     if (dy < 0 && !mFab.isShown()) mFab.show();
@@ -160,24 +163,13 @@ public class HomeAllFragment extends Fragment {
                 @Override
                 public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
-//                if (newState == RecyclerView.SCROLL_STATE_IDLE
-//                        && lastVisibleItem + 1 == mAdapter.getItemCount()
-//                        && !refreshLock) {
-//                    mSwipeRefreshLayout.setRefreshing(true);
-//                    //实际项目中这里一般是用网络请求获取数据
-//                    refreshLock=true;
-//                    //为了有刷新的效果，延迟关闭刷新效果
-////                    mSwipeRefreshLayout.postDelayed(new Runnable() {
-////                        @Override
-////                        public void run() {
-////                            stringList.add("上啦");
-////                            mSwipeRefreshLayout.setRefreshing(false);
-////                            mAdapter.notifyDataSetChanged();
-////                            refreshLock=false;
-////                        }
-////                    }, 4000);
-//
-//                }
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE
+                            && lastVisibleItem + 1 == mAdapter.get(pageSelect).getItemCount()) {
+                        mSwipeRefreshLayout.get(pageSelect).setRefreshing(true);
+                        GetDataThread getDataThread=new GetDataThread(GetDataHandler.BOTTOM_PULL,pageSelect,mHomeList.get(pageSelect).get(lastVisibleItem).getPid());
+                        getDataThread.start();
+                        handler.sendEmptyMessageDelayed(0, 3000);
+                    }
                 }
             });
             myView.setTag(mRecyclerview);
@@ -265,6 +257,13 @@ public class HomeAllFragment extends Fragment {
 
         private int dataType;
         private int page;
+        private String pid=null;
+
+        GetDataThread(int type,int page,String pid){
+            this.dataType=type;
+            this.page=page;
+            this.pid=pid;
+        }
 
         GetDataThread(int type,int page){
             this.dataType=type;
@@ -275,6 +274,9 @@ public class HomeAllFragment extends Fragment {
         public void run() {
             super.run();
             Map<String,String> params=new HashMap<String,String>();
+            if (pid!=null){
+                params.put(Model.POST_ID_ATTR,pid);
+            }
             String result= HttpPostUtil.sendPostMessage(params,"utf-8",Model.HOME_PATH);
             getData(result);
         }
@@ -327,10 +329,7 @@ public class HomeAllFragment extends Fragment {
                     mAdapter.get(msg.arg1).notifyDataSetChanged();
                     break;
                 case BOTTOM_PULL:
-                    List<PostInfo> list=new ArrayList<PostInfo>();
-                    list.addAll(mHomeList.get(msg.arg1));
-                    mHomeList.get(msg.arg1).clear();
-                    mHomeList.get(msg.arg1).addAll(list);
+                    mHomeList.get(msg.arg1).addAll((ArrayList<PostInfo>) msg.obj);
                     mAdapter.get(msg.arg1).notifyDataSetChanged();
                     break;
                 case ERROR:
@@ -341,8 +340,6 @@ public class HomeAllFragment extends Fragment {
             mSwipeRefreshLayout.get(msg.arg1).setRefreshing(false);
         }
     }
-
-
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
