@@ -1,5 +1,6 @@
 package com.example.clothshop.Activity;
 
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
@@ -138,6 +139,7 @@ public class UserPostActivity extends AppCompatActivity {
             super.run();
             Map<String,String> params=new HashMap<String,String>();
             params.put(Model.POST_UID_ATTR,uid);
+            params.put("type", getIntent().getStringExtra("type"));
             if (pid!=null){
                 params.put(Model.POST_UID_ATTR,pid);
             }

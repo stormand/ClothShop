@@ -154,7 +154,6 @@ public class HomeAllFragment extends Fragment {
                     if (mLayoutManager.get(pageSelect) instanceof LinearLayoutManager) {
                         //获取最后一个可见view的位置
                         lastVisibleItem = mLayoutManager.get(pageSelect).findLastVisibleItemPosition();
-                        Log.e("lastVisibleItem_scroll", Integer.toString(lastVisibleItem)+"  "+mAdapter.get(pageSelect).getItemCount());
                     }
                     if (dy > 0 && mFab.isShown()) mFab.hide();
                     if (dy < 0 && !mFab.isShown()) mFab.show();

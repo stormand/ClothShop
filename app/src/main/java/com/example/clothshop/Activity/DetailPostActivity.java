@@ -502,7 +502,6 @@ public class DetailPostActivity extends AppCompatActivity{
                     mPostInfo.setMyCollection(!mPostInfo.isMyCollection());
                     mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_COLLECTION);
                 }
-                mPostInfo.setMyCollection(!mPostInfo.isMyCollection());
                 setLCText();
                 AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_COLLECTION);
                 mAddLCThread.start();

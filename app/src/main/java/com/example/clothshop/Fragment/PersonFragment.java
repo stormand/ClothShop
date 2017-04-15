@@ -110,6 +110,7 @@ public class PersonFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(getActivity(), UserPostActivity.class);
+                intent.putExtra("type","user_post");
                 startActivity(intent);
             }
         });
@@ -118,7 +119,8 @@ public class PersonFragment extends Fragment {
         mUserCollectionLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(getActivity(), UserInfoActivity.class);
+                Intent intent=new Intent(getActivity(), UserPostActivity.class);
+                intent.putExtra("type","user_collection");
                 startActivity(intent);
             }
         });

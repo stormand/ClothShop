@@ -2,8 +2,10 @@ package com.example.clothshop.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Message;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +18,15 @@ import com.example.clothshop.DB.DatabaseUtil;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
+import com.example.clothshop.utils.HttpPostUtil;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 主页homeFragment 的 recyclerview 的adapter
@@ -91,6 +99,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     mDatabaseUtil.insertFav(mDatas.get(position), DatabaseUtil.ATTR_LOVE);
                 }
                 itemHolder.loveButton.setText(mDatas.get(position).getLoveNum());
+                AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_LOVE,mDatas.get(position));
+                mAddLCThread.start();
             }
         });
         itemHolder.collectionButton.setText(mDatas.get(position).isMyCollection()?mContext.getString(R.string.collected):mContext.getString(R.string.collection));
@@ -105,6 +115,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     mDatabaseUtil.insertFav(mDatas.get(position), DatabaseUtil.ATTR_COLLECTION);
                 }
                 itemHolder.collectionButton.setText(mDatas.get(position).isMyCollection()?mContext.getString(R.string.collected):mContext.getString(R.string.collection));
+                AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_COLLECTION,mDatas.get(position));
+                mAddLCThread.start();
             }
         });
 
@@ -129,6 +141,44 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             userAvatar= (ImageView) itemView.findViewById(R.id.home_list_avatar);
             loveButton= (Button) itemView.findViewById(R.id.home_list_love_button);
             collectionButton= (Button) itemView.findViewById(R.id.home_list_collect_button);
+        }
+    }
+
+    class AddLCThread extends Thread{
+        String attribute;
+        PostInfo mPostInfo;
+        public AddLCThread(String attr,PostInfo postInfo) {
+            this.attribute=attr;
+            this.mPostInfo=postInfo;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            Map<String,String> params=new HashMap<String, String>();
+            params.put(Model.COMMENT_UID,Model.MYUSER.getUserid());
+            params.put(Model.COMMENT_PID,mPostInfo.getPid());
+            String result="";
+            if (attribute.equals(DatabaseUtil.ATTR_LOVE)){
+                params.put(Model.LOVE, String.valueOf(mPostInfo.isMyLove()?1:0));
+                result= HttpPostUtil.sendPostMessage(params,"utf-8",Model.ADD_LOVE_PATH);
+            }else if (attribute.equals(DatabaseUtil.ATTR_COLLECTION)){
+                params.put(Model.COLLECTION, String.valueOf(mPostInfo.isMyCollection()?1:0));
+                result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.ADD_COLLECTION_PATH);
+            }
+//            if (result.equals("")){ //为空返回
+//                showMessage("",GetCommentHanlder.FAILURE);
+//                return;
+//            }
+//            try {
+//                JSONObject jsonObject=new JSONObject(result);
+//                if (jsonObject.getString("status").equals("0")){
+//                    showMessage(jsonObject.getString("mes"), DetailPostActivity.AddLCHandler.SUCCESS);
+//                }else {
+//                    showMessage(jsonObject.getString("mes"), DetailPostActivity.AddLCHandler.FAILURE);
+//                }
+
+
         }
     }
 
