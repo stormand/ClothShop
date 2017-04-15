@@ -2,6 +2,7 @@ package com.example.clothshop.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,6 +63,14 @@ public class UserPostRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
         }else {
             Picasso.with(mContext).load(R.drawable.empty_image).into(itemHolder.imageView);
         }
+        itemHolder.constraintLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(mContext,DetailPostActivity.class);
+                intent.putExtra("pid",mDatas.get(position).getPid());
+                mContext.startActivity(intent);
+            }
+        });
 
 
 
@@ -76,12 +85,14 @@ public class UserPostRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
         public ImageView imageView;
         public TextView timeTextView;
         public TextView loveNumTextView;
+        public ConstraintLayout constraintLayout;
         public ItemHolder(View itemView) {
             super(itemView);
             imageView= (ImageView) itemView.findViewById(R.id.user_post_image_view);
             titleTextView = (TextView) itemView.findViewById(R.id.user_post_title);
             timeTextView= (TextView) itemView.findViewById(R.id.user_post_time);
             loveNumTextView= (TextView) itemView.findViewById(R.id.user_post_love_num);
+            constraintLayout= (ConstraintLayout) itemView.findViewById(R.id.user_post_layout);
         }
     }
 

@@ -10,8 +10,11 @@
     >
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/user_post_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true">
 
         <ImageView
             android:id="@+id/user_post_image_view"
