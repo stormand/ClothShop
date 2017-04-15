@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.example.clothshop.Activity.LoginActivity;
 import com.example.clothshop.Activity.SettingActivity;
 import com.example.clothshop.Activity.UserInfoActivity;
+import com.example.clothshop.Activity.UserPostActivity;
 import com.example.clothshop.Info.UserInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
@@ -94,9 +95,27 @@ public class PersonFragment extends Fragment {
         setHasOptionsMenu(true);
         final Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
+        //个人信息
         ConstraintLayout mUserInfoLayout= (ConstraintLayout) view.findViewById(R.id.user_info_layout);
         mUserInfoLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getActivity(), UserInfoActivity.class);
+                startActivity(intent);
+            }
+        });
+        //用户发帖
+        ConstraintLayout mUserPostLayout= (ConstraintLayout) view.findViewById(R.id.user_post_layout);
+        mUserPostLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getActivity(), UserPostActivity.class);
+                startActivity(intent);
+            }
+        });
+        //用户收藏
+        ConstraintLayout mUserCollectionLayout= (ConstraintLayout) view.findViewById(R.id.user_collection_layout);
+        mUserCollectionLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(getActivity(), UserInfoActivity.class);

@@ -22,6 +22,7 @@ public class Model {
     public static final String SEND_COMMENT_PATH = PATH + "SendComment.php";
     public static final String ADD_LOVE_PATH = PATH + "AddLove.php";
     public static final String ADD_COLLECTION_PATH = PATH + "AddCollection.php";
+    public static final String USER_POST_PATH = PATH + "UserPost.php";
     //DB
     //user
     public static final String USER_NAME_ATTR="username";

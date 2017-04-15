@@ -168,7 +168,6 @@ public class HomeAllFragment extends Fragment {
                         mSwipeRefreshLayout.get(pageSelect).setRefreshing(true);
                         GetDataThread getDataThread=new GetDataThread(GetDataHandler.BOTTOM_PULL,pageSelect,mHomeList.get(pageSelect).get(lastVisibleItem).getPid());
                         getDataThread.start();
-                        handler.sendEmptyMessageDelayed(0, 3000);
                     }
                 }
             });

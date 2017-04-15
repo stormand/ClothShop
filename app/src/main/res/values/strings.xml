@@ -38,7 +38,9 @@
 
     <string name="action_send">保存</string>
 
-    <string name="user_info">user infomation</string>
+    <string name="user_info">个人信息</string>
+    <string name="user_post">我的发布</string>
+    <string name="user_collection">我的收藏</string>
     <string name="edit_user_name">昵称</string>
     <string name="edit_sex">性别</string>
     <string name="radio_sex_female">女</string>

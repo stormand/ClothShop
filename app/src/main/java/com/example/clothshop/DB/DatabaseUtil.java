@@ -103,6 +103,9 @@ public class DatabaseUtil {
 
 
     public boolean isLoved(String pid) {
+        if (Model.MYUSER==null){
+            return false;
+        }
         Cursor cursor = null;
         String where = DBHelper.FavTable.USER_ID + " = '" + Model.MYUSER.getUserid()
                 + "' AND " + DBHelper.FavTable.OBJECT_ID + " = '" + pid + "'";
@@ -120,6 +123,9 @@ public class DatabaseUtil {
 
     public boolean isCollected(String pid) {
         Cursor cursor = null;
+        if (Model.MYUSER==null){
+            return false;
+        }
         String where = DBHelper.FavTable.USER_ID + " = '" + Model.MYUSER.getUserid()
                 + "' AND " + DBHelper.FavTable.OBJECT_ID + " = '" + pid + "'";
         Log.i(TAG,"------------------------------------"+where);
