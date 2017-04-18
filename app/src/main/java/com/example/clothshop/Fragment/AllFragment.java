@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.clothshop.Activity.MainActivity;
 import com.example.clothshop.Activity.PublishActivity;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
@@ -41,15 +40,12 @@ import java.util.Map;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link HomeAllFragment.OnFragmentInteractionListener} interface
+ * {@link AllFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link HomeAllFragment#newInstance} factory method to
+ * Use the {@link AllFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeAllFragment extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+public class AllFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private ViewPager mViewPager;
@@ -73,10 +69,9 @@ public class HomeAllFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     private OnFragmentInteractionListener mListener;
 
-    public HomeAllFragment() {
+    public AllFragment() {
         // Required empty public constructor
     }
 
@@ -86,11 +81,11 @@ public class HomeAllFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeAllFragment.
+     * @return A new instance of fragment AllFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static HomeAllFragment newInstance(String param1, String param2) {
-        HomeAllFragment fragment = new HomeAllFragment();
+    public static AllFragment newInstance(String param1, String param2) {
+        AllFragment fragment = new AllFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -105,13 +100,13 @@ public class HomeAllFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_home_all, container, false);
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_all, container, false);
 
         //toolbar.inflateMenu(R.menu.menu_message);
         mViewPager = (ViewPager) view.findViewById(R.id.home_all_viewpager);
@@ -124,10 +119,11 @@ public class HomeAllFragment extends Fragment {
     private void initViewPager(View view, final int page) {
 
         List<String> titles = new ArrayList<>();
-        titles.add("全部"); // TODO: 2017/4/13 改成资源引用
-        titles.add("身材");
+        titles.add("最新"); // TODO: 2017/4/13 改成资源引用
+        titles.add("最热");
+        titles.add("榜单");
         for(int i=0;i<titles.size();i++){
-            View myView= LayoutInflater.from(getActivity()).inflate(R.layout.fragment_home,null);
+            View myView= LayoutInflater.from(getActivity()).inflate(R.layout.fragment_home_view_page,null);
             RecyclerView recyclerview= (RecyclerView) myView.findViewById(R.id.recycler_view);
 
             List<PostInfo> data=new ArrayList<PostInfo>();
@@ -299,14 +295,14 @@ public class HomeAllFragment extends Fragment {
                 msg.arg1=page;
                 msg.obj=paramsList;
                 //点击新tab的涟漪效果会提前结束，如果不延迟发送
-                if (dataType==GetDataHandler.NEW_PAGE){
+                if (dataType== GetDataHandler.NEW_PAGE){
                     handler.sendMessageDelayed(msg,300);
                 }else {
                     msg.sendToTarget();
                 }
 
             } catch (JSONException e) {
-                Message msg=Message.obtain(handler,GetDataHandler.ERROR);
+                Message msg=Message.obtain(handler, GetDataHandler.ERROR);
                 msg.arg1=page;
                 msg.obj=e.toString();
                 msg.sendToTarget();
@@ -344,6 +340,17 @@ public class HomeAllFragment extends Fragment {
         }
     }
 
+    public class SpaceItemDecoration extends RecyclerView.ItemDecoration{
+        int space=Model.LISTMARGIN;
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            outRect.top = space*3/2;
+            outRect.left=space;
+            outRect.right=space;
+        }
+    }
+
+
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -366,16 +373,6 @@ public class HomeAllFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    public class SpaceItemDecoration extends RecyclerView.ItemDecoration{
-        int space=Model.LISTMARGIN;
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            outRect.top = space*3/2;
-            outRect.left=space;
-            outRect.right=space;
-        }
     }
 
     /**

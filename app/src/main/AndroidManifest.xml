@@ -44,7 +44,11 @@
             android:name=".Activity.DetailPostActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".Activity.UserPostActivity"></activity>
+        <activity android:name=".Activity.UserPostActivity" />
+        <activity
+            android:name=".Activity.ImageActivity"
+            android:label="@string/title_activity_image"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

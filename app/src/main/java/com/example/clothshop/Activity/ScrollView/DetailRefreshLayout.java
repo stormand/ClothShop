@@ -18,6 +18,12 @@ import com.example.clothshop.Activity.DetailPostActivity;
 public class DetailRefreshLayout extends SwipeRefreshLayout {
     ViewPager mViewPager;
     DetailScrollView mDetailScrollView;
+    private float startY;
+    private float startX;
+    // 记录viewPager是否拖拽的标记
+    private boolean mIsVpDragger;
+    private final int mTouchSlop;
+
 
     public void setmDetailScrollView(DetailScrollView mDetailScrollView) {
         this.mDetailScrollView = mDetailScrollView;
@@ -25,10 +31,50 @@ public class DetailRefreshLayout extends SwipeRefreshLayout {
 
     public DetailRefreshLayout(Context context) {
         super(context);
+        this.mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
     public DetailRefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        int action = ev.getAction();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                // 记录手指按下的位置
+                startY = ev.getY();
+                startX = ev.getX();
+                // 初始化标记
+                mIsVpDragger = false;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                // 如果viewpager正在拖拽中，那么不拦截它的事件，直接return false；
+                if(mIsVpDragger) {
+                    return false;
+                }
+
+                // 获取当前手指位置
+                float endY = ev.getY();
+                float endX = ev.getX();
+                float distanceX = Math.abs(endX - startX);
+                float distanceY = Math.abs(endY - startY);
+                // 如果X轴位移大于Y轴位移，那么将事件交给viewPager处理。
+                if(distanceX > mTouchSlop && distanceX > distanceY) {
+                    mIsVpDragger = true;
+                    return false;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                // 初始化标记
+                mIsVpDragger = false;
+                break;
+        }
+        // 如果是Y轴位移大于X轴，事件交给swipeRefreshLayout处理。
+        return super.onInterceptTouchEvent(ev);
     }
 
     private boolean inRangeOfView(View view, MotionEvent ev) {
@@ -52,22 +98,23 @@ public class DetailRefreshLayout extends SwipeRefreshLayout {
         this.mViewPager = mViewPager;
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-// TODO Auto-generated method stub
-        if (inRangeOfView(mViewPager,ev)){
-            return mDetailScrollView.onTouchEvent(ev);
-        }
-        return super.onTouchEvent(ev);
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev){
-        if (inRangeOfView(mViewPager,ev)){
-            return mDetailScrollView.onTouchEvent(ev);
-        }
-        return super.dispatchTouchEvent(ev);
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent ev) {
+//        if (inRangeOfView(mViewPager,ev)){
+//            mViewPager.onTouchEvent(ev);
+//            return mDetailScrollView.onTouchEvent(ev);
+//        }
+//        return super.onTouchEvent(ev);
+//    }
+//
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent ev){
+//        if (inRangeOfView(mViewPager,ev)){
+//            mViewPager.onTouchEvent(ev);
+//            return mDetailScrollView.onTouchEvent(ev);
+//        }
+//        return super.dispatchTouchEvent(ev);
+//    }
 
 
 }

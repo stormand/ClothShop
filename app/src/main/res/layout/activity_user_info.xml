@@ -5,13 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.clothshop.Activity.UserInfoActivity">
+    tools:context="com.example.clothshop.Activity.UserInfoActivity"
+    android:weightSum="1">
 
+
+    <ImageView
+        android:id="@+id/user_info_avatar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:srcCompat="@drawable/common_google_signin_btn_icon_dark_normal_background"
+         />
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/user_info_list_margin"
         >
 
         <AutoCompleteTextView

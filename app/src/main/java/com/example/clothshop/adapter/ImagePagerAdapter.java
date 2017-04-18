@@ -1,13 +1,17 @@
 package com.example.clothshop.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import com.example.clothshop.Activity.ImageActivity;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 import com.squareup.picasso.Picasso;
@@ -35,6 +39,15 @@ public class ImagePagerAdapter extends PagerAdapter {
 
         View imageLayout = LayoutInflater.from(mContext).inflate(R.layout.item_pager_image, container, false);
         ImageView imageView = (ImageView) imageLayout.findViewById(R.id.item_detail_image);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(mContext, ImageActivity.class);
+                mContext.startActivity(intent);
+                Toast.makeText(mContext, "aaa", Toast.LENGTH_SHORT).show();
+                Log.e("test","test");
+            }
+        });
         StringBuilder sb=new StringBuilder();
         if (mImageList[position].length()>2){
             sb.append(Model.IMAGE_SAVE_PATH)
@@ -45,8 +58,6 @@ public class ImagePagerAdapter extends PagerAdapter {
             Picasso.with(mContext).load(R.drawable.empty_image).into(imageView);
         }
 
-
-        //imageView.setImageResource(R.drawable.test);
         ((ViewPager) container).addView(imageLayout,0);
         return imageLayout;
     }

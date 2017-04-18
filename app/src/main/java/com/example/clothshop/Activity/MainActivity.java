@@ -1,7 +1,5 @@
 package com.example.clothshop.Activity;
 
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,14 +11,12 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.clothshop.Fragment.HomeAllFragment;
+import com.example.clothshop.Fragment.AllFragment;
 import com.example.clothshop.Fragment.HomeFragment;
 import com.example.clothshop.Fragment.PersonFragment;
 import com.example.clothshop.Info.UserInfo;
@@ -37,9 +33,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.security.AccessController.getContext;
-
-public class MainActivity extends AppCompatActivity implements PersonFragment.OnFragmentInteractionListener,HomeAllFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements PersonFragment.OnFragmentInteractionListener,HomeFragment.OnFragmentInteractionListener,AllFragment.OnFragmentInteractionListener{
 
     public static int TAB_HOME=1;
     public static int TAB_PERSON=3;
@@ -48,7 +42,8 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
 
     private FragmentManager fragmentManager;
     private PersonFragment personFragment;
-    private HomeAllFragment homeFragment;
+    private HomeFragment homeFragment;
+    private AllFragment allFragment;
 
     private Loginhandler handler;
 
@@ -85,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
         switch (num){
             case 1:
                 if(homeFragment==null){
-                    homeFragment=new HomeAllFragment();
+                    homeFragment=new HomeFragment();
                     transaction.add(R.id.content,homeFragment);
                 }else{
                     transaction.show(homeFragment);
@@ -95,7 +90,15 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
                 }
                 break;
             case 2:
-
+                if(allFragment==null){
+                    allFragment=new AllFragment();
+                    transaction.add(R.id.content,allFragment);
+                }else{
+                    transaction.show(allFragment);
+                    if (num==NaviClickRecord){
+                        allFragment.refresh();
+                    }
+                }
                 break;
             case 3:
                 if(personFragment==null){
@@ -121,6 +124,8 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
             transaction.hide(personFragment);
         }if (homeFragment!= null) {
             transaction.hide(homeFragment);
+        }if (allFragment!=null){
+            transaction.hide(allFragment);
         }
     }
 

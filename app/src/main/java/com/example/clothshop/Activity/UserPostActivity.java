@@ -1,25 +1,20 @@
 package com.example.clothshop.Activity;
 
-import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.clothshop.Fragment.HomeFragment;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
-import com.example.clothshop.adapter.RecyclerAdapter;
 import com.example.clothshop.adapter.UserPostRecyclerAdapter;
 import com.example.clothshop.utils.HttpPostUtil;
 

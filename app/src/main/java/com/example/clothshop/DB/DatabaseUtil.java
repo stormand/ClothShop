@@ -88,10 +88,12 @@ public class DatabaseUtil {
             }else if (deleteCollection && collected==1){
                 if (loved==0){
                     dbHelper.delete(DBHelper.TABLE_NAME, where, null);  //既不收藏也不点赞，删除
+                    Log.e("love_test","delete all "+loved+"  "+collected);
                 }else {
                     ContentValues cv = new ContentValues();  //只更改收藏
                     cv.put(DBHelper.FavTable.IS_COLLECTION, 0);
                     dbHelper.update(DBHelper.TABLE_NAME, cv, where, null);
+                    Log.e("love_test","delete collection "+loved+"  "+collected);
                 }
             }
         }
@@ -162,7 +164,7 @@ public class DatabaseUtil {
             cv.put(DBHelper.FavTable.OBJECT_ID, postInfo.getPid());
             cv.put(DBHelper.FavTable.IS_LOVE, postInfo.isMyLove() == true ? 1 : 0);
             cv.put(DBHelper.FavTable.IS_COLLECTION, postInfo.isMyCollection() == true ? 1 : 0);
-            Log.e("love_test","add both "+postInfo.isMyLove()+" "+postInfo.isMyCollection());
+            Log.e("love_test","add new "+postInfo.isMyLove()+" "+postInfo.isMyCollection());
             uri = dbHelper.insert(DBHelper.TABLE_NAME, null, cv);
         }
         if (cursor != null) {

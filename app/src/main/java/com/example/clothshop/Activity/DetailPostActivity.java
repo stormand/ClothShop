@@ -1,12 +1,8 @@
 package com.example.clothshop.Activity;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -14,30 +10,19 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
 
 import com.example.clothshop.Activity.ScrollView.DetailRefreshLayout;
 import com.example.clothshop.Activity.ScrollView.DetailScrollView;
-import com.example.clothshop.DB.DBHelper;
 import com.example.clothshop.DB.DatabaseUtil;
-import com.example.clothshop.Fragment.HomeFragment;
 import com.example.clothshop.Info.CommentsInfo;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
@@ -46,13 +31,10 @@ import com.example.clothshop.adapter.CommentRecyclerAdapter;
 import com.example.clothshop.adapter.ImagePagerAdapter;
 import com.example.clothshop.utils.HttpPostUtil;
 
-import org.apache.http.conn.MultihomePlainSocketFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -574,10 +556,11 @@ public class DetailPostActivity extends AppCompatActivity{
     }
 
     public class GuidePageChangeListener implements ViewPager.OnPageChangeListener {
+
+
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
         }
-
         //页面滑动完成后执行
         @Override
         public void onPageSelected(int position) {
@@ -589,10 +572,8 @@ public class DetailPostActivity extends AppCompatActivity{
                 }
             }
         }
-
         @Override
         public void onPageScrollStateChanged(int state) {
-
         }
     }
 }
