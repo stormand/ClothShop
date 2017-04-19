@@ -1,5 +1,6 @@
 package com.example.clothshop.Activity;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -12,18 +13,23 @@ import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.clothshop.Model.Model;
@@ -43,6 +49,10 @@ import java.util.Map;
 
 public class PublishActivity extends AppCompatActivity {
 
+
+    private ArrayList<String> Link_url=new ArrayList<String>();
+    private ArrayList<String> Thing_names=new ArrayList<String>();
+    private Button link_add;
     private EditText mPubTittle;
     private EditText mPubEditText;
     private EditText mPubSexEditText;
@@ -60,8 +70,11 @@ public class PublishActivity extends AppCompatActivity {
     private HashMap<String, Object> mAddIconItem;
 
     private SendHandler handler;
-
-
+    private EditText thing_name;//物品名称
+    private EditText thing_link;//物品链接
+    private Button all_save;
+    private MyAdapter adapter;
+    private ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,11 +91,101 @@ public class PublishActivity extends AppCompatActivity {
         mPubHeightEditText.setText(Model.MYUSER.getUheight());
         mPubWeightEditText= (EditText) findViewById(R.id.pub_weight_edit_text);
         mPubWeightEditText.setText(Model.MYUSER.getUweight());
+        listView=(ListView)findViewById(R.id.List_view);
         mImageWidth=Model.SCREEMWIDTH/5;
         initImageGrid();
+        adapter=new MyAdapter(this);
+        listView.setAdapter(adapter);
         imagePaths=new ArrayList<String>();
-
+        link_add=(Button)findViewById(R.id.link_add_button);
+        all_save=(Button)findViewById(R.id.link_save);
+        thing_link=(EditText)findViewById(R.id.thing_link_edit);
+        thing_name=(EditText)findViewById(R.id.thing_name_edit);
+        link_add.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+             thing_name.setVisibility(View.VISIBLE);
+                thing_link.setVisibility(View.VISIBLE);
+                all_save.setVisibility(View.VISIBLE);
+            }
+        });
+        //添加点击
+        all_save.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                if(Thing_names.size()<=5){
+                if (thing_link.getText().toString().equals("") || thing_name.getText().toString().equals("")) {
+                    Toast.makeText(PublishActivity.this, "wrong input!", Toast.LENGTH_LONG).show();
+                } else {
+                    Thing_names.add(thing_name.getText().toString());
+                    Link_url.add(thing_link.getText().toString());
+                    thing_name.setText("");
+                    thing_link.setText("");
+                    adapter.notifyDataSetChanged();
+                }}
+                else{
+                    Toast.makeText(PublishActivity.this,"most for 5 link",Toast.LENGTH_LONG);
+                }
+            }
+        });
     }
+
+
+
+  public class MyAdapter extends BaseAdapter{
+      private LayoutInflater mInflater;
+      public MyAdapter(Context context){
+          this.mInflater = LayoutInflater.from(context);
+      }
+      @Override
+      public int getCount() {
+          // TODO Auto-generated method stub
+          return Thing_names.size();
+      }
+
+      @Override
+      public Object getItem(int arg0) {
+          // TODO Auto-generated method stub
+          return arg0;
+      }
+
+      @Override
+      public long getItemId(int arg0) {
+          // TODO Auto-generated method stub
+          return arg0;
+      }
+
+      @Override
+      public View getView(final int position, View convertView, ViewGroup parent) {
+
+          ViewHolder holder;
+          if (convertView == null) {
+              holder=new ViewHolder();
+              convertView = mInflater.inflate(R.layout.list_item,null);
+              holder.textView = (TextView) convertView.findViewById(R.id.item_textView);
+              holder.button = (Button) convertView.findViewById(R.id.delete);
+              convertView.setTag(holder);
+          }else {
+              holder = (ViewHolder)convertView.getTag();
+          }
+          holder.textView.setText(Thing_names.get(position));
+          holder.button.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View v) {
+                  Thing_names.remove(position);
+                  Link_url.remove(position);
+                  adapter.notifyDataSetChanged();
+              }
+          });
+          return convertView;
+     }
+
+  }
+public static class ViewHolder{
+        public TextView textView;
+        public Button button;
+    }
+
 
     private void initImageGrid(){
         bmp = BitmapFactory.decodeResource(getResources(), R.drawable.add_image);
@@ -212,9 +315,15 @@ public class PublishActivity extends AppCompatActivity {
 
 
     class SendThread extends Thread{
-        @Override
+        private StringBuilder alllink=new StringBuilder("");
         public void run() {
             super.run();
+            for(int i=0;i<Thing_names.size();i++){
+                alllink.append(Thing_names.get(i));
+                alllink.append(" ");
+                alllink.append(Link_url.get(i));
+                alllink.append("  ");
+            }
             Map<String,String> params=new HashMap<String, String>();
             params.put(Model.POST_TITLE_ATTR,mPubTittle.getText().toString());
             params.put(Model.POST_CONTENT_ATTR,mPubEditText.getText().toString());
@@ -223,6 +332,7 @@ public class PublishActivity extends AppCompatActivity {
             params.put(Model.POST_USEX_ATTR,mPubSexEditText.getText().toString());
             params.put(Model.POST_UHEIGHT_ATTR,mPubHeightEditText.getText().toString());
             params.put(Model.POST_UWEIGHT_ATTR,mPubWeightEditText.getText().toString());
+            params.put(Model.POST_LINK_ATTR,alllink.toString());
             File[] imageFile=new File[imagePaths.size()];
             for (int i=0;i<imagePaths.size();i++){
                 imageFile[i]=new File(imagePaths.get(i));

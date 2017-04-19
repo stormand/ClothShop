@@ -50,7 +50,6 @@
         android:id="@+id/linearLayout2">
 
 
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -187,8 +186,42 @@
                 android:layout_marginRight="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="0dp" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/link_add_button"
+                android:onClick="OnClick"
+                android:text="添加链接(可选)"/>
+
+           <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+               android:orientation="horizontal">
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/thing_name_edit"
+                android:visibility="gone"
+                android:hint="thing name"/>
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/thing_link_edit"
+                android:visibility="gone"
+                android:hint="link for thing"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="save"
+                android:visibility="gone"
+                android:id="@+id/link_save"/>
+        </LinearLayout>
+
+        <ListView
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:id="@+id/List_view">
+            </ListView>
         </LinearLayout>
     </ScrollView>
-
-
 </android.support.constraint.ConstraintLayout>
