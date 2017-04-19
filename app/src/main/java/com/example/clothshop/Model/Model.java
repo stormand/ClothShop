@@ -47,12 +47,13 @@ public class Model {
     public static final String POST_IMAGE_ATTR="image";
     public static final String POST_DAY_TIME_ATTR="day_time";
     public static final String POST_LOVE_NUM="love_num";
+    public static final String POST_LINK_ATTR="link";
     //pcomment
     public static final String COMMENT_UID="uid";
     public static final String COMMENT_PID="pid";
     public static final String COMMENT_UNAME="uname";
     public static final String COMMENT_TIME="date_time";
-    public static final String COMMENT_CONTENT="ccontent";
+    public static final String COMMENT_CONTENT="content";
     //love collection
     public static final String LOVE="love";
     public static final String COLLECTION="collection";
