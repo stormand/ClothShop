@@ -1,7 +1,6 @@
-package com.example.clothshop.adapter;
+package com.example.clothshop.Adapter;
 
 import android.app.Activity;
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +15,6 @@ import com.example.clothshop.R;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
-
-import static com.example.clothshop.R.id.imageView;
 
 /**
  * Created by 一凡 on 2017/4/6.

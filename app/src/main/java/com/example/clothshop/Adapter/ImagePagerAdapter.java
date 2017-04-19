@@ -1,7 +1,8 @@
-package com.example.clothshop.adapter;
+package com.example.clothshop.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -21,21 +22,21 @@ import com.squareup.picasso.Picasso;
  */
 
 public class ImagePagerAdapter extends PagerAdapter {
-    private String[] mImageList;
+    private String[] mImageArray;
     private Context mContext;
 
-    public ImagePagerAdapter(String[] imageList,Context context) {
-        this.mImageList = imageList;
+    public ImagePagerAdapter(String[] imageArray,Context context) {
+        this.mImageArray = imageArray;
         this.mContext=context;
     }
 
     @Override
     public int getCount() {//必须实现
-        return mImageList.length;
+        return mImageArray.length;
     }
 
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {//必须实现，实例化
+    public Object instantiateItem(ViewGroup container, final int position) {//必须实现，实例化
 
         View imageLayout = LayoutInflater.from(mContext).inflate(R.layout.item_pager_image, container, false);
         ImageView imageView = (ImageView) imageLayout.findViewById(R.id.item_detail_image);
@@ -43,15 +44,18 @@ public class ImagePagerAdapter extends PagerAdapter {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(mContext, ImageActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putStringArray("imageArray",mImageArray);
+                bundle.putInt("position",position);
+                intent.putExtra("showImage",bundle);
                 mContext.startActivity(intent);
-                Toast.makeText(mContext, "aaa", Toast.LENGTH_SHORT).show();
-                Log.e("test","test");
+
             }
         });
         StringBuilder sb=new StringBuilder();
-        if (mImageList[position].length()>2){
+        if (mImageArray[position].length()>2){
             sb.append(Model.IMAGE_SAVE_PATH)
-                    .append(mImageList[position].substring(2));
+                    .append(mImageArray[position].substring(2));
             String imageurl = sb.toString();
             Picasso.with(mContext).load(imageurl).placeholder(R.drawable.empty_image).error(R.drawable.error_image).resize(800, 800).into(imageView);
         }else {

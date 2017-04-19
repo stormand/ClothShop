@@ -11,7 +11,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -27,8 +26,8 @@ import com.example.clothshop.Info.CommentsInfo;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
-import com.example.clothshop.adapter.CommentRecyclerAdapter;
-import com.example.clothshop.adapter.ImagePagerAdapter;
+import com.example.clothshop.Adapter.CommentRecyclerAdapter;
+import com.example.clothshop.Adapter.ImagePagerAdapter;
 import com.example.clothshop.utils.HttpPostUtil;
 
 import org.json.JSONArray;
@@ -371,8 +370,6 @@ public class DetailPostActivity extends AppCompatActivity{
                     setViewPager();
                     initPointer(); //获取数据后初始化小白点
                     mLoveButton.setText(mPostInfo.getLoveNum());
-                    mSwipeRefreshLayout.setmViewPager(mImageViewPager);
-                    mSwipeRefreshLayout.setmDetailScrollView(mDetailScrollView);
                     break;
                 case FAILURE:
                     mSwipeRefreshLayout.setRefreshing(false);

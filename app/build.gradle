@@ -18,6 +18,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    dexOptions {
+        incremental false
+    }
+    compileOptions {
+        sourceCompatibility 7
+        targetCompatibility 7
+    }
 }
 
 dependencies {
@@ -28,7 +35,10 @@ dependencies {
     compile 'net.yazeed44.imagepicker:imagepicker:1.0.0'
     compile 'com.android.support:appcompat-v7:25.3.0'
     compile 'com.android.support:design:25.3.0'
-    compile 'com.android.support:support-v4:25.3.0'
+    compile('com.android.support:support-v4:25.3.0') {
+        exclude module: 'support-annotations'
+    }
+    compile 'com.github.chrisbanes.photoview:library:1.2.3'
     compile 'com.google.android.gms:play-services-plus:10.2.0'
     compile 'com.getbase:floatingactionbutton:1.9.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'

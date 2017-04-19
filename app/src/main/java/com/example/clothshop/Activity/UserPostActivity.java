@@ -15,7 +15,7 @@ import android.widget.Toast;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
-import com.example.clothshop.adapter.UserPostRecyclerAdapter;
+import com.example.clothshop.Adapter.UserPostRecyclerAdapter;
 import com.example.clothshop.utils.HttpPostUtil;
 
 import org.json.JSONArray;

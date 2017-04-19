@@ -22,7 +22,7 @@ import com.example.clothshop.Activity.PublishActivity;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
-import com.example.clothshop.adapter.RecyclerAdapter;
+import com.example.clothshop.Adapter.RecyclerAdapter;
 import com.example.clothshop.utils.HttpPostUtil;
 
 import org.json.JSONArray;

@@ -16,18 +16,11 @@ import com.example.clothshop.Activity.DetailPostActivity;
  */
 
 public class DetailRefreshLayout extends SwipeRefreshLayout {
-    ViewPager mViewPager;
-    DetailScrollView mDetailScrollView;
     private float startY;
     private float startX;
     // 记录viewPager是否拖拽的标记
     private boolean mIsVpDragger;
     private final int mTouchSlop;
-
-
-    public void setmDetailScrollView(DetailScrollView mDetailScrollView) {
-        this.mDetailScrollView = mDetailScrollView;
-    }
 
     public DetailRefreshLayout(Context context) {
         super(context);
@@ -76,45 +69,4 @@ public class DetailRefreshLayout extends SwipeRefreshLayout {
         // 如果是Y轴位移大于X轴，事件交给swipeRefreshLayout处理。
         return super.onInterceptTouchEvent(ev);
     }
-
-    private boolean inRangeOfView(View view, MotionEvent ev) {
-        if (view==null){
-            return false;
-        }
-        int []location = new int[2];
-        view.getLocationOnScreen(location);
-        int x = location[0];
-        int y = location[1];
-        if (ev.getX() < x
-                || ev.getX() > (x + view.getWidth())
-                || ev.getY() < y
-                || ev.getY() > (y + view.getHeight())) {
-            return false;
-        }
-        return true;
-    }
-
-    public void setmViewPager(ViewPager mViewPager) {
-        this.mViewPager = mViewPager;
-    }
-
-//    @Override
-//    public boolean onTouchEvent(MotionEvent ev) {
-//        if (inRangeOfView(mViewPager,ev)){
-//            mViewPager.onTouchEvent(ev);
-//            return mDetailScrollView.onTouchEvent(ev);
-//        }
-//        return super.onTouchEvent(ev);
-//    }
-//
-//    @Override
-//    public boolean dispatchTouchEvent(MotionEvent ev){
-//        if (inRangeOfView(mViewPager,ev)){
-//            mViewPager.onTouchEvent(ev);
-//            return mDetailScrollView.onTouchEvent(ev);
-//        }
-//        return super.dispatchTouchEvent(ev);
-//    }
-
-
 }
