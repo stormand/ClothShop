@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -51,6 +52,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Handler;
 
+import cn.smssdk.EventHandler;
+import cn.smssdk.SMSSDK;
+
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
@@ -63,9 +67,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private static final int REQUEST_READ_CONTACTS = 0;
     public static String LOGIN_TO_MAIN = "login_to_main";
-    public static String USER_NAME="user_name";
+    public static String USER_NAME = "user_name";
 
-    private ImageHandler handler=new ImageHandler();
+    private ImageHandler handler = new ImageHandler();
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -108,7 +112,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        mImageConfirmTextView= (EditText) findViewById(R.id.image_confirm_text_view);
+        mImageConfirmTextView = (EditText) findViewById(R.id.image_confirm_text_view);
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
@@ -121,9 +125,27 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         Button mRegisterButton = (Button) findViewById(R.id.register_button);
         mRegisterButton.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Intent intent=new Intent(LoginActivity.this,RegisterActivity.class);
-                startActivity(intent);
+            public void onClick(View view) {//注册按钮
+                //打开注册页面
+                SMSSDK.initSDK(LoginActivity.this, "1d082f36cee98", "92d871fb8953017cd157da7a586c08a1");
+                RegisterPage registerPage = new RegisterPage();
+                registerPage.setRegisterCallback(new EventHandler() {
+                    public void afterEvent(int event, int result, Object data) {
+                        // 解析注册结果
+                        Log.i("register_result", Integer.toString(result));
+                        if (result == SMSSDK.RESULT_COMPLETE) {
+                            @SuppressWarnings("unchecked")
+                            HashMap<String, Object> phoneMap = (HashMap<String, Object>) data;
+                            String country = (String) phoneMap.get("country");
+                            String phone = (String) phoneMap.get("phone");
+                            // 提交用户信息
+                            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                            intent.putExtra("phone", phone);
+                            startActivityForResult(intent, 0);
+                        }
+                    }
+                });
+                registerPage.show(LoginActivity.this);
             }
         });
 
@@ -131,7 +153,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
 
         //验证码
-        mImageConfirmView= (ImageView) findViewById(R.id.image_comfirm_view);
+        mImageConfirmView = (ImageView) findViewById(R.id.image_comfirm_view);
         ImageThread imageThread=new ImageThread();
         imageThread.start();
         mImageConfirmView.setOnClickListener(new OnClickListener() {
@@ -144,6 +166,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         });
 
     }
+
+   @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+       switch (resultCode) { //resultCode为回传的标记，我在B中回传的是RESULT_OK
+           case RESULT_OK:
+               this.finish();
+               break;
+           default:
+               break;
+       }
+
+   }
+
 
     private void populateAutoComplete() {
         if (!mayRequestContacts()) {
@@ -199,6 +234,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return;
         }
 
+
+
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -207,7 +244,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
-        String confirmcode=mImageConfirmTextView.getText().toString();
+        String confirmcode = mImageConfirmTextView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -238,14 +275,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password,confirmcode);
+            mAuthTask = new UserLoginTask(email, password, confirmcode);
             mAuthTask.execute((Void) null);
         }
     }
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
-        return email.matches("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$")||email.matches("^1+[0-9]{10}$");
+        return email.matches("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$") || email.matches("^1+[0-9]{10}$");
     }
 
     private boolean isPasswordValid(String password) {
@@ -357,7 +394,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         UserLoginTask(String email, String password, String confirmcode) {
             mEmail = email;
             mPassword = password;
-            mConfirmCode=confirmcode;
+            mConfirmCode = confirmcode;
         }
 
         /**
@@ -367,18 +404,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             //传入http请求参数
-            Map<String,String> myparams=new HashMap<String,String>();
-            myparams.put(Model.USER_NAME_ATTR,mEmail);
-            myparams.put(Model.USER_PASSWORD_ATTR,mPassword);
-            myparams.put(Model.LOGIN_MODE,Model.USER_AGE_ATTR);
-            myparams.put("code",mConfirmCode);
-            String result=HttpPostUtil.sendPostMessage(myparams,"utf-8",Model.LOGIN_PATH);
+            Map<String, String> myparams = new HashMap<String, String>();
+            myparams.put(Model.USER_NAME_ATTR, mEmail);
+            myparams.put(Model.USER_PASSWORD_ATTR, mPassword);
+            myparams.put(Model.LOGIN_MODE, Model.USER_AGE_ATTR);
+            myparams.put("code", mConfirmCode);
+            String result = HttpPostUtil.sendPostMessage(myparams, "utf-8", Model.LOGIN_PATH);
             try {
-                JSONObject jsonObject=new JSONObject(result);
-                if (jsonObject.getString("status").equals("0")){
+                JSONObject jsonObject = new JSONObject(result);
+                if (jsonObject.getString("status").equals("0")) {
 
-                    Model.ISLOGIN=true;
-                    Model.MYUSER=new UserInfo();
+                    Model.ISLOGIN = true;
+                    Model.MYUSER = new UserInfo();
                     Model.MYUSER.setUname(mEmail);
 
                     Model.MYUSER.setUserid(jsonObject.getString("id"));
@@ -386,15 +423,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Model.MYUSER.setUsex(jsonObject.getString("sex"));
                     Model.MYUSER.setUheight(jsonObject.getString("height"));
                     Model.MYUSER.setUweight(jsonObject.getString("weight"));
-                    Intent intent=new Intent();
+                    Intent intent = new Intent();
                     //跳转到person页面
                     return true;
-                }else {
-                    mes=jsonObject.getString("mes");
+                } else {
+                    mes = jsonObject.getString("mes");
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
-                mes="JSONException";
+                mes = "JSONException";
             }
             return false;
         }
@@ -424,36 +461,36 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onStop() {
         super.onStop();
         // 保存用户名和密码
-        SharedPreferences settings=getSharedPreferences(Model.SP_NAME_PASSWD,MODE_PRIVATE);
-        settings.edit().putString(Model.USER_NAME_ATTR,mEmailView.getText().toString())
-        .putString(Model.USER_PASSWORD_ATTR,mPasswordView.getText().toString()).commit();
+        SharedPreferences settings = getSharedPreferences(Model.SP_NAME_PASSWD, MODE_PRIVATE);
+        settings.edit().putString(Model.USER_NAME_ATTR, mEmailView.getText().toString())
+                .putString(Model.USER_PASSWORD_ATTR, mPasswordView.getText().toString()).commit();
 
     }
 
-    class ImageHandler extends android.os.Handler{
+    class ImageHandler extends android.os.Handler {
         public static final int SHOW_NETWORK_IMAGE = 0x0001;
 
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what==SHOW_NETWORK_IMAGE){
-                Bitmap bitmap= (Bitmap) msg.obj;
+            if (msg.what == SHOW_NETWORK_IMAGE) {
+                Bitmap bitmap = (Bitmap) msg.obj;
                 mImageConfirmView.setImageBitmap(bitmap);
             }
         }
     }
 
-    class ImageThread extends Thread{
+    class ImageThread extends Thread {
         @Override
         public void run() {
-            HttpPostUtil httpPostUtil=new HttpPostUtil();
-            Bitmap bitmap=HttpPostUtil.getHttpBitmap(Model.IMAGE_PATH);
+            HttpPostUtil httpPostUtil = new HttpPostUtil();
+            Bitmap bitmap = HttpPostUtil.getHttpBitmap(Model.IMAGE_PATH);
             showImage(bitmap);
         }
 
-        private void showImage(Bitmap bitmap){
+        private void showImage(Bitmap bitmap) {
 
-            Message msg=Message.obtain(handler,ImageHandler.SHOW_NETWORK_IMAGE);
-            msg.obj=bitmap;
+            Message msg = Message.obtain(handler, ImageHandler.SHOW_NETWORK_IMAGE);
+            msg.obj = bitmap;
             msg.sendToTarget();
         }
 

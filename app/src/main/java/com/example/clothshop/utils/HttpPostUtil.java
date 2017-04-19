@@ -224,12 +224,13 @@ public class HttpPostUtil {
             conn.setConnectTimeout(6000);
             conn.setDoInput(true);
 
-            String session_value=conn.getHeaderField("Set-Cookie");
-            sessionId=session_value.split(";");
-
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200){
+                String session_value=conn.getHeaderField("Set-Cookie");
+                sessionId=session_value.split(";");
+            }
             conn.connect();
             //得到数据流
-
             InputStream is=conn.getInputStream();
             //解析为图片
             bitmap = BitmapFactory.decodeStream(is);

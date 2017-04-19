@@ -3,9 +3,11 @@ package com.example.clothshop.Activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -44,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarInputStream;
 
+import cn.smssdk.SMSSDK;
+
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
@@ -77,7 +81,10 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_register);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -169,7 +176,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
-        String passwordcomfirm=mPasswordComfirmView.getText().toString();
+        String passwordcomfirm = mPasswordComfirmView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -183,11 +190,11 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
-        } else if(!isPasswordValid(password)){
+        } else if (!isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
-        } else if(!password.equals(passwordcomfirm)){
+        } else if (!password.equals(passwordcomfirm)) {
             mPasswordComfirmView.setError(getString(R.string.error_wrong_password_confirm));
             focusView = mPasswordComfirmView;
             cancel = true;
@@ -207,7 +214,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
     }
 
     private boolean isEmailValid(String email) {
-        return email.matches("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$")||email.matches("^1+[0-9]{10}$");
+        return true;
     }
 
     private boolean isPasswordValid(String password) {
@@ -322,13 +329,18 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         @Override
         protected String doInBackground(Void... params) {
             //传入请求参数
-            Map<String,String> myparams= new HashMap<String, String>();
-            myparams.put(Model.USER_NAME_ATTR,mEmail);
-            myparams.put(Model.USER_PASSWORD_ATTR,mPassword);
-            String result=HttpPostUtil.sendPostMessage(myparams,"utf-8",Model.REGISTER_PATH);
+            Map<String, String> myparams = new HashMap<String, String>();
+            myparams.put(Model.USER_PHONE_ATTR, getIntent().getStringExtra("phone"));
+            myparams.put(Model.USER_NAME_ATTR, mEmail);
+            myparams.put(Model.USER_PASSWORD_ATTR, mPassword);
+            String result = HttpPostUtil.sendPostMessage(myparams, "utf-8", Model.REGISTER_PATH);
             try {
-                JSONObject jsonObject=new JSONObject(result);
-                if (jsonObject.getString(("status")).equals("0")) return "success";
+                JSONObject jsonObject = new JSONObject(result);
+                if (jsonObject.getString(("status")).equals("0")){
+                    Model.MYUSER = new UserInfo();
+                    Model.MYUSER.setUname(mEmail);
+                    return "success";
+                }
                 return jsonObject.getString("mes");
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -340,10 +352,11 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         protected void onPostExecute(final String mes) {
             mAuthTask = null;
             showProgress(false);
-            if(mes.equals("success")){
+            if (mes.equals("success")) {
                 Toast.makeText(RegisterActivity.this, mes, Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK,getIntent()); //intent为A传来的带有Bundle的intent，当然也可以自己定义新的Bundle
                 finish();
-            }else{
+            } else {
                 Toast.makeText(RegisterActivity.this, mes, Toast.LENGTH_SHORT).show();
             }
         }
