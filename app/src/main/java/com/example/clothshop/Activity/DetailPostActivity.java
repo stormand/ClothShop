@@ -1,21 +1,26 @@
 package com.example.clothshop.Activity;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,11 +46,11 @@ import java.util.Map;
 /**
  *
  */
-public class DetailPostActivity extends AppCompatActivity{
+public class DetailPostActivity extends AppCompatActivity implements DetailScrollView.OnScrollChangedListener{
 
     private ViewPager mImageViewPager;
     private DetailScrollView mDetailScrollView;
-    private String[] imageList;
+    private String[] imageArray;
     private ImageView imageView;
     private ImageView[] imageViews;
     private PostInfo mPostInfo;
@@ -70,6 +75,8 @@ public class DetailPostActivity extends AppCompatActivity{
     private Button mLoveButton;
     private Button mCollectionButton;
     private DatabaseUtil mDatabaseUtil;
+
+    private Toolbar mToolBar;
 
     private RecyclerView mDetailCommentRecyclerView;
 
@@ -104,13 +111,30 @@ public class DetailPostActivity extends AppCompatActivity{
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
+        //toolbar
+        mToolBar = (Toolbar) findViewById(R.id.detail_post_toolbar);
+        mToolBar.setTitle("ToolBar");
+        mToolBar.setAlpha(0);  //先设置透明
+        setSupportActionBar(mToolBar);
+        ActionBar actionBar =  getSupportActionBar();
+        if(actionBar != null) {
+            //设为 false
+//           actionBar.setDisplayShowTitleEnabled(false);  //是否隐藏标题
+            actionBar.setDisplayHomeAsUpEnabled(true);     //是否显示返回按钮
+        }
+        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     private void initLayout(){
         //viewPager
         mImageViewPager= (ViewPager) findViewById(R.id.detail_view_pager);
-        imageList=new String[]{};
-        mImagePagerAdapter=new ImagePagerAdapter(imageList,DetailPostActivity.this);
+        imageArray =new String[]{};
+        mImagePagerAdapter=new ImagePagerAdapter(imageArray,DetailPostActivity.this);
         mImageViewPager.setAdapter(mImagePagerAdapter);
         mPointGroup= (ViewGroup) findViewById(R.id.detail_point_view_Group);
         //text
@@ -128,6 +152,7 @@ public class DetailPostActivity extends AppCompatActivity{
         //scrollView
         mDetailScrollView= (DetailScrollView) findViewById(R.id.detail_scroll_view);
         mDetailScrollView.setmViewPager(mImageViewPager);
+        mDetailScrollView.setOnScrollChangedListener(this);
 
     }
 
@@ -143,8 +168,8 @@ public class DetailPostActivity extends AppCompatActivity{
     }
 
     private void setViewPager(){
-        imageList = mPostInfo.getPimage().split("@");
-        mImagePagerAdapter=new ImagePagerAdapter(imageList,DetailPostActivity.this);
+        imageArray = mPostInfo.getPimage().split("@");
+        mImagePagerAdapter=new ImagePagerAdapter(imageArray,DetailPostActivity.this);
         mImageViewPager.setAdapter(mImagePagerAdapter);
         mImageViewPager.setOnPageChangeListener(new GuidePageChangeListener());
     }
@@ -155,7 +180,7 @@ public class DetailPostActivity extends AppCompatActivity{
     private void initPointer() {
         //有多少个界面就new多长的数组
         mPointGroup.removeAllViews();
-        imageViews = new ImageView[imageList.length];
+        imageViews = new ImageView[imageArray.length];
         for (int i = 0; i < imageViews.length; i++) {
             imageView = new ImageView(this);
             //设置控件的宽高
@@ -245,6 +270,18 @@ public class DetailPostActivity extends AppCompatActivity{
         // TODO: 2017/4/6 refresh?
         mGetCommentThread.start();
 
+    }
+
+    @Override
+    public void onScrollChanged(ScrollView who, int l, int t, int oldl, int oldt) {
+        float height = mImageViewPager.getHeight();  //获取图片的高度
+        if (oldt < height){
+            float f=Float.valueOf(oldt/height).floatValue();
+            Log.e("alpha",Float.toString(f));
+            mToolBar.setAlpha(Math.max(f,0));   // 0~255 透明度
+        }else {
+            mToolBar.setAlpha(1);
+        }
     }
 
     class GetCommentThread extends Thread{

@@ -16,10 +16,12 @@
         tools:layout_editor_absoluteY="0dp">
 
         <android.support.v7.widget.Toolbar
+            android:id="@+id/detail_post_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="#10ffffff"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:fitsSystemWindows="true"
+            />
     </android.support.design.widget.AppBarLayout>
 
     <com.example.clothshop.Activity.ScrollView.DetailRefreshLayout

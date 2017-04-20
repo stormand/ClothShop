@@ -12,8 +12,10 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,6 +52,8 @@ public class AllFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private ViewPager mViewPager;
     private TabLayout mTabLayout;
+
+    private Toolbar mToolBar;
 
     private static List<List<PostInfo>> mHomeList= new ArrayList<List<PostInfo>>();;
 
@@ -110,6 +114,10 @@ public class AllFragment extends Fragment {
 
         //toolbar.inflateMenu(R.menu.menu_message);
         mViewPager = (ViewPager) view.findViewById(R.id.home_all_viewpager);
+        mTabLayout= (TabLayout) view.findViewById(R.id.all_tabs);
+        mToolBar = (Toolbar) view.findViewById(R.id.all_toolbar);
+        mToolBar.setTitle("ToolBar");
+        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolBar);
         handler=new GetDataHandler();
         initViewPager(view,0);
         initFab(view);
@@ -186,9 +194,15 @@ public class AllFragment extends Fragment {
         viewPager.setAdapter(myPagerAdapter);
         viewPager.setOnPageChangeListener(new viewPageListener());
 
-        TabLayout tabLayout= (TabLayout)view.findViewById(R.id.home_all_tabs);
-        tabLayout.setupWithViewPager(viewPager);
+        mTabLayout.setupWithViewPager(viewPager);
 
+    }
+
+    // TODO: 2017/4/20 how to unuse this?
+    @Override
+    public void onResume() {
+        super.onResume();
+        mToolBar.getBackground().setAlpha(255);
     }
 
     private void refreshViewPager(int page){
