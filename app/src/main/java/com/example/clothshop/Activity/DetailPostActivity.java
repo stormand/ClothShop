@@ -1,6 +1,7 @@
 package com.example.clothshop.Activity;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -63,6 +64,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
 
     private ImagePagerAdapter mImagePagerAdapter;
 
+    private ImageView mAuthorAvatar;
     private TextView mDetailTitle;
     private TextView mDetailContent;
     private TextView mDetailUname;
@@ -138,6 +140,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         mImageViewPager.setAdapter(mImagePagerAdapter);
         mPointGroup= (ViewGroup) findViewById(R.id.detail_point_view_Group);
         //text
+        mAuthorAvatar= (ImageView) findViewById(R.id.detail_post_author_avatar);
         mDetailTitle= (TextView) findViewById(R.id.detail_title);
         mDetailContent= (TextView) findViewById(R.id.detail_content);
         mDetailUname= (TextView) findViewById(R.id.detail_uname);
@@ -277,7 +280,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         float height = mImageViewPager.getHeight();  //获取图片的高度
         if (oldt < height){
             float f=Float.valueOf(oldt/height).floatValue();
-            Log.e("alpha",Float.toString(f));
             mToolBar.setAlpha(Math.max(f,0));   // 0~255 透明度
         }else {
             mToolBar.setAlpha(1);
@@ -305,6 +307,17 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                     commentsInfo.setCcontent(jo.getString(Model.COMMENT_CONTENT));
                     commentsInfo.setCtime(jo.getString(Model.COMMENT_TIME));
                     commentsInfo.setUname(jo.getString(Model.COMMENT_UNAME));
+                    Drawable draw1;
+                    if (jo.getString(Model.POST_USEX_ATTR)==null || jo.getString(Model.POST_USEX_ATTR).isEmpty()){
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }else if (jo.getString(Model.POST_USEX_ATTR).equals("男")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_male);
+                    }else if (jo.getString(Model.POST_USEX_ATTR).equals("女")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_female);
+                    }else {
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }
+                    commentsInfo.setUavatar(draw1);
                     mCommentsInfoList.add(commentsInfo);
                 }
                 showMessage(jsonObject.getString("mes"),GetCommentHanlder.SUCCESS);
@@ -355,18 +368,29 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
             String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.DETAIL_POST_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
-                mPostInfo.setPimage(jsonObject.getString(Model.POST_IMAGE_ATTR));
-                mPostInfo.setPtitle(jsonObject.getString(Model.POST_TITLE_ATTR));
-                mPostInfo.setUname(jsonObject.getString(Model.POST_UNAME_ATTR));
-                mPostInfo.setPdaytime(jsonObject.getString(Model.POST_DAY_TIME_ATTR));
-                mPostInfo.setPcontent(jsonObject.getString(Model.POST_CONTENT_ATTR));
-                mPostInfo.setUheight(jsonObject.getString(Model.POST_UHEIGHT_ATTR));
-                mPostInfo.setUweight(jsonObject.getString(Model.POST_UWEIGHT_ATTR));
-                mPostInfo.setUsex(jsonObject.getString(Model.POST_USEX_ATTR));
-                mPostInfo.setUage(jsonObject.getString(Model.POST_UAGE_ATTR));
-                mPostInfo.setPid(jsonObject.getString(Model.POST_ID_ATTR));
-                mPostInfo.setLoveNum(jsonObject.getString(Model.POST_LOVE_NUM));
                 if (jsonObject.getString("status").equals("0")){
+                    mPostInfo.setPimage(jsonObject.getString(Model.POST_IMAGE_ATTR));
+                    mPostInfo.setPtitle(jsonObject.getString(Model.POST_TITLE_ATTR));
+                    mPostInfo.setUname(jsonObject.getString(Model.POST_UNAME_ATTR));
+                    mPostInfo.setPdaytime(jsonObject.getString(Model.POST_DAY_TIME_ATTR));
+                    mPostInfo.setPcontent(jsonObject.getString(Model.POST_CONTENT_ATTR));
+                    mPostInfo.setUheight(jsonObject.getString(Model.POST_UHEIGHT_ATTR));
+                    mPostInfo.setUweight(jsonObject.getString(Model.POST_UWEIGHT_ATTR));
+                    mPostInfo.setUsex(jsonObject.getString(Model.POST_USEX_ATTR));
+                    mPostInfo.setUage(jsonObject.getString(Model.POST_UAGE_ATTR));
+                    mPostInfo.setPid(jsonObject.getString(Model.POST_ID_ATTR));
+                    mPostInfo.setLoveNum(jsonObject.getString(Model.POST_LOVE_NUM));
+                    Drawable draw1;
+                    if (mPostInfo.getUsex()==null || mPostInfo.getUsex().isEmpty()){
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }else if (mPostInfo.getUsex().equals("男")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_male);
+                    }else if (mPostInfo.getUsex().equals("女")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_female);
+                    }else {
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }
+                    mPostInfo.setUavatar(draw1);
                     showMessage(jsonObject.getString("mes"), GetDataHandler.SUCCESS);
                 }else {
                     showMessage(jsonObject.getString("mes"), GetDataHandler.FAILURE);
@@ -407,6 +431,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                     setViewPager();
                     initPointer(); //获取数据后初始化小白点
                     mLoveButton.setText(mPostInfo.getLoveNum());
+                    mAuthorAvatar.setImageDrawable(mPostInfo.getUavatar());
                     break;
                 case FAILURE:
                     mSwipeRefreshLayout.setRefreshing(false);

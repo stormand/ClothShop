@@ -17,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -134,9 +135,7 @@ public class PersonFragment extends Fragment {
                 }
             }
         });
-
         return view;
-
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -169,6 +168,8 @@ public class PersonFragment extends Fragment {
             CollapsingToolbarLayout mCollapsingToolbarLayout = (CollapsingToolbarLayout) getView().findViewById(R.id.toolbar_layout);
             mCollapsingToolbarLayout.setTitle(Model.MYUSER.getUname());
             mPersonLoginLayout.setVisibility(View.VISIBLE);
+            ImageView imageView= (ImageView) getView().findViewById(R.id.person_fragment_avatar);
+            imageView.setImageDrawable(Model.MYUSER.getUavatar());
         }else {
             CollapsingToolbarLayout mCollapsingToolbarLayout = (CollapsingToolbarLayout) getView().findViewById(R.id.toolbar_layout);
             mCollapsingToolbarLayout.setTitle(getString(R.string.not_login));

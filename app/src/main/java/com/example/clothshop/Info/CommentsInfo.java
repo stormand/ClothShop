@@ -1,5 +1,7 @@
 package com.example.clothshop.Info;
 
+import android.graphics.drawable.Drawable;
+
 import java.io.Serializable;
 
 public class CommentsInfo implements Serializable{
@@ -9,6 +11,16 @@ public class CommentsInfo implements Serializable{
 	private String ccontent;
 	private String ctime;
 	private String uname;
+	private Drawable uavatar;
+
+	public void setUavatar(Drawable uavatar) {
+		this.uavatar = uavatar;
+	}
+
+	public Drawable getUavatar() {
+
+		return uavatar;
+	}
 
 	public void setCid(String cid) {
 		this.cid = cid;

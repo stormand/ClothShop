@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -294,9 +295,21 @@ public class HomeFragment extends Fragment {
                     postInfo.setPtitle(jo.getString(Model.POST_TITLE_ATTR));
                     postInfo.setPid(jo.getString(Model.POST_ID_ATTR));
                     postInfo.setUname(jo.getString(Model.USER_NAME_ATTR));
+                    postInfo.setUsex(jo.getString(Model.POST_USEX_ATTR));
                     postInfo.setPdaytime(jo.getString(Model.POST_DAY_TIME_ATTR));
                     postInfo.setLoveNum(jo.getString(Model.POST_LOVE_NUM));
                     postInfo.setPimage(jo.getString(Model.POST_IMAGE_ATTR).split("@")[0]);
+                    Drawable draw1;
+                    if (postInfo.getUsex()==null || postInfo.getUsex().isEmpty()){
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }else if (postInfo.getUsex().equals("男")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_male);
+                    }else if (postInfo.getUsex().equals("女")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_female);
+                    }else {
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }
+                    postInfo.setUavatar(draw1);
                     paramsList.add(postInfo);
                 }
 

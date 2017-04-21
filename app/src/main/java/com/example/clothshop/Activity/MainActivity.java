@@ -1,6 +1,7 @@
 package com.example.clothshop.Activity;
 
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -204,6 +205,17 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
                     Model.MYUSER.setUsex(jsonObject.getString("sex"));
                     Model.MYUSER.setUheight(jsonObject.getString("height"));
                     Model.MYUSER.setUweight(jsonObject.getString("weight"));
+                    Drawable draw1;
+                    if (Model.MYUSER.getUsex()==null || Model.MYUSER.getUsex().isEmpty()){
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }else if (Model.MYUSER.getUsex().equals("男")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_male);
+                    }else if (Model.MYUSER.getUsex().equals("女")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_female);
+                    }else {
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }
+                    Model.MYUSER.setUavatar(draw1);
                 }else {
                     showMessage(jsonObject.getString("mes"));
                 }
