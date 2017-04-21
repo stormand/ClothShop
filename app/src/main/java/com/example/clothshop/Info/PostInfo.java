@@ -24,7 +24,6 @@ public class PostInfo implements Serializable{
     private String usex;
     private String uname;
     private String loveNum;
-    private String link;//for all link
 
     private boolean myCollection=false;
     private boolean myLove=false;
@@ -43,38 +42,41 @@ public class PostInfo implements Serializable{
     public void setLoveNum(String loveNum) {
         this.loveNum = loveNum;
     }
+
     public String getLoveNum() {
 
         return loveNum;
     }
-    public void setLink(String Link){
-         this.link=Link;
-    }
-   public String getLink(){
-        return link;
-    }
+
     public void setMyCollection(boolean myCollection) {
         this.myCollection = myCollection;
     }
+
     public void setMyLove(boolean myLove) {
         this.myLove = myLove;
     }
+
     public boolean isMyCollection() {
         return myCollection;
     }
+
     public boolean isMyLove() {
         return myLove;
     }
+
     public void setUname(String uname) {
         this.uname = uname;
     }
+
     public String getUname() {
 
         return uname;
     }
+
     public void setUage(String uage) {
         this.uage = uage;
     }
+
     public String getUage() {
 
         return uage;
