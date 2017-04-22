@@ -1,5 +1,7 @@
 package com.example.clothshop.Activity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
@@ -9,9 +11,11 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.clothshop.DB.DatabaseUtil;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
@@ -30,18 +34,21 @@ import java.util.Map;
 public class UserPostActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerview;
-    private RecyclerView.Adapter mAdapter;
+    private static RecyclerView.Adapter mAdapter;
     private LinearLayoutManager mLayoutManager;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private GetDataHandler handler=new GetDataHandler();
     private static List<PostInfo> mUserPostDataList=null;
     private int lastVisibleItem;
     private boolean refreshLock=false;
+    private static DeleteHandler deleteHandler=new DeleteHandler();
+    private String type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_post);
+        type=getIntent().getStringExtra("type");
         initRecyclerView();
     }
     private void initRecyclerView(){
@@ -64,7 +71,7 @@ public class UserPostActivity extends AppCompatActivity {
         mRecyclerview.setLayoutManager(mLayoutManager);
 
         mUserPostDataList=new ArrayList<PostInfo>();
-        mAdapter = new UserPostRecyclerAdapter(UserPostActivity.this,mUserPostDataList);
+        mAdapter = new UserPostRecyclerAdapter(UserPostActivity.this,mUserPostDataList,type);
         mRecyclerview.setAdapter(mAdapter);
         mRecyclerview.addItemDecoration(new SpaceItemDecoration());
         //创建适配器，并且设置
@@ -134,7 +141,7 @@ public class UserPostActivity extends AppCompatActivity {
             super.run();
             Map<String,String> params=new HashMap<String,String>();
             params.put(Model.POST_UID_ATTR,uid);
-            params.put("type", getIntent().getStringExtra("type"));
+            params.put("type", type);
             if (pid!=null){
                 params.put(Model.POST_UID_ATTR,pid);
             }
@@ -201,6 +208,74 @@ public class UserPostActivity extends AppCompatActivity {
                     break;
             }
             mSwipeRefreshLayout.setRefreshing(false);
+        }
+    }
+
+    public static class DeleteThread extends Thread{
+        String pid;
+        String type;
+        int position;
+        Context mContext;
+        public DeleteThread(String pid,String type,int position,Context context) {
+            this.pid=pid;
+            this.type=type;
+            this.position=position;
+            this.mContext=context;
+        }
+
+        @Override
+        public void run() {
+//            SharedPreferences sp=getSharedPreferences(Model.SP_NAME_PASSWD,MODE_PRIVATE);
+            Map<String,String> params=new HashMap<String, String>();
+            params.put(Model.COMMENT_UID,Model.MYUSER.getUserid());
+            params.put(Model.COMMENT_PID,pid);
+            params.put("type",type);
+//            params.put(Model.USER_PASSWORD_ATTR,sp.getString(Model.USER_PASSWORD_ATTR,"error"));
+            String result= HttpPostUtil.sendPostMessage(params,"utf-8",Model.DELETE_POST_PATH); //// TODO: 2017/4/22 delete post
+            try {
+                JSONObject jsonObject=new JSONObject(result);
+                if (jsonObject.getString("status").equals("0")){
+                    if (type.equals("user_collection")){
+                        DatabaseUtil databaseUtil=DatabaseUtil.getInstance(mContext);
+                        databaseUtil.deleteFav(pid,DatabaseUtil.ATTR_COLLECTION);
+                    }
+                    Message msg=Message.obtain(deleteHandler, deleteHandler.SUCCESS);
+                    msg.arg1=position;
+                    msg.obj=type;
+                    msg.sendToTarget();
+                }else {
+                    Message msg=Message.obtain(deleteHandler, deleteHandler.ERROR);
+                    msg.sendToTarget();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Log.e("delete error",e.toString());
+                Message msg=Message.obtain(deleteHandler, deleteHandler.ERROR);
+                msg.sendToTarget();
+            }
+        }
+    }
+
+    static class DeleteHandler extends Handler{
+        public static final int SUCCESS=0x0004;
+        public static final int ERROR=0x0003;
+
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case SUCCESS:
+                    mUserPostDataList.remove(msg.arg1);
+                    mAdapter.notifyItemRemoved(msg.arg1);
+
+                    break;
+                case ERROR:
+
+                    break;
+                default:
+                    break;
+            }
+
         }
     }
 }

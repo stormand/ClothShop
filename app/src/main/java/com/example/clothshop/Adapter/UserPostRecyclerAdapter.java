@@ -2,22 +2,30 @@ package com.example.clothshop.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.clothshop.Activity.DetailPostActivity;
+import com.example.clothshop.Activity.UserPostActivity;
 import com.example.clothshop.DB.DatabaseUtil;
 import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
+import com.example.clothshop.utils.HttpPostUtil;
 import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * 主页homeFragment 的 recyclerview 的adapter
@@ -29,12 +37,14 @@ public class UserPostRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
     private Context mContext;
     private List<PostInfo> mDatas;
     private DatabaseUtil mDatabaseUtil;
+    private String type;
 
 
-    public UserPostRecyclerAdapter(Context mContext, List<PostInfo> mDatas) {
+    public UserPostRecyclerAdapter(Context mContext, List<PostInfo> mDatas,String type) {
         this.mContext = mContext;
         this.mDatas = mDatas;
         mDatabaseUtil=DatabaseUtil.getInstance(mContext);
+        this.type=type;
 
     }
 
@@ -51,6 +61,13 @@ public class UserPostRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
         itemHolder.titleTextView.setText(mDatas.get(position).getPtitle());
         itemHolder.timeTextView.setText(mDatas.get(position).getPdaytime());
         itemHolder.loveNumTextView.setText(mDatas.get(position).getLoveNum());
+        itemHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserPostActivity.DeleteThread deleteThread=new UserPostActivity.DeleteThread(mDatas.get(position).getPid(),type,position,mContext);
+                deleteThread.start();
+            }
+        });
         //读取图片路径
         String imageUrl=mDatas.get(position).getPimage();
         StringBuilder sb=new StringBuilder();
@@ -85,14 +102,18 @@ public class UserPostRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
         public TextView timeTextView;
         public TextView loveNumTextView;
         public ConstraintLayout constraintLayout;
+        public Button deleteButton;
         public ItemHolder(View itemView) {
             super(itemView);
             imageView= (ImageView) itemView.findViewById(R.id.user_post_image_view);
             titleTextView = (TextView) itemView.findViewById(R.id.user_post_title);
             timeTextView= (TextView) itemView.findViewById(R.id.user_post_time);
             loveNumTextView= (TextView) itemView.findViewById(R.id.user_post_love_num);
+            deleteButton= (Button) itemView.findViewById(R.id.user_post_delete_button);
             constraintLayout= (ConstraintLayout) itemView.findViewById(R.id.user_post_layout);
         }
     }
+
+
 
 }
