@@ -1,9 +1,12 @@
 package com.example.clothshop.Adapter;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.constraint.ConstraintLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,8 +67,7 @@ public class UserPostRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
         itemHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                UserPostActivity.DeleteThread deleteThread=new UserPostActivity.DeleteThread(mDatas.get(position).getPid(),type,position,mContext);
-                deleteThread.start();
+                deleteDialog(position);
             }
         });
         //读取图片路径
@@ -114,6 +116,27 @@ public class UserPostRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
         }
     }
 
+    private void deleteDialog(final int position){
+        AlertDialog.Builder builder=new AlertDialog.Builder(mContext);  //先得到构造器
+        builder.setTitle("提示"); //设置标题
+        builder.setMessage("是否确认删除?"); //设置内容
+        builder.setIcon(R.mipmap.ic_launcher);//设置图标，图片id即可
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener(){ //设置确定按钮
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                UserPostActivity.DeleteThread deleteThread=new UserPostActivity.DeleteThread(mDatas.get(position).getPid(),type,position,mContext);
+                deleteThread.start();
+                dialog.dismiss(); //关闭dialog
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() { //设置取消按钮
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
 
+        builder.create().show();
+    }
 
 }
