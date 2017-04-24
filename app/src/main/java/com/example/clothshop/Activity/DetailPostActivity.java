@@ -51,7 +51,7 @@ import java.util.Map;
 /**
  *
  */
-public class DetailPostActivity extends AppCompatActivity{
+public class DetailPostActivity extends AppCompatActivity implements DetailScrollView.OnScrollChangedListener{
 
     private ViewPager mImageViewPager;
     private DetailScrollView mDetailScrollView;
@@ -91,11 +91,11 @@ public class DetailPostActivity extends AppCompatActivity{
     private SendCommentHandler mSendCommentHandler;
     private AddLCHandler mAddLCHandler;
     private Button linkButton;
-    private String[] thingName;//用于物品名称数组
-    private String[] linkName;//用于链接名称数组
+    private ArrayList<String> thingName=new ArrayList<String>();//用于物品名称数组
+    private ArrayList<String> linkName=new ArrayList<String>();//用于链接名称数组ng
     private String[] all;//一组的物品名称与url的对应。
     private String[] tem;
-    private int k=0;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_post);
@@ -113,25 +113,28 @@ public class DetailPostActivity extends AppCompatActivity{
         });
     }
     public void test4() {
-        if(mPostInfo.getLink()==null){
-            Toast.makeText(DetailPostActivity.this,"没有链接",Toast.LENGTH_LONG);
+        thingName.clear();
+        linkName.clear();
+        int key=0;
+        if(mPostInfo.getLink()==null || mPostInfo.getLink().equals("")){
+            Toast.makeText(DetailPostActivity.this,"没有链接",Toast.LENGTH_LONG).show();
         }
         else {
             all = mPostInfo.getLink().split("  ");
             for (int i = 0; i < all.length; i++) {
                 tem = all[i].split(" ");
-                thingName[k] = tem[0];
-                linkName[k] = tem[0];
-                k++;
+                thingName.add(tem[0]);
+                linkName.add(tem[1]);
             }
 
         //初始化一个界面
+            String[] sthingName = (String[]) thingName.toArray(new String[0]);
         new AlertDialog.Builder(this).setTitle("衣物直达界面")
-                .setItems(thingName, new DialogInterface.OnClickListener() {
+                .setItems(sthingName, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // 第一个参数 dialog int which 那个条目
-                        Intent fIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkName[which]));
+                        Intent fIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkName.get(which)));
                         fIntent.setClassName("com.android.browser","com.android.browser.BrowserActivity");
                         startActivity(fIntent);
                     }
@@ -175,6 +178,7 @@ public class DetailPostActivity extends AppCompatActivity{
         mImagePagerAdapter=new ImagePagerAdapter(imageArray,DetailPostActivity.this);
         mImageViewPager.setAdapter(mImagePagerAdapter);
         mPointGroup=(ViewGroup)findViewById(R.id.detail_point_view_Group);
+        mAuthorAvatar= (ImageView) findViewById(R.id.detail_post_author_avatar);
         mDetailTitle=(TextView) findViewById(R.id.detail_title);
         mDetailContent=(TextView) findViewById(R.id.detail_content);
         mDetailUname=(TextView) findViewById(R.id.detail_uname);
