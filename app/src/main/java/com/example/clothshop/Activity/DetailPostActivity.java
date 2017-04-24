@@ -51,7 +51,7 @@ import java.util.Map;
 /**
  *
  */
-public class DetailPostActivity extends AppCompatActivity{
+public class DetailPostActivity extends AppCompatActivity implements DetailScrollView.OnScrollChangedListener{
 
     private ViewPager mImageViewPager;
     private DetailScrollView mDetailScrollView;
@@ -119,8 +119,8 @@ public class DetailPostActivity extends AppCompatActivity{
         thingName.clear();
         linkName.clear();
         int key=0;
-        if(mPostInfo.getLink()==null){
-            Toast.makeText(DetailPostActivity.this,"没有链接",Toast.LENGTH_LONG);
+        if(mPostInfo.getLink()==null || mPostInfo.getLink().equals("")){
+            Toast.makeText(DetailPostActivity.this,"没有链接",Toast.LENGTH_LONG).show();
         }
         else {
             all = mPostInfo.getLink().split("  ");
