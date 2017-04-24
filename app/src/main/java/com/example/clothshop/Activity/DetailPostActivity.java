@@ -3,22 +3,28 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.SyncStateContract;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,19 +47,27 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
 /**
+ *
  */
 public class DetailPostActivity extends AppCompatActivity{
+
     private ViewPager mImageViewPager;
     private DetailScrollView mDetailScrollView;
-    private String[] imageList;
+    private String[] imageArray;
     private ImageView imageView;
     private ImageView[] imageViews;
     private PostInfo mPostInfo;
     private ArrayList<CommentsInfo> mCommentsInfoList;
+
     private DetailRefreshLayout mSwipeRefreshLayout;
+
+    //包裹点点的LinearLayout
     private ViewGroup mPointGroup;
     private ImagePagerAdapter mImagePagerAdapter;
+
+    private ImageView mAuthorAvatar;
     private TextView mDetailTitle;
     private TextView mDetailContent;
     private TextView mDetailUname;
@@ -65,6 +79,9 @@ public class DetailPostActivity extends AppCompatActivity{
     private Button mLoveButton;
     private Button mCollectionButton;
     private DatabaseUtil mDatabaseUtil;
+
+    private Toolbar mToolBar;
+
     private RecyclerView mDetailCommentRecyclerView;
     private GetDataHandler handler;
     private GetDataThread mGetDataThread;
@@ -122,7 +139,8 @@ public class DetailPostActivity extends AppCompatActivity{
         }
     }
     private void initToolbar(){
-        mSwipeRefreshLayout=(DetailRefreshLayout)findViewById(R.id.detail_refresh_layout);
+        //refreshlayout
+        mSwipeRefreshLayout= (DetailRefreshLayout)findViewById(R.id.detail_refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -131,12 +149,30 @@ public class DetailPostActivity extends AppCompatActivity{
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
+        //toolbar
+        mToolBar = (Toolbar) findViewById(R.id.detail_post_toolbar);
+        mToolBar.setTitle("ToolBar");
+        mToolBar.setAlpha(0);  //先设置透明
+        setSupportActionBar(mToolBar);
+        ActionBar actionBar =  getSupportActionBar();
+        if(actionBar != null) {
+            //设为 false
+//           actionBar.setDisplayShowTitleEnabled(false);  //是否隐藏标题
+            actionBar.setDisplayHomeAsUpEnabled(true);     //是否显示返回按钮
+        }
+        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     private void initLayout(){
-        mImageViewPager=(ViewPager) findViewById(R.id.detail_view_pager);
-        imageList=new String[]{};
-        mImagePagerAdapter=new ImagePagerAdapter(imageList,DetailPostActivity.this);
+        //viewPager
+        mImageViewPager= (ViewPager) findViewById(R.id.detail_view_pager);
+        imageArray =new String[]{};
+        mImagePagerAdapter=new ImagePagerAdapter(imageArray,DetailPostActivity.this);
         mImageViewPager.setAdapter(mImagePagerAdapter);
         mPointGroup=(ViewGroup)findViewById(R.id.detail_point_view_Group);
         mDetailTitle=(TextView) findViewById(R.id.detail_title);
@@ -162,21 +198,23 @@ public class DetailPostActivity extends AppCompatActivity{
         mDetailUname.setText(mPostInfo.getUname());
     }
     private void setViewPager(){
-        imageList = mPostInfo.getPimage().split("@");
-        mImagePagerAdapter=new ImagePagerAdapter(imageList,DetailPostActivity.this);
+        imageArray = mPostInfo.getPimage().split("@");
+        mImagePagerAdapter=new ImagePagerAdapter(imageArray,DetailPostActivity.this);
         mImageViewPager.setAdapter(mImagePagerAdapter);
         mImageViewPager.setOnPageChangeListener(new GuidePageChangeListener());
     }
-    /*
+
+    /**
      * 初始化导航小白点，根据getData的图片数目设置小白点数目
      */
     private void initPointer() {
         //有多少个界面就new多长的数组
         mPointGroup.removeAllViews();
-        imageViews = new ImageView[imageList.length];
+        imageViews = new ImageView[imageArray.length];
         for (int i = 0; i < imageViews.length; i++) {
             imageView = new ImageView(this);
             //设置控件的宽高
+            //imageView.setLayoutParams(new ViewGroup.LayoutParams(20, 20));
             //设置控件的padding属性
             LinearLayout.LayoutParams lp= new LinearLayout.LayoutParams(20, 20);
             lp.leftMargin=10;
@@ -187,7 +225,7 @@ public class DetailPostActivity extends AppCompatActivity{
             if (i == 0) {
                 //表示当前图片
                 imageViews[i].setBackgroundResource(R.drawable.point_focused);
-                /*
+                /**
                  * 在java代码中动态生成ImageView的时候
                  * 要设置其BackgroundResource属性才有效
                  * 设置ImageResource属性无效
@@ -228,7 +266,8 @@ public class DetailPostActivity extends AppCompatActivity{
         mSwipeRefreshLayout.setRefreshing(true);
         mGetDataThread.start();
     }
-    /*
+
+    /**
      * 获取评论数据
      */
     private void getCommentData(){
@@ -240,6 +279,7 @@ public class DetailPostActivity extends AppCompatActivity{
                 return false;
             }
         };
+
         //垂直方向
         mLayoutManager.setOrientation(OrientationHelper.VERTICAL);
         //mLayoutManager.setAutoMeasureEnabled(true);
@@ -249,12 +289,27 @@ public class DetailPostActivity extends AppCompatActivity{
         mCommentadapter=new CommentRecyclerAdapter(DetailPostActivity.this,mCommentsInfoList);
         mDetailCommentRecyclerView.setAdapter(mCommentadapter);
         if (mPostInfo.getPid().isEmpty()){
+            // TODO: 2017/4/6 other oeration? 
             return;
         }
         mCommentHandler=new GetCommentHanlder();
         GetCommentThread mGetCommentThread=new GetCommentThread();
+        // TODO: 2017/4/6 refresh?
         mGetCommentThread.start();
+
     }
+
+    @Override
+    public void onScrollChanged(ScrollView who, int l, int t, int oldl, int oldt) {
+        float height = mImageViewPager.getHeight();  //获取图片的高度
+        if (oldt < height){
+            float f=Float.valueOf(oldt/height).floatValue();
+            mToolBar.setAlpha(Math.max(f,0));   // 0~255 透明度
+        }else {
+            mToolBar.setAlpha(1);
+        }
+    }
+
     class GetCommentThread extends Thread{
         @Override
         public void run() {
@@ -276,6 +331,17 @@ public class DetailPostActivity extends AppCompatActivity{
                     commentsInfo.setCcontent(jo.getString(Model.COMMENT_CONTENT));
                     commentsInfo.setCtime(jo.getString(Model.COMMENT_TIME));
                     commentsInfo.setUname(jo.getString(Model.COMMENT_UNAME));
+                    Drawable draw1;
+                    if (jo.getString(Model.POST_USEX_ATTR)==null || jo.getString(Model.POST_USEX_ATTR).isEmpty()){
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }else if (jo.getString(Model.POST_USEX_ATTR).equals("男")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_male);
+                    }else if (jo.getString(Model.POST_USEX_ATTR).equals("女")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_female);
+                    }else {
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }
+                    commentsInfo.setUavatar(draw1);
                     mCommentsInfoList.add(commentsInfo);
                 }
                 showMessage(jsonObject.getString("mes"),GetCommentHanlder.SUCCESS);
@@ -291,6 +357,7 @@ public class DetailPostActivity extends AppCompatActivity{
             msg.setTarget(mCommentHandler);
         }
     }
+
     public class GetCommentHanlder extends Handler{
         public static final int FAILURE=0x0002;
         public static final int SUCCESS=0x0001;
@@ -311,6 +378,7 @@ public class DetailPostActivity extends AppCompatActivity{
             }
         }
     }
+
     /**
      * 获取帖子数据
      */
@@ -335,7 +403,17 @@ public class DetailPostActivity extends AppCompatActivity{
                 mPostInfo.setPid(jsonObject.getString(Model.POST_ID_ATTR));
                 mPostInfo.setLoveNum(jsonObject.getString(Model.POST_LOVE_NUM));
                 mPostInfo.setLink(jsonObject.getString(Model.POST_LINK_ATTR));
-
+                Drawable draw1;
+                if (mPostInfo.getUsex()==null || mPostInfo.getUsex().isEmpty()){
+                    draw1 = getResources().getDrawable(R.drawable.avatar);
+                }else if (mPostInfo.getUsex().equals("男")){
+                    draw1 = getResources().getDrawable(R.drawable.avatar_male);
+                }else if (mPostInfo.getUsex().equals("女")){
+                    draw1 = getResources().getDrawable(R.drawable.avatar_female);
+                }else {
+                    draw1 = getResources().getDrawable(R.drawable.avatar);
+                }
+                mPostInfo.setUavatar(draw1);
                 if (jsonObject.getString("status").equals("0")){
                     showMessage(jsonObject.getString("mes"), GetDataHandler.SUCCESS);
                 }else {
@@ -372,6 +450,7 @@ public class DetailPostActivity extends AppCompatActivity{
                     setViewPager();
                     initPointer(); //获取数据后初始化小白点
                     mLoveButton.setText(mPostInfo.getLoveNum());
+                    mAuthorAvatar.setImageDrawable(mPostInfo.getUavatar());
                     break;
                 case FAILURE:
                     mSwipeRefreshLayout.setRefreshing(false);
@@ -546,6 +625,7 @@ public class DetailPostActivity extends AppCompatActivity{
             }
         }
     }
+
     public class GuidePageChangeListener implements ViewPager.OnPageChangeListener {
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

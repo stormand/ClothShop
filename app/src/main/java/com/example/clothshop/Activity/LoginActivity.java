@@ -8,6 +8,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -423,8 +426,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Model.MYUSER.setUsex(jsonObject.getString("sex"));
                     Model.MYUSER.setUheight(jsonObject.getString("height"));
                     Model.MYUSER.setUweight(jsonObject.getString("weight"));
-                    Intent intent = new Intent();
-                    //跳转到person页面
+                    Drawable draw1;
+                    if (Model.MYUSER.getUsex()==null || Model.MYUSER.getUsex().isEmpty()){
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }else if (Model.MYUSER.getUsex().equals("男")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_male);
+                    }else if (Model.MYUSER.getUsex().equals("女")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_female);
+                    }else {
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }
+                    Model.MYUSER.setUavatar(draw1);
                     return true;
                 } else {
                     mes = jsonObject.getString("mes");

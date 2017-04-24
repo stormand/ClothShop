@@ -1,5 +1,7 @@
 package com.example.clothshop.Info;
 
+import android.graphics.drawable.Drawable;
+
 import java.io.Serializable;
 
 /**
@@ -16,6 +18,8 @@ public class PostInfo implements Serializable{
     private String pimage;
     private String uweight;
     private String uheight;
+    private Drawable uavatar;
+
     private String uage;
     private String usex;
     private String uname;
@@ -24,6 +28,17 @@ public class PostInfo implements Serializable{
 
     private boolean myCollection=false;
     private boolean myLove=false;
+
+
+    public void setUavatar(Drawable uavatar) {
+        this.uavatar = uavatar;
+    }
+
+    public Drawable getUavatar() {
+
+        return uavatar;
+    }
+
 
     public void setLoveNum(String loveNum) {
         this.loveNum = loveNum;

@@ -2,7 +2,9 @@ package com.example.clothshop.Fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,8 +14,10 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,6 +55,7 @@ public class HomeFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private Toolbar mToolBar;
     private ViewPager mViewPager;
     private TabLayout mTabLayout;
 
@@ -111,7 +116,10 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-
+        mTabLayout= (TabLayout) view.findViewById(R.id.home_tabs);
+        mToolBar = (Toolbar) view.findViewById(R.id.home_toolbar);
+        mToolBar.setTitle("ToolBar");
+        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolBar);
         //toolbar.inflateMenu(R.menu.menu_message);
         mViewPager = (ViewPager) view.findViewById(R.id.home_all_viewpager);
         handler=new GetDataHandler();
@@ -190,8 +198,7 @@ public class HomeFragment extends Fragment {
         viewPager.setAdapter(myPagerAdapter);
         viewPager.setOnPageChangeListener(new viewPageListener());
 
-        TabLayout tabLayout= (TabLayout)view.findViewById(R.id.home_all_tabs);
-        tabLayout.setupWithViewPager(viewPager);
+        mTabLayout.setupWithViewPager(viewPager);
 
     }
 
@@ -201,7 +208,6 @@ public class HomeFragment extends Fragment {
             newPageThread.start();
         }
     }
-
     private void initFab(View view){
         mFab= (FloatingActionButton) view.findViewById(R.id.fab);
         mFab.setOnClickListener(new View.OnClickListener() {
@@ -253,6 +259,7 @@ public class HomeFragment extends Fragment {
         private int dataType;
         private int page;
         private String pid=null;
+        private String[] order={"new","hot","top"};
 
         GetDataThread(int type,int page,String pid){
             this.dataType=type;
@@ -272,6 +279,8 @@ public class HomeFragment extends Fragment {
             if (pid!=null){
                 params.put(Model.POST_ID_ATTR,pid);
             }
+            params.put("show_type","person");
+            params.put("show_order",order[page]);
             String result= HttpPostUtil.sendPostMessage(params,"utf-8",Model.HOME_PATH);
             getData(result);
         }
@@ -279,8 +288,6 @@ public class HomeFragment extends Fragment {
         private void getData(String result){
             List<PostInfo> paramsList=new ArrayList<PostInfo>();
             try {
-                Log.e("datatype",Integer.toString(dataType));
-
                 JSONObject jsonObject=new JSONObject(result);
                 JSONArray jsonArray=jsonObject.getJSONArray("post");
                 for (int i=0;i<jsonArray.length();i++){
@@ -289,9 +296,21 @@ public class HomeFragment extends Fragment {
                     postInfo.setPtitle(jo.getString(Model.POST_TITLE_ATTR));
                     postInfo.setPid(jo.getString(Model.POST_ID_ATTR));
                     postInfo.setUname(jo.getString(Model.USER_NAME_ATTR));
+                    postInfo.setUsex(jo.getString(Model.POST_USEX_ATTR));
                     postInfo.setPdaytime(jo.getString(Model.POST_DAY_TIME_ATTR));
                     postInfo.setLoveNum(jo.getString(Model.POST_LOVE_NUM));
                     postInfo.setPimage(jo.getString(Model.POST_IMAGE_ATTR).split("@")[0]);
+                    Drawable draw1;
+                    if (postInfo.getUsex()==null || postInfo.getUsex().isEmpty()){
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }else if (postInfo.getUsex().equals("男")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_male);
+                    }else if (postInfo.getUsex().equals("女")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_female);
+                    }else {
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }
+                    postInfo.setUavatar(draw1);
                     paramsList.add(postInfo);
                 }
 

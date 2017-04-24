@@ -3,6 +3,7 @@ package com.example.clothshop.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,8 +13,10 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,6 +53,8 @@ public class AllFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private ViewPager mViewPager;
     private TabLayout mTabLayout;
+
+    private Toolbar mToolBar;
 
     private static List<List<PostInfo>> mHomeList= new ArrayList<List<PostInfo>>();;
 
@@ -110,6 +115,10 @@ public class AllFragment extends Fragment {
 
         //toolbar.inflateMenu(R.menu.menu_message);
         mViewPager = (ViewPager) view.findViewById(R.id.home_all_viewpager);
+        mTabLayout= (TabLayout) view.findViewById(R.id.all_tabs);
+        mToolBar = (Toolbar) view.findViewById(R.id.all_toolbar);
+        mToolBar.setTitle("ToolBar");
+        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolBar);
         handler=new GetDataHandler();
         initViewPager(view,0);
         initFab(view);
@@ -186,9 +195,15 @@ public class AllFragment extends Fragment {
         viewPager.setAdapter(myPagerAdapter);
         viewPager.setOnPageChangeListener(new viewPageListener());
 
-        TabLayout tabLayout= (TabLayout)view.findViewById(R.id.home_all_tabs);
-        tabLayout.setupWithViewPager(viewPager);
+        mTabLayout.setupWithViewPager(viewPager);
 
+    }
+
+    // TODO: 2017/4/20 how to unuse this?
+    @Override
+    public void onResume() {
+        super.onResume();
+        mToolBar.getBackground().setAlpha(255);
     }
 
     private void refreshViewPager(int page){
@@ -249,6 +264,7 @@ public class AllFragment extends Fragment {
         private int dataType;
         private int page;
         private String pid=null;
+        private String[] order={"new","hot","top"};
 
         GetDataThread(int type,int page,String pid){
             this.dataType=type;
@@ -268,6 +284,8 @@ public class AllFragment extends Fragment {
             if (pid!=null){
                 params.put(Model.POST_ID_ATTR,pid);
             }
+            params.put("show_type","explore");
+            params.put("show_order",order[page]);
             String result= HttpPostUtil.sendPostMessage(params,"utf-8",Model.HOME_PATH);
             getData(result);
         }
@@ -287,7 +305,19 @@ public class AllFragment extends Fragment {
                     postInfo.setUname(jo.getString(Model.USER_NAME_ATTR));
                     postInfo.setPdaytime(jo.getString(Model.POST_DAY_TIME_ATTR));
                     postInfo.setLoveNum(jo.getString(Model.POST_LOVE_NUM));
+                    postInfo.setUsex(jo.getString(Model.POST_USEX_ATTR));
                     postInfo.setPimage(jo.getString(Model.POST_IMAGE_ATTR).split("@")[0]);
+                    Drawable draw1;
+                    if (postInfo.getUsex()==null || postInfo.getUsex().isEmpty()){
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }else if (postInfo.getUsex().equals("男")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_male);
+                    }else if (postInfo.getUsex().equals("女")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_female);
+                    }else {
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }
+                    postInfo.setUavatar(draw1);
                     paramsList.add(postInfo);
                 }
 

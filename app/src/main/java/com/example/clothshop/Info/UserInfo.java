@@ -1,6 +1,7 @@
 package com.example.clothshop.Info;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 
 import java.io.Serializable;
 
@@ -16,7 +17,7 @@ public class UserInfo implements Serializable{
     private String usex;        //性别
     private String uheight;     //身高
     private String uweight;     //体重
-    private Bitmap uavatar;     //头像
+    private Drawable uavatar;     //头像
 
     public String getUsex() {
         return usex;
@@ -66,11 +67,11 @@ public class UserInfo implements Serializable{
         return uheight;
     }
 
-    public void setUavatar(Bitmap uavatar){
+    public void setUavatar(Drawable uavatar){
         this.uavatar=uavatar;
     }
 
-    public Bitmap getUavatar(){
+    public Drawable getUavatar(){
         return uavatar;
     }
 

@@ -55,7 +55,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         final ItemHolder itemHolder = (ItemHolder) holder;
         itemHolder.titleTextView.setText(mDatas.get(position).getPtitle());
         itemHolder.userNameTextView.setText(mDatas.get(position).getUname());
-
+        itemHolder.userAvatar.setImageDrawable(mDatas.get(position).getUavatar());
         //读取图片路径，用picasso显示图片
         String imageUrl=mDatas.get(position).getPimage();
         StringBuilder sb=new StringBuilder();

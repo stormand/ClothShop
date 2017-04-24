@@ -2,6 +2,7 @@ package com.example.clothshop.Activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.IdRes;
@@ -11,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -33,6 +35,7 @@ public class UserInfoActivity extends AppCompatActivity {
     private EditText mHeightEditView;
     private EditText mWeightEditView;
     private RadioGroup mSexRadioGroup;
+    private ImageView mAvatar;
     private String mSex=null;
     private SaveHandler handler;
 
@@ -54,8 +57,11 @@ public class UserInfoActivity extends AppCompatActivity {
         mHeightEditView= (EditText) findViewById(R.id.edit_height_view);
         mWeightEditView= (EditText) findViewById(R.id.edit_weight_view);
         mSexRadioGroup= (RadioGroup) findViewById(R.id.sex_radio_group);
-
+        mAvatar= (ImageView) findViewById(R.id.user_info_avatar);
         if (Model.MYUSER!=null){
+            //头像
+            Drawable draw1;
+            mAvatar.setImageDrawable(Model.MYUSER.getUavatar());
             if (!Model.MYUSER.getUname().equals("null")){
                 mNameEditView.setText(Model.MYUSER.getUname());
             }
@@ -82,9 +88,11 @@ public class UserInfoActivity extends AppCompatActivity {
                 switch (checkedId){
                     case R.id.radio_female:
                         mSex=Model.FEMALE_TEXT;
+                        mAvatar.setImageResource(R.drawable.avatar_female);
                         break;
                     case R.id.radio_male:
                         mSex=Model.MALE_TEXT;
+                        mAvatar.setImageResource(R.drawable.avatar_male);
                         break;
                     default:
                         break;
@@ -170,6 +178,17 @@ public class UserInfoActivity extends AppCompatActivity {
                     Model.MYUSER.setUweight(mWeightEditView.getText().toString());
                     Model.MYUSER.setUage(mAgeEditView.getText().toString());
                     Model.MYUSER.setUsex(mSex);
+                    Drawable draw1;
+                    if (Model.MYUSER.getUsex()==null || Model.MYUSER.getUsex().isEmpty()){
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }else if (Model.MYUSER.getUsex().equals("男")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_male);
+                    }else if (Model.MYUSER.getUsex().equals("女")){
+                        draw1 = getResources().getDrawable(R.drawable.avatar_female);
+                    }else {
+                        draw1 = getResources().getDrawable(R.drawable.avatar);
+                    }
+                    Model.MYUSER.setUavatar(draw1);
                     break;
                 case FAILURE:
                     Toast.makeText(UserInfoActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();

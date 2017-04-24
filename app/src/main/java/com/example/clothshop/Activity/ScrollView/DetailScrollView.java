@@ -17,6 +17,7 @@ import android.widget.ViewFlipper;
 
 public class DetailScrollView extends ScrollView {
     ViewPager mViewPager;
+    private OnScrollChangedListener mOnScrollListener;
 
     public void setmViewPager(ViewPager mViewPager) {
         this.mViewPager = mViewPager;
@@ -51,6 +52,22 @@ public class DetailScrollView extends ScrollView {
             return false;
         }
         return true;
+    }
+
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+        if (mOnScrollListener != null) {
+            mOnScrollListener.onScrollChanged(this, l, t, oldl, oldt);
+        }
+    }
+
+    public void setOnScrollChangedListener(OnScrollChangedListener listener) {
+        mOnScrollListener = listener;
+    }
+
+    public interface OnScrollChangedListener {
+        void onScrollChanged(ScrollView who, int l, int t, int oldl, int oldt);
     }
 
     @Override

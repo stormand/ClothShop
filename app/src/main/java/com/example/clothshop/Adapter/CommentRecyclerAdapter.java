@@ -54,6 +54,7 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter {
             itemHolder.mCommentContent.setText(mDatas.get(position).getCcontent());
             itemHolder.mCommentDateTime.setText(mDatas.get(position).getCtime());
             itemHolder.mCommentUname.setText(mDatas.get(position).getUname());
+            itemHolder.mCommentUavatar.setImageDrawable(mDatas.get(position).getUavatar());
 
         }else {
             final AddCommentHolder itemHolder = (AddCommentHolder) holder;
@@ -99,10 +100,12 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter {
         public TextView mAddCommentEditView;
         public Button mSendCommentButton;
 
+
         public AddCommentHolder(View itemView) {
             super(itemView);
             mAddCommentEditView = (TextView) itemView.findViewById(R.id.add_comment_edit_text);
             mSendCommentButton= (Button) itemView.findViewById(R.id.send_comment_button);
+
         }
     }
 }
