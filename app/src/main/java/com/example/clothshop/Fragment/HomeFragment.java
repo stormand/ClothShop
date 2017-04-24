@@ -259,6 +259,7 @@ public class HomeFragment extends Fragment {
         private int dataType;
         private int page;
         private String pid=null;
+        private String[] order={"new","hot","top"};
 
         GetDataThread(int type,int page,String pid){
             this.dataType=type;
@@ -278,6 +279,8 @@ public class HomeFragment extends Fragment {
             if (pid!=null){
                 params.put(Model.POST_ID_ATTR,pid);
             }
+            params.put("show_type","person");
+            params.put("show_order",order[page]);
             String result= HttpPostUtil.sendPostMessage(params,"utf-8",Model.HOME_PATH);
             getData(result);
         }
@@ -285,8 +288,6 @@ public class HomeFragment extends Fragment {
         private void getData(String result){
             List<PostInfo> paramsList=new ArrayList<PostInfo>();
             try {
-                Log.e("datatype",Integer.toString(dataType));
-
                 JSONObject jsonObject=new JSONObject(result);
                 JSONArray jsonArray=jsonObject.getJSONArray("post");
                 for (int i=0;i<jsonArray.length();i++){

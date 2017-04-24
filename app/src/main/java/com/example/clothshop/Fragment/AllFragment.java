@@ -264,6 +264,7 @@ public class AllFragment extends Fragment {
         private int dataType;
         private int page;
         private String pid=null;
+        private String[] order={"new","hot","top"};
 
         GetDataThread(int type,int page,String pid){
             this.dataType=type;
@@ -283,6 +284,8 @@ public class AllFragment extends Fragment {
             if (pid!=null){
                 params.put(Model.POST_ID_ATTR,pid);
             }
+            params.put("show_type","explore");
+            params.put("show_order",order[page]);
             String result= HttpPostUtil.sendPostMessage(params,"utf-8",Model.HOME_PATH);
             getData(result);
         }
