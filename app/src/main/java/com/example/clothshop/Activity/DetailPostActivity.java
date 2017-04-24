@@ -51,7 +51,7 @@ import java.util.Map;
 /**
  *
  */
-public class DetailPostActivity extends AppCompatActivity implements DetailScrollView.OnScrollChangedListener{
+public class DetailPostActivity extends AppCompatActivity{
 
     private ViewPager mImageViewPager;
     private DetailScrollView mDetailScrollView;
@@ -91,10 +91,12 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
     private SendCommentHandler mSendCommentHandler;
     private AddLCHandler mAddLCHandler;
     private Button linkButton;
+
     private ArrayList<String> thingName=new ArrayList<String>();//用于物品名称数组
     private ArrayList<String> linkName=new ArrayList<String>();//用于链接名称数组ng
     private String[] all;//一组的物品名称与url的对应。
     private String[] tem;
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,11 +115,12 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         });
     }
     public void test4() {
+
         thingName.clear();
         linkName.clear();
         int key=0;
-        if(mPostInfo.getLink()==null || mPostInfo.getLink().equals("")){
-            Toast.makeText(DetailPostActivity.this,"没有链接",Toast.LENGTH_LONG).show();
+        if(mPostInfo.getLink()==null){
+            Toast.makeText(DetailPostActivity.this,"没有链接",Toast.LENGTH_LONG);
         }
         else {
             all = mPostInfo.getLink().split("  ");
@@ -135,6 +138,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                     public void onClick(DialogInterface dialog, int which) {
                         // 第一个参数 dialog int which 那个条目
                         Intent fIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkName.get(which)));
+
                         fIntent.setClassName("com.android.browser","com.android.browser.BrowserActivity");
                         startActivity(fIntent);
                     }
@@ -179,6 +183,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         mImageViewPager.setAdapter(mImagePagerAdapter);
         mPointGroup=(ViewGroup)findViewById(R.id.detail_point_view_Group);
         mAuthorAvatar= (ImageView) findViewById(R.id.detail_post_author_avatar);
+
         mDetailTitle=(TextView) findViewById(R.id.detail_title);
         mDetailContent=(TextView) findViewById(R.id.detail_content);
         mDetailUname=(TextView) findViewById(R.id.detail_uname);
