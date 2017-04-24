@@ -1,8 +1,11 @@
 package com.example.clothshop.Activity;
-
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.SyncStateContract;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +33,7 @@ import com.example.clothshop.Adapter.CommentRecyclerAdapter;
 import com.example.clothshop.Adapter.ImagePagerAdapter;
 import com.example.clothshop.utils.HttpPostUtil;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,12 +41,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 /**
- *
  */
 public class DetailPostActivity extends AppCompatActivity{
-
     private ViewPager mImageViewPager;
     private DetailScrollView mDetailScrollView;
     private String[] imageList;
@@ -50,14 +51,9 @@ public class DetailPostActivity extends AppCompatActivity{
     private ImageView[] imageViews;
     private PostInfo mPostInfo;
     private ArrayList<CommentsInfo> mCommentsInfoList;
-
     private DetailRefreshLayout mSwipeRefreshLayout;
-
-    //包裹点点的LinearLayout
     private ViewGroup mPointGroup;
-
     private ImagePagerAdapter mImagePagerAdapter;
-
     private TextView mDetailTitle;
     private TextView mDetailContent;
     private TextView mDetailUname;
@@ -66,23 +62,23 @@ public class DetailPostActivity extends AppCompatActivity{
     private TextView mDetailUheight;
     private TextView mDetailDateTime;
     private TextView mDetailUsex;
-
     private Button mLoveButton;
     private Button mCollectionButton;
     private DatabaseUtil mDatabaseUtil;
-
     private RecyclerView mDetailCommentRecyclerView;
-
     private GetDataHandler handler;
     private GetDataThread mGetDataThread;
-
     private GetCommentHanlder mCommentHandler;
     private CommentRecyclerAdapter mCommentadapter;
     private LinearLayoutManager mLayoutManager;
     private SendCommentHandler mSendCommentHandler;
     private AddLCHandler mAddLCHandler;
-
-    @Override
+    private Button linkButton;
+    private String[] thingName;//用于物品名称数组
+    private String[] linkName;//用于链接名称数组
+    private String[] all;//一组的物品名称与url的对应。
+    private String[] tem;
+    private int k=0;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_post);
@@ -91,11 +87,42 @@ public class DetailPostActivity extends AppCompatActivity{
         initLayout();
         getCommentData();
         loveAndCollect();
+        linkButton=(Button)findViewById(R.id.link_button);
+        linkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                test4();
+            }
+        });
     }
+    public void test4() {
+        if(mPostInfo.getLink()==null){
+            Toast.makeText(DetailPostActivity.this,"没有链接",Toast.LENGTH_LONG);
+        }
+        else {
+            all = mPostInfo.getLink().split("  ");
+            for (int i = 0; i < all.length; i++) {
+                tem = all[i].split(" ");
+                thingName[k] = tem[0];
+                linkName[k] = tem[0];
+                k++;
+            }
 
+        //初始化一个界面
+        new AlertDialog.Builder(this).setTitle("衣物直达界面")
+                .setItems(thingName, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 第一个参数 dialog int which 那个条目
+                        Intent fIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkName[which]));
+                        fIntent.setClassName("com.android.browser","com.android.browser.BrowserActivity");
+                        startActivity(fIntent);
+                    }
+                }).show();
+        }
+    }
     private void initToolbar(){
-        //refreshlayout
-        mSwipeRefreshLayout= (DetailRefreshLayout)findViewById(R.id.detail_refresh_layout);
+        mSwipeRefreshLayout=(DetailRefreshLayout)findViewById(R.id.detail_refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -107,30 +134,23 @@ public class DetailPostActivity extends AppCompatActivity{
     }
 
     private void initLayout(){
-        //viewPager
-        mImageViewPager= (ViewPager) findViewById(R.id.detail_view_pager);
+        mImageViewPager=(ViewPager) findViewById(R.id.detail_view_pager);
         imageList=new String[]{};
         mImagePagerAdapter=new ImagePagerAdapter(imageList,DetailPostActivity.this);
         mImageViewPager.setAdapter(mImagePagerAdapter);
-        mPointGroup= (ViewGroup) findViewById(R.id.detail_point_view_Group);
-        //text
-        mDetailTitle= (TextView) findViewById(R.id.detail_title);
-        mDetailContent= (TextView) findViewById(R.id.detail_content);
-        mDetailUname= (TextView) findViewById(R.id.detail_uname);
-        mDetailUage= (TextView) findViewById(R.id.detail_uage);
-        mDetailUweight= (TextView) findViewById(R.id.detail_uweight);
-        mDetailUheight= (TextView) findViewById(R.id.detail_uheight);
-        mDetailDateTime= (TextView) findViewById(R.id.detail_date_time);
-        mDetailUsex=(TextView) findViewById(R.id.detail_usex);
-        //love&collection
-        mLoveButton= (Button) findViewById(R.id.love_button);
-        mCollectionButton= (Button) findViewById(R.id.collection_button);
-        //scrollView
-        mDetailScrollView= (DetailScrollView) findViewById(R.id.detail_scroll_view);
-        mDetailScrollView.setmViewPager(mImageViewPager);
-
-    }
-
+        mPointGroup=(ViewGroup)findViewById(R.id.detail_point_view_Group);
+        mDetailTitle=(TextView) findViewById(R.id.detail_title);
+        mDetailContent=(TextView) findViewById(R.id.detail_content);
+        mDetailUname=(TextView) findViewById(R.id.detail_uname);
+        mDetailUage=(TextView) findViewById(R.id.detail_uage);
+        mDetailUweight=(TextView) findViewById(R.id.detail_uweight);
+        mDetailUheight=(TextView) findViewById(R.id.detail_uheight);
+        mDetailDateTime=(TextView) findViewById(R.id.detail_date_time);
+        mDetailUsex=(TextView)findViewById(R.id.detail_usex);
+        mLoveButton=(Button) findViewById(R.id.love_button);
+        mCollectionButton=(Button) findViewById(R.id.collection_button);
+        mDetailScrollView=(DetailScrollView) findViewById(R.id.detail_scroll_view);
+        mDetailScrollView.setmViewPager(mImageViewPager);}
     private void setPostInfoView(){
         mDetailTitle.setText(mPostInfo.getPtitle());
         mDetailContent.setText(mPostInfo.getPcontent());
@@ -141,15 +161,13 @@ public class DetailPostActivity extends AppCompatActivity{
         mDetailUsex.setText(mPostInfo.getUsex());
         mDetailUname.setText(mPostInfo.getUname());
     }
-
     private void setViewPager(){
         imageList = mPostInfo.getPimage().split("@");
         mImagePagerAdapter=new ImagePagerAdapter(imageList,DetailPostActivity.this);
         mImageViewPager.setAdapter(mImagePagerAdapter);
         mImageViewPager.setOnPageChangeListener(new GuidePageChangeListener());
     }
-
-    /**
+    /*
      * 初始化导航小白点，根据getData的图片数目设置小白点数目
      */
     private void initPointer() {
@@ -159,7 +177,6 @@ public class DetailPostActivity extends AppCompatActivity{
         for (int i = 0; i < imageViews.length; i++) {
             imageView = new ImageView(this);
             //设置控件的宽高
-            //imageView.setLayoutParams(new ViewGroup.LayoutParams(20, 20));
             //设置控件的padding属性
             LinearLayout.LayoutParams lp= new LinearLayout.LayoutParams(20, 20);
             lp.leftMargin=10;
@@ -170,7 +187,7 @@ public class DetailPostActivity extends AppCompatActivity{
             if (i == 0) {
                 //表示当前图片
                 imageViews[i].setBackgroundResource(R.drawable.point_focused);
-                /**
+                /*
                  * 在java代码中动态生成ImageView的时候
                  * 要设置其BackgroundResource属性才有效
                  * 设置ImageResource属性无效
@@ -181,7 +198,6 @@ public class DetailPostActivity extends AppCompatActivity{
             mPointGroup.addView(imageViews[i]);
         }
     }
-
     private void setLCText(){
         if(mPostInfo.isMyLove()){
             mLoveButton.setText(mPostInfo.getLoveNum());
@@ -196,9 +212,7 @@ public class DetailPostActivity extends AppCompatActivity{
             mCollectionButton.setText(getString(R.string.collection));
         }
     }
-
-
-    /**
+    /*
      * 获取帖子（post）的数据
      */
     private void getData(){
@@ -214,8 +228,7 @@ public class DetailPostActivity extends AppCompatActivity{
         mSwipeRefreshLayout.setRefreshing(true);
         mGetDataThread.start();
     }
-
-    /**
+    /*
      * 获取评论数据
      */
     private void getCommentData(){
@@ -227,7 +240,6 @@ public class DetailPostActivity extends AppCompatActivity{
                 return false;
             }
         };
-
         //垂直方向
         mLayoutManager.setOrientation(OrientationHelper.VERTICAL);
         //mLayoutManager.setAutoMeasureEnabled(true);
@@ -237,16 +249,12 @@ public class DetailPostActivity extends AppCompatActivity{
         mCommentadapter=new CommentRecyclerAdapter(DetailPostActivity.this,mCommentsInfoList);
         mDetailCommentRecyclerView.setAdapter(mCommentadapter);
         if (mPostInfo.getPid().isEmpty()){
-            // TODO: 2017/4/6 other oeration? 
             return;
         }
         mCommentHandler=new GetCommentHanlder();
         GetCommentThread mGetCommentThread=new GetCommentThread();
-        // TODO: 2017/4/6 refresh?
         mGetCommentThread.start();
-
     }
-
     class GetCommentThread extends Thread{
         @Override
         public void run() {
@@ -263,7 +271,7 @@ public class DetailPostActivity extends AppCompatActivity{
                 JSONArray jsonArray=jsonObject.getJSONArray("comment");
                 mCommentsInfoList.clear();
                 for (int i=0;i<jsonArray.length();i++){
-                    JSONObject jo= (JSONObject) jsonArray.get(i);
+                    JSONObject jo= (JSONObject)jsonArray.get(i);
                     CommentsInfo commentsInfo=new CommentsInfo();
                     commentsInfo.setCcontent(jo.getString(Model.COMMENT_CONTENT));
                     commentsInfo.setCtime(jo.getString(Model.COMMENT_TIME));
@@ -271,7 +279,6 @@ public class DetailPostActivity extends AppCompatActivity{
                     mCommentsInfoList.add(commentsInfo);
                 }
                 showMessage(jsonObject.getString("mes"),GetCommentHanlder.SUCCESS);
-
             } catch (JSONException e) {
                 e.printStackTrace();
                 showMessage(e.toString(),GetCommentHanlder.FAILURE);
@@ -284,7 +291,6 @@ public class DetailPostActivity extends AppCompatActivity{
             msg.setTarget(mCommentHandler);
         }
     }
-
     public class GetCommentHanlder extends Handler{
         public static final int FAILURE=0x0002;
         public static final int SUCCESS=0x0001;
@@ -305,7 +311,6 @@ public class DetailPostActivity extends AppCompatActivity{
             }
         }
     }
-
     /**
      * 获取帖子数据
      */
@@ -329,6 +334,8 @@ public class DetailPostActivity extends AppCompatActivity{
                 mPostInfo.setUage(jsonObject.getString(Model.POST_UAGE_ATTR));
                 mPostInfo.setPid(jsonObject.getString(Model.POST_ID_ATTR));
                 mPostInfo.setLoveNum(jsonObject.getString(Model.POST_LOVE_NUM));
+                mPostInfo.setLink(jsonObject.getString(Model.POST_LINK_ATTR));
+
                 if (jsonObject.getString("status").equals("0")){
                     showMessage(jsonObject.getString("mes"), GetDataHandler.SUCCESS);
                 }else {
@@ -338,10 +345,7 @@ public class DetailPostActivity extends AppCompatActivity{
                 showMessage(e.toString(), GetDataHandler.FAILURE);
                 e.printStackTrace();
             }
-
-
         }
-
         /**
          * 获取帖子数据的thread
          * @param message
@@ -356,10 +360,8 @@ public class DetailPostActivity extends AppCompatActivity{
     }
 
     public class GetDataHandler extends Handler {
-
         public static final int FAILURE=0x0002;
         public static final int SUCCESS=0x0001;
-
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -381,7 +383,6 @@ public class DetailPostActivity extends AppCompatActivity{
             }
         }
     }
-
     /**
      * 评论
      * @param content
@@ -391,13 +392,11 @@ public class DetailPostActivity extends AppCompatActivity{
         SendCommentThread mSendCommentThread=new SendCommentThread(content);
         mSendCommentThread.start();
     }
-
     class SendCommentThread extends Thread{
         private String cContent;
         public SendCommentThread(String content) {
             this.cContent=content;
         }
-
         @Override
         public void run() {
             super.run();
@@ -413,7 +412,6 @@ public class DetailPostActivity extends AppCompatActivity{
                 }else {
                     showMessage(jsonObject.getString("mes"), SendCommentHandler.FAILURE);
                 }
-
             } catch (JSONException e) {
                 e.printStackTrace();
                 showMessage(e.toString(),GetCommentHanlder.FAILURE);
@@ -444,7 +442,6 @@ public class DetailPostActivity extends AppCompatActivity{
             }
         }
     }
-
     /**
      * LC:love & collection
      */
@@ -468,7 +465,6 @@ public class DetailPostActivity extends AppCompatActivity{
                 setLCText();
                 AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_LOVE);
                 mAddLCThread.start();
-
             }
         });
         mCollectionButton.setOnClickListener(new View.OnClickListener() {
@@ -493,7 +489,6 @@ public class DetailPostActivity extends AppCompatActivity{
         public AddLCThread(String attr) {
             this.attribute=attr;
         }
-
         @Override
         public void run() {
             super.run();
@@ -551,10 +546,7 @@ public class DetailPostActivity extends AppCompatActivity{
             }
         }
     }
-
     public class GuidePageChangeListener implements ViewPager.OnPageChangeListener {
-
-
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
         }
