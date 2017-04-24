@@ -1,10 +1,13 @@
 package com.example.clothshop.Activity;
-
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.SyncStateContract;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -36,6 +39,7 @@ import com.example.clothshop.Adapter.CommentRecyclerAdapter;
 import com.example.clothshop.Adapter.ImagePagerAdapter;
 import com.example.clothshop.utils.HttpPostUtil;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,7 +51,7 @@ import java.util.Map;
 /**
  *
  */
-public class DetailPostActivity extends AppCompatActivity implements DetailScrollView.OnScrollChangedListener{
+public class DetailPostActivity extends AppCompatActivity{
 
     private ViewPager mImageViewPager;
     private DetailScrollView mDetailScrollView;
@@ -61,7 +65,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
 
     //包裹点点的LinearLayout
     private ViewGroup mPointGroup;
-
     private ImagePagerAdapter mImagePagerAdapter;
 
     private ImageView mAuthorAvatar;
@@ -73,7 +76,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
     private TextView mDetailUheight;
     private TextView mDetailDateTime;
     private TextView mDetailUsex;
-
     private Button mLoveButton;
     private Button mCollectionButton;
     private DatabaseUtil mDatabaseUtil;
@@ -81,17 +83,19 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
     private Toolbar mToolBar;
 
     private RecyclerView mDetailCommentRecyclerView;
-
     private GetDataHandler handler;
     private GetDataThread mGetDataThread;
-
     private GetCommentHanlder mCommentHandler;
     private CommentRecyclerAdapter mCommentadapter;
     private LinearLayoutManager mLayoutManager;
     private SendCommentHandler mSendCommentHandler;
     private AddLCHandler mAddLCHandler;
-
-    @Override
+    private Button linkButton;
+    private String[] thingName;//用于物品名称数组
+    private String[] linkName;//用于链接名称数组
+    private String[] all;//一组的物品名称与url的对应。
+    private String[] tem;
+    private int k=0;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_post);
@@ -100,8 +104,40 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         initLayout();
         getCommentData();
         loveAndCollect();
+        linkButton=(Button)findViewById(R.id.link_button);
+        linkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                test4();
+            }
+        });
     }
+    public void test4() {
+        if(mPostInfo.getLink()==null){
+            Toast.makeText(DetailPostActivity.this,"没有链接",Toast.LENGTH_LONG);
+        }
+        else {
+            all = mPostInfo.getLink().split("  ");
+            for (int i = 0; i < all.length; i++) {
+                tem = all[i].split(" ");
+                thingName[k] = tem[0];
+                linkName[k] = tem[0];
+                k++;
+            }
 
+        //初始化一个界面
+        new AlertDialog.Builder(this).setTitle("衣物直达界面")
+                .setItems(thingName, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 第一个参数 dialog int which 那个条目
+                        Intent fIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkName[which]));
+                        fIntent.setClassName("com.android.browser","com.android.browser.BrowserActivity");
+                        startActivity(fIntent);
+                    }
+                }).show();
+        }
+    }
     private void initToolbar(){
         //refreshlayout
         mSwipeRefreshLayout= (DetailRefreshLayout)findViewById(R.id.detail_refresh_layout);
@@ -138,27 +174,19 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         imageArray =new String[]{};
         mImagePagerAdapter=new ImagePagerAdapter(imageArray,DetailPostActivity.this);
         mImageViewPager.setAdapter(mImagePagerAdapter);
-        mPointGroup= (ViewGroup) findViewById(R.id.detail_point_view_Group);
-        //text
-        mAuthorAvatar= (ImageView) findViewById(R.id.detail_post_author_avatar);
-        mDetailTitle= (TextView) findViewById(R.id.detail_title);
-        mDetailContent= (TextView) findViewById(R.id.detail_content);
-        mDetailUname= (TextView) findViewById(R.id.detail_uname);
-        mDetailUage= (TextView) findViewById(R.id.detail_uage);
-        mDetailUweight= (TextView) findViewById(R.id.detail_uweight);
-        mDetailUheight= (TextView) findViewById(R.id.detail_uheight);
-        mDetailDateTime= (TextView) findViewById(R.id.detail_date_time);
-        mDetailUsex=(TextView) findViewById(R.id.detail_usex);
-        //love&collection
-        mLoveButton= (Button) findViewById(R.id.love_button);
-        mCollectionButton= (Button) findViewById(R.id.collection_button);
-        //scrollView
-        mDetailScrollView= (DetailScrollView) findViewById(R.id.detail_scroll_view);
-        mDetailScrollView.setmViewPager(mImageViewPager);
-        mDetailScrollView.setOnScrollChangedListener(this);
-
-    }
-
+        mPointGroup=(ViewGroup)findViewById(R.id.detail_point_view_Group);
+        mDetailTitle=(TextView) findViewById(R.id.detail_title);
+        mDetailContent=(TextView) findViewById(R.id.detail_content);
+        mDetailUname=(TextView) findViewById(R.id.detail_uname);
+        mDetailUage=(TextView) findViewById(R.id.detail_uage);
+        mDetailUweight=(TextView) findViewById(R.id.detail_uweight);
+        mDetailUheight=(TextView) findViewById(R.id.detail_uheight);
+        mDetailDateTime=(TextView) findViewById(R.id.detail_date_time);
+        mDetailUsex=(TextView)findViewById(R.id.detail_usex);
+        mLoveButton=(Button) findViewById(R.id.love_button);
+        mCollectionButton=(Button) findViewById(R.id.collection_button);
+        mDetailScrollView=(DetailScrollView) findViewById(R.id.detail_scroll_view);
+        mDetailScrollView.setmViewPager(mImageViewPager);}
     private void setPostInfoView(){
         mDetailTitle.setText(mPostInfo.getPtitle());
         mDetailContent.setText(mPostInfo.getPcontent());
@@ -169,7 +197,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         mDetailUsex.setText(mPostInfo.getUsex());
         mDetailUname.setText(mPostInfo.getUname());
     }
-
     private void setViewPager(){
         imageArray = mPostInfo.getPimage().split("@");
         mImagePagerAdapter=new ImagePagerAdapter(imageArray,DetailPostActivity.this);
@@ -209,7 +236,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
             mPointGroup.addView(imageViews[i]);
         }
     }
-
     private void setLCText(){
         if(mPostInfo.isMyLove()){
             mLoveButton.setText(mPostInfo.getLoveNum());
@@ -224,9 +250,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
             mCollectionButton.setText(getString(R.string.collection));
         }
     }
-
-
-    /**
+    /*
      * 获取帖子（post）的数据
      */
     private void getData(){
@@ -302,7 +326,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                 JSONArray jsonArray=jsonObject.getJSONArray("comment");
                 mCommentsInfoList.clear();
                 for (int i=0;i<jsonArray.length();i++){
-                    JSONObject jo= (JSONObject) jsonArray.get(i);
+                    JSONObject jo= (JSONObject)jsonArray.get(i);
                     CommentsInfo commentsInfo=new CommentsInfo();
                     commentsInfo.setCcontent(jo.getString(Model.COMMENT_CONTENT));
                     commentsInfo.setCtime(jo.getString(Model.COMMENT_TIME));
@@ -321,7 +345,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                     mCommentsInfoList.add(commentsInfo);
                 }
                 showMessage(jsonObject.getString("mes"),GetCommentHanlder.SUCCESS);
-
             } catch (JSONException e) {
                 e.printStackTrace();
                 showMessage(e.toString(),GetCommentHanlder.FAILURE);
@@ -368,29 +391,30 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
             String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.DETAIL_POST_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
+                mPostInfo.setPimage(jsonObject.getString(Model.POST_IMAGE_ATTR));
+                mPostInfo.setPtitle(jsonObject.getString(Model.POST_TITLE_ATTR));
+                mPostInfo.setUname(jsonObject.getString(Model.POST_UNAME_ATTR));
+                mPostInfo.setPdaytime(jsonObject.getString(Model.POST_DAY_TIME_ATTR));
+                mPostInfo.setPcontent(jsonObject.getString(Model.POST_CONTENT_ATTR));
+                mPostInfo.setUheight(jsonObject.getString(Model.POST_UHEIGHT_ATTR));
+                mPostInfo.setUweight(jsonObject.getString(Model.POST_UWEIGHT_ATTR));
+                mPostInfo.setUsex(jsonObject.getString(Model.POST_USEX_ATTR));
+                mPostInfo.setUage(jsonObject.getString(Model.POST_UAGE_ATTR));
+                mPostInfo.setPid(jsonObject.getString(Model.POST_ID_ATTR));
+                mPostInfo.setLoveNum(jsonObject.getString(Model.POST_LOVE_NUM));
+                mPostInfo.setLink(jsonObject.getString(Model.POST_LINK_ATTR));
+                Drawable draw1;
+                if (mPostInfo.getUsex()==null || mPostInfo.getUsex().isEmpty()){
+                    draw1 = getResources().getDrawable(R.drawable.avatar);
+                }else if (mPostInfo.getUsex().equals("男")){
+                    draw1 = getResources().getDrawable(R.drawable.avatar_male);
+                }else if (mPostInfo.getUsex().equals("女")){
+                    draw1 = getResources().getDrawable(R.drawable.avatar_female);
+                }else {
+                    draw1 = getResources().getDrawable(R.drawable.avatar);
+                }
+                mPostInfo.setUavatar(draw1);
                 if (jsonObject.getString("status").equals("0")){
-                    mPostInfo.setPimage(jsonObject.getString(Model.POST_IMAGE_ATTR));
-                    mPostInfo.setPtitle(jsonObject.getString(Model.POST_TITLE_ATTR));
-                    mPostInfo.setUname(jsonObject.getString(Model.POST_UNAME_ATTR));
-                    mPostInfo.setPdaytime(jsonObject.getString(Model.POST_DAY_TIME_ATTR));
-                    mPostInfo.setPcontent(jsonObject.getString(Model.POST_CONTENT_ATTR));
-                    mPostInfo.setUheight(jsonObject.getString(Model.POST_UHEIGHT_ATTR));
-                    mPostInfo.setUweight(jsonObject.getString(Model.POST_UWEIGHT_ATTR));
-                    mPostInfo.setUsex(jsonObject.getString(Model.POST_USEX_ATTR));
-                    mPostInfo.setUage(jsonObject.getString(Model.POST_UAGE_ATTR));
-                    mPostInfo.setPid(jsonObject.getString(Model.POST_ID_ATTR));
-                    mPostInfo.setLoveNum(jsonObject.getString(Model.POST_LOVE_NUM));
-                    Drawable draw1;
-                    if (mPostInfo.getUsex()==null || mPostInfo.getUsex().isEmpty()){
-                        draw1 = getResources().getDrawable(R.drawable.avatar);
-                    }else if (mPostInfo.getUsex().equals("男")){
-                        draw1 = getResources().getDrawable(R.drawable.avatar_male);
-                    }else if (mPostInfo.getUsex().equals("女")){
-                        draw1 = getResources().getDrawable(R.drawable.avatar_female);
-                    }else {
-                        draw1 = getResources().getDrawable(R.drawable.avatar);
-                    }
-                    mPostInfo.setUavatar(draw1);
                     showMessage(jsonObject.getString("mes"), GetDataHandler.SUCCESS);
                 }else {
                     showMessage(jsonObject.getString("mes"), GetDataHandler.FAILURE);
@@ -399,10 +423,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                 showMessage(e.toString(), GetDataHandler.FAILURE);
                 e.printStackTrace();
             }
-
-
         }
-
         /**
          * 获取帖子数据的thread
          * @param message
@@ -417,10 +438,8 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
     }
 
     public class GetDataHandler extends Handler {
-
         public static final int FAILURE=0x0002;
         public static final int SUCCESS=0x0001;
-
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -443,7 +462,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
             }
         }
     }
-
     /**
      * 评论
      * @param content
@@ -453,13 +471,11 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         SendCommentThread mSendCommentThread=new SendCommentThread(content);
         mSendCommentThread.start();
     }
-
     class SendCommentThread extends Thread{
         private String cContent;
         public SendCommentThread(String content) {
             this.cContent=content;
         }
-
         @Override
         public void run() {
             super.run();
@@ -475,7 +491,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                 }else {
                     showMessage(jsonObject.getString("mes"), SendCommentHandler.FAILURE);
                 }
-
             } catch (JSONException e) {
                 e.printStackTrace();
                 showMessage(e.toString(),GetCommentHanlder.FAILURE);
@@ -506,7 +521,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
             }
         }
     }
-
     /**
      * LC:love & collection
      */
@@ -530,7 +544,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                 setLCText();
                 AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_LOVE);
                 mAddLCThread.start();
-
             }
         });
         mCollectionButton.setOnClickListener(new View.OnClickListener() {
@@ -555,7 +568,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         public AddLCThread(String attr) {
             this.attribute=attr;
         }
-
         @Override
         public void run() {
             super.run();
@@ -615,8 +627,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
     }
 
     public class GuidePageChangeListener implements ViewPager.OnPageChangeListener {
-
-
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
         }

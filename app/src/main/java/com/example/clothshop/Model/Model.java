@@ -1,13 +1,10 @@
 package com.example.clothshop.Model;
 
 import com.example.clothshop.Info.UserInfo;
-
 /**
  * Created by 一凡 on 2017/3/25.
  */
-
 public class Model {
-
     //http
     public static final String IMAGE_SAVE_PATH = "http://122.112.247.7:8080/Order/";
     public static final String PATH = "http://122.112.247.7:8080/Order/Main/";

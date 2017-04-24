@@ -18,9 +18,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    dexOptions {
-        incremental false
-    }
+
     compileOptions {
         sourceCompatibility 7
         targetCompatibility 7
