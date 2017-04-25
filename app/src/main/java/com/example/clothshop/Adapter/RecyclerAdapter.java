@@ -1,13 +1,14 @@
 package com.example.clothshop.Adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.clothshop.Activity.DetailPostActivity;
@@ -16,6 +17,7 @@ import com.example.clothshop.Info.PostInfo;
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 import com.example.clothshop.utils.HttpPostUtil;
+import com.sackcentury.shinebuttonlib.ShineButton;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
@@ -46,7 +48,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.item_recycler_refresh,parent,false);
+                    R.layout.item_home_recycler,parent,false);
         return new ItemHolder(view);
     }
 
@@ -78,43 +80,86 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         //点赞和收藏
         mDatas.get(position).setMyCollection(mDatabaseUtil.isCollected(mDatas.get(position).getPid()));
         mDatas.get(position).setMyLove(mDatabaseUtil.isLoved(mDatas.get(position).getPid()));
-        itemHolder.loveButton.setText(mDatas.get(position).getLoveNum());
+
+        if (mDatas.get(position).isMyLove()){
+            itemHolder.loveButton.setChecked(true);
+            itemHolder.loveTextView.setText("已赞 "+mDatas.get(position).getLoveNum());
+        }else {
+            itemHolder.loveButton.setChecked(false);
+            itemHolder.loveTextView.setText("赞 "+mDatas.get(position).getLoveNum());
+        }
+        if (mDatas.get(position).isMyCollection()){
+            itemHolder.collectionButton.setChecked(true);
+            itemHolder.collectTextView.setText("已收藏");
+        }else {
+            itemHolder.collectionButton.setChecked(false);
+            itemHolder.collectTextView.setText("收藏");
+        }
+        //点击监听
+        itemHolder.loveLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loveClick(position,itemHolder);
+            }
+        });
+        itemHolder.collectLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                collectionClick(position,itemHolder);
+            }
+        });
+        //shineButton 的监听 不监听会出现点击button，只有动画效果
         itemHolder.loveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int loveNum=Integer.valueOf(mDatas.get(position).getLoveNum()).intValue();
-                if (mDatas.get(position).isMyLove() && loveNum>0){
-                    mDatas.get(position).setLoveNum(Integer.toString(loveNum-1));
-                    mDatas.get(position).setMyLove(!mDatas.get(position).isMyLove());
-                    mDatabaseUtil.deleteFav(mDatas.get(position).getPid(), DatabaseUtil.ATTR_LOVE);
-                }else if(!mDatas.get(position).isMyLove()){
-                    mDatas.get(position).setLoveNum(Integer.toString(loveNum+1));
-                    mDatas.get(position).setMyLove(!mDatas.get(position).isMyLove());
-                    mDatabaseUtil.insertFav(mDatas.get(position), DatabaseUtil.ATTR_LOVE);
-                }
-                itemHolder.loveButton.setText(mDatas.get(position).getLoveNum());
-                AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_LOVE,mDatas.get(position));
-                mAddLCThread.start();
+                loveClick(position,itemHolder);
             }
         });
-        itemHolder.collectionButton.setText(mDatas.get(position).isMyCollection()?mContext.getString(R.string.collected):mContext.getString(R.string.collection));
         itemHolder.collectionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mDatas.get(position).isMyCollection()){
-                    mDatas.get(position).setMyCollection(false);
-                    mDatabaseUtil.deleteFav(mDatas.get(position).getPid(),DatabaseUtil.ATTR_COLLECTION);
-                }else if(!mDatas.get(position).isMyCollection()){
-                    mDatas.get(position).setMyCollection(true);
-                    mDatabaseUtil.insertFav(mDatas.get(position), DatabaseUtil.ATTR_COLLECTION);
-                }
-                itemHolder.collectionButton.setText(mDatas.get(position).isMyCollection()?mContext.getString(R.string.collected):mContext.getString(R.string.collection));
-                AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_COLLECTION,mDatas.get(position));
-                mAddLCThread.start();
+                collectionClick(position,itemHolder);
             }
         });
 
     }
+
+    private void loveClick(int position,ItemHolder itemHolder){
+        int loveNum=Integer.valueOf(mDatas.get(position).getLoveNum()).intValue();
+        if (mDatas.get(position).isMyLove() && loveNum>0){
+            mDatas.get(position).setLoveNum(Integer.toString(loveNum-1));
+            mDatas.get(position).setMyLove(!mDatas.get(position).isMyLove());
+            itemHolder.loveButton.setChecked(false,true);
+            itemHolder.loveTextView.setText("赞 "+mDatas.get(position).getLoveNum());
+            mDatabaseUtil.deleteFav(mDatas.get(position).getPid(), DatabaseUtil.ATTR_LOVE);
+        }else if(!mDatas.get(position).isMyLove()){
+            mDatas.get(position).setLoveNum(Integer.toString(loveNum+1));
+            mDatas.get(position).setMyLove(!mDatas.get(position).isMyLove());
+            mDatabaseUtil.insertFav(mDatas.get(position), DatabaseUtil.ATTR_LOVE);
+            itemHolder.loveButton.setChecked(true,true);
+            itemHolder.loveTextView.setText("已赞 "+mDatas.get(position).getLoveNum());
+        }
+        AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_LOVE,mDatas.get(position));
+        mAddLCThread.start();
+    }
+
+    private void collectionClick(int position,ItemHolder itemHolder){
+        if (mDatas.get(position).isMyCollection()){
+            mDatas.get(position).setMyCollection(false);
+            itemHolder.collectionButton.setChecked(false,true);
+            itemHolder.collectTextView.setText("收藏");
+            mDatabaseUtil.deleteFav(mDatas.get(position).getPid(),DatabaseUtil.ATTR_COLLECTION);
+        }else if(!mDatas.get(position).isMyCollection()){
+            mDatas.get(position).setMyCollection(true);
+            itemHolder.collectionButton.setChecked(true,true);
+            itemHolder.collectTextView.setText("已收藏");
+            mDatabaseUtil.insertFav(mDatas.get(position), DatabaseUtil.ATTR_COLLECTION);
+        }
+        //itemHolder.collectionButton.setText(mDatas.get(position).isMyCollection()?mContext.getString(R.string.collected):mContext.getString(R.string.collection));
+        AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_COLLECTION,mDatas.get(position));
+        mAddLCThread.start();
+    }
+
     @Override
     public int getItemCount() {
         return mDatas.size();
@@ -125,16 +170,26 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         public ImageView imageView;
         public TextView userNameTextView;
         public ImageView userAvatar;
-        public Button loveButton;
-        public Button collectionButton;
+        public LinearLayout loveLayout;
+        public LinearLayout collectLayout;
+        public ShineButton loveButton;
+        public ShineButton collectionButton;
+        public TextView loveTextView;
+        public TextView collectTextView;
         public ItemHolder(View itemView) {
             super(itemView);
             imageView= (ImageView) itemView.findViewById(R.id.home_list_image_item);
             titleTextView = (TextView) itemView.findViewById(R.id.home_list_title_item);
             userNameTextView= (TextView) itemView.findViewById(R.id.home_list_user_name);
             userAvatar= (ImageView) itemView.findViewById(R.id.home_list_avatar);
-            loveButton= (Button) itemView.findViewById(R.id.home_list_love_button);
-            collectionButton= (Button) itemView.findViewById(R.id.home_list_collect_button);
+            loveButton= (ShineButton) itemView.findViewById(R.id.home_list_love_button);
+            loveButton.init((Activity) mContext);
+            collectionButton= (ShineButton) itemView.findViewById(R.id.home_list_collect_button);
+            collectionButton.init((Activity) mContext);
+            loveTextView= (TextView) itemView.findViewById(R.id.home_list_love_text_view);
+            collectTextView= (TextView) itemView.findViewById(R.id.home_list_collect_text_view);
+            loveLayout= (LinearLayout) itemView.findViewById(R.id.home_list_love_layout);
+            collectLayout= (LinearLayout) itemView.findViewById(R.id.home_list_collect_layout);
         }
     }
 

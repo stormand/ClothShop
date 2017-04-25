@@ -1,15 +1,10 @@
-package com.example.clothshop.Activity.ScrollView;
+package com.example.clothshop.Activity.Refactor;
 
 import android.content.Context;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewConfiguration;
-
-import com.example.clothshop.Activity.DetailPostActivity;
 
 /**
  * Created by 一凡 on 2017/4/5.

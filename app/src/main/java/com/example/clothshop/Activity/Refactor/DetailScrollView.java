@@ -1,15 +1,11 @@
-package com.example.clothshop.Activity.ScrollView;
+package com.example.clothshop.Activity.Refactor;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
-import android.support.annotation.Size;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
-import android.widget.ViewFlipper;
 
 /**
  * Created by 一凡 on 2017/4/3.

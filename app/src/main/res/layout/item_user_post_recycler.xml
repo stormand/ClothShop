@@ -36,11 +36,13 @@
 
         <Button
             android:id="@+id/user_post_delete_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Button"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:layout_marginRight="8dp"
-            app:layout_constraintRight_toRightOf="parent" />
+            android:shadowColor="@color/alter_album_name_text_color"
+            android:background="@drawable/delete"
+            app:layout_constraintRight_toRightOf="parent"
+            tools:layout_editor_absoluteX="339dp" />
 
         <TextView
             android:id="@+id/user_post_time"

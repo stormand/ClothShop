@@ -36,50 +36,25 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType==TYPE_FOOTER){
-            View view = LayoutInflater.from(mContext).inflate(R.layout.item_comment_recycler_add,parent,false);
-            return new CommentRecyclerAdapter.AddCommentHolder(view);
-        }else {
             View view = LayoutInflater.from(mContext).inflate(
                     R.layout.item_comment_recycler,parent,false);
             return new CommentRecyclerAdapter.ItemHolder(view);
-        }
 
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (position<getItemCount()-1){
             ItemHolder itemHolder = (ItemHolder) holder;
             itemHolder.mCommentContent.setText(mDatas.get(position).getCcontent());
             itemHolder.mCommentDateTime.setText(mDatas.get(position).getCtime());
             itemHolder.mCommentUname.setText(mDatas.get(position).getUname());
             itemHolder.mCommentUavatar.setImageDrawable(mDatas.get(position).getUavatar());
-
-        }else {
-            final AddCommentHolder itemHolder = (AddCommentHolder) holder;
-            itemHolder.mSendCommentButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mContext.sendComment(itemHolder.mAddCommentEditView.getText().toString());
-                }
-            });
-        }
-
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        if (position==getItemCount()-1){
-            return TYPE_FOOTER;
-        } else {
-            return TYPE_ITEM;
-        }
-    }
 
     @Override
     public int getItemCount() {
-            return mDatas.size()+1;
+            return mDatas.size();
     }
 
     class ItemHolder extends RecyclerView.ViewHolder {
@@ -94,18 +69,6 @@ public class CommentRecyclerAdapter extends RecyclerView.Adapter {
             mCommentUname = (TextView) itemView.findViewById(R.id.comment_uname);
             mCommentDateTime= (TextView) itemView.findViewById(R.id.comment_date_time);
             mCommentContent= (TextView) itemView.findViewById(R.id.comment_content);
-        }
-    }
-    class AddCommentHolder extends RecyclerView.ViewHolder {
-        public TextView mAddCommentEditView;
-        public Button mSendCommentButton;
-
-
-        public AddCommentHolder(View itemView) {
-            super(itemView);
-            mAddCommentEditView = (TextView) itemView.findViewById(R.id.add_comment_edit_text);
-            mSendCommentButton= (Button) itemView.findViewById(R.id.send_comment_button);
-
         }
     }
 }

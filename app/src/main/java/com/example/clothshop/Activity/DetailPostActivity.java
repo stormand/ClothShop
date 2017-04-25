@@ -4,32 +4,31 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.SyncStateContract;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.clothshop.Activity.ScrollView.DetailRefreshLayout;
-import com.example.clothshop.Activity.ScrollView.DetailScrollView;
+import com.example.clothshop.Activity.Refactor.DetailRefreshLayout;
+import com.example.clothshop.Activity.Refactor.DetailScrollView;
+import com.example.clothshop.Activity.Refactor.FullyLinearLayoutManager;
+import com.example.clothshop.Adapter.RecyclerAdapter;
 import com.example.clothshop.DB.DatabaseUtil;
 import com.example.clothshop.Info.CommentsInfo;
 import com.example.clothshop.Info.PostInfo;
@@ -38,8 +37,8 @@ import com.example.clothshop.R;
 import com.example.clothshop.Adapter.CommentRecyclerAdapter;
 import com.example.clothshop.Adapter.ImagePagerAdapter;
 import com.example.clothshop.utils.HttpPostUtil;
+import com.sackcentury.shinebuttonlib.ShineButton;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,8 +75,14 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
     private TextView mDetailUheight;
     private TextView mDetailDateTime;
     private TextView mDetailUsex;
-    private Button mLoveButton;
-    private Button mCollectionButton;
+    private ShineButton mLoveButton;
+    private ShineButton mCollectionButton;
+    private TextView mLoveTextView;
+    private TextView mCollectTextView;
+    private LinearLayout mLoveLayout;
+    private LinearLayout mCollectLayout;
+    private EditText mCommentEditText;
+    private Button mCommentSendButton;
     private DatabaseUtil mDatabaseUtil;
 
     private Toolbar mToolBar;
@@ -87,7 +92,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
     private GetDataThread mGetDataThread;
     private GetCommentHanlder mCommentHandler;
     private CommentRecyclerAdapter mCommentadapter;
-    private LinearLayoutManager mLayoutManager;
+    private FullyLinearLayoutManager mLayoutManager;
     private SendCommentHandler mSendCommentHandler;
     private AddLCHandler mAddLCHandler;
     private Button linkButton;
@@ -106,6 +111,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         initLayout();
         getCommentData();
         loveAndCollect();
+        initSendComment();
         linkButton=(Button)findViewById(R.id.link_button);
         linkButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,6 +130,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         }
         else {
             all = mPostInfo.getLink().split("  ");
+            Log.e("link",mPostInfo.getLink());
             for (int i = 0; i < all.length; i++) {
                 tem = all[i].split(" ");
                 thingName.add(tem[0]);
@@ -192,8 +199,12 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         mDetailUheight=(TextView) findViewById(R.id.detail_uheight);
         mDetailDateTime=(TextView) findViewById(R.id.detail_date_time);
         mDetailUsex=(TextView)findViewById(R.id.detail_usex);
-        mLoveButton=(Button) findViewById(R.id.love_button);
-        mCollectionButton=(Button) findViewById(R.id.collection_button);
+        mLoveButton=(ShineButton) findViewById(R.id.love_button);
+        mCollectionButton=(ShineButton) findViewById(R.id.collect_button);
+        mLoveTextView= (TextView) findViewById(R.id.love_text_view);
+        mCollectTextView= (TextView) findViewById(R.id.collect_text_view);
+        mLoveLayout= (LinearLayout) findViewById(R.id.love_layout);
+        mCollectLayout= (LinearLayout) findViewById(R.id.collect_layout);
         mDetailScrollView=(DetailScrollView) findViewById(R.id.detail_scroll_view);
         mDetailScrollView.setmViewPager(mImageViewPager);}
     private void setPostInfoView(){
@@ -245,19 +256,83 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
             mPointGroup.addView(imageViews[i]);
         }
     }
-    private void setLCText(){
-        if(mPostInfo.isMyLove()){
-            mLoveButton.setText(mPostInfo.getLoveNum());
-            //mLoveButton.setTextColor(101010); // TODO: 2017/4/11 change the color
-        }else{
-            mLoveButton.setText(mPostInfo.getLoveNum());
-            //mLoveButton.setTextColor(0);
+    private void setLoveAndCollection(){
+        if (mPostInfo.isMyLove()){
+            mLoveButton.setChecked(true);
+            mLoveTextView.setText("已赞 "+mPostInfo.getLoveNum());
+        }else {
+            mLoveButton.setChecked(false);
+            mLoveTextView.setText("赞 "+mPostInfo.getLoveNum());
         }
         if (mPostInfo.isMyCollection()){
-            mCollectionButton.setText(getString(R.string.collected));
+            mCollectionButton.setChecked(true);
+            mCollectTextView.setText("已收藏");
         }else {
-            mCollectionButton.setText(getString(R.string.collection));
+            mCollectionButton.setChecked(false);
+            mCollectTextView.setText("收藏");
         }
+        //点击监听
+        mLoveLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loveClick();
+            }
+        });
+        mCollectLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                collectionClick();
+            }
+        });
+        //shineButton 的监听 不监听会出现点击button，只有动画效果
+        mLoveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loveClick();
+            }
+        });
+        mCollectionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                collectionClick();
+            }
+        });
+    }
+
+    private void loveClick(){
+        int loveNum=Integer.valueOf(mPostInfo.getLoveNum()).intValue();
+        if (mPostInfo.isMyLove() && loveNum>0){
+            mPostInfo.setLoveNum(Integer.toString(loveNum-1));
+            mPostInfo.setMyLove(!mPostInfo.isMyLove());
+            mLoveButton.setChecked(false,true);
+            mLoveTextView.setText("赞 "+mPostInfo.getLoveNum());
+            mDatabaseUtil.deleteFav(mPostInfo.getPid(), DatabaseUtil.ATTR_LOVE);
+        }else if(!mPostInfo.isMyLove()){
+            mPostInfo.setLoveNum(Integer.toString(loveNum+1));
+            mPostInfo.setMyLove(!mPostInfo.isMyLove());
+            mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_LOVE);
+            mLoveButton.setChecked(true,true);
+            mLoveTextView.setText("已赞 "+mPostInfo.getLoveNum());
+        }
+        AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_LOVE);
+        mAddLCThread.start();
+    }
+
+    private void collectionClick(){
+        if (mPostInfo.isMyCollection()){
+            mPostInfo.setMyCollection(false);
+            mCollectionButton.setChecked(false,true);
+            mCollectTextView.setText("收藏");
+            mDatabaseUtil.deleteFav(mPostInfo.getPid(),DatabaseUtil.ATTR_COLLECTION);
+        }else if(!mPostInfo.isMyCollection()){
+            mPostInfo.setMyCollection(true);
+            mCollectionButton.setChecked(true,true);
+            mCollectTextView.setText("已收藏");
+            mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_COLLECTION);
+        }
+        //itemHolder.collectionButton.setText(mDatas.get(position).isMyCollection()?mContext.getString(R.string.collected):mContext.getString(R.string.collection));
+        AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_COLLECTION);
+        mAddLCThread.start();
     }
     /*
      * 获取帖子（post）的数据
@@ -280,15 +355,10 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
      * 获取评论数据
      */
     private void getCommentData(){
+
         mDetailCommentRecyclerView= (RecyclerView) findViewById(R.id.detail_comment_recycler_view);
         //创建线性布局
-        mLayoutManager = new LinearLayoutManager(DetailPostActivity.this){
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
-
+        mLayoutManager = new FullyLinearLayoutManager(DetailPostActivity.this);
         //垂直方向
         mLayoutManager.setOrientation(OrientationHelper.VERTICAL);
         //mLayoutManager.setAutoMeasureEnabled(true);
@@ -328,7 +398,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
             String result=HttpPostUtil.sendPostMessage(params,"utf-8",Model.GET_COMMENT_PATH);
             try {
                 JSONObject jsonObject=new JSONObject(result);
-                if (jsonObject.getString("status").equals("0")){
+                if (jsonObject.getString("status").equals("1")){
                     showMessage(jsonObject.getString("mes"), GetCommentHanlder.FAILURE);
                     return;
                 }
@@ -352,7 +422,9 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                     }
                     commentsInfo.setUavatar(draw1);
                     mCommentsInfoList.add(commentsInfo);
+
                 }
+
                 showMessage(jsonObject.getString("mes"),GetCommentHanlder.SUCCESS);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -375,12 +447,13 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
             super.handleMessage(msg);
             switch (msg.what){
                 case SUCCESS:
-                    CommentRecyclerAdapter adapter=new CommentRecyclerAdapter(DetailPostActivity.this,mCommentsInfoList);
-                    mDetailCommentRecyclerView.setAdapter(adapter);
+                    mCommentadapter.notifyItemInserted(mCommentsInfoList.size()-1);
+                    LinearLayout.LayoutParams lp= (LinearLayout.LayoutParams) mDetailCommentRecyclerView.getLayoutParams();
+                    //lp.height= RecyclerView.LayoutParams.WRAP_CONTENT;
+                    //mDetailCommentRecyclerView.setLayoutParams(lp);
                     break;
                 case FAILURE:
-                    CommentRecyclerAdapter adapter1=new CommentRecyclerAdapter(DetailPostActivity.this,mCommentsInfoList);
-                    mDetailCommentRecyclerView.setAdapter(adapter1);
+                    mCommentadapter.notifyDataSetChanged();
                     break;
                 default:
                     break;
@@ -458,7 +531,12 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                     setPostInfoView();
                     setViewPager();
                     initPointer(); //获取数据后初始化小白点
-                    mLoveButton.setText(mPostInfo.getLoveNum());
+                    if (mPostInfo.isMyLove()){
+                        mLoveTextView.setText("已赞 "+mPostInfo.getLoveNum());
+                    }else {
+                        mLoveTextView.setText("赞 "+mPostInfo.getLoveNum());
+                    }
+
                     mAuthorAvatar.setImageDrawable(mPostInfo.getUavatar());
                     break;
                 case FAILURE:
@@ -472,13 +550,19 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         }
     }
     /**
-     * 评论
-     * @param content
+     * 发送评论
      */
-    public void sendComment(String content){
+    public void initSendComment(){
         mSendCommentHandler = new SendCommentHandler();
-        SendCommentThread mSendCommentThread=new SendCommentThread(content);
-        mSendCommentThread.start();
+        mCommentEditText= (EditText) findViewById(R.id.comment_edit_text);
+        mCommentSendButton= (Button) findViewById(R.id.send_comment_button);
+        mCommentSendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SendCommentThread sendCommentThread=new SendCommentThread(mCommentEditText.getText().toString());
+                sendCommentThread.start();
+            }
+        });
     }
     class SendCommentThread extends Thread{
         private String cContent;
@@ -534,7 +618,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
      * LC:love & collection
      */
     private void loveAndCollect(){
-        setLCText();
+        setLoveAndCollection();
         mAddLCHandler=new AddLCHandler();
         mLoveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -550,7 +634,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                     mPostInfo.setMyLove(!mPostInfo.isMyLove());
                     mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_LOVE);
                 }
-                setLCText();
+                setLoveAndCollection();
                 AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_LOVE);
                 mAddLCThread.start();
             }
@@ -565,7 +649,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                     mPostInfo.setMyCollection(!mPostInfo.isMyCollection());
                     mDatabaseUtil.insertFav(mPostInfo, DatabaseUtil.ATTR_COLLECTION);
                 }
-                setLCText();
+                setLoveAndCollection();
                 AddLCThread mAddLCThread=new AddLCThread(DatabaseUtil.ATTR_COLLECTION);
                 mAddLCThread.start();
             }

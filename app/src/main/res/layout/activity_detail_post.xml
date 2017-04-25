@@ -24,19 +24,19 @@
             />
     </android.support.design.widget.AppBarLayout>
 
-    <com.example.clothshop.Activity.ScrollView.DetailRefreshLayout
+    <com.example.clothshop.Activity.Refactor.DetailRefreshLayout
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:id="@+id/detail_refresh_layout"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.example.clothshop.Activity.ScrollView.DetailScrollView
+        <com.example.clothshop.Activity.Refactor.DetailScrollView
             android:id="@+id/detail_scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="wrap_content"
             >
 
             <LinearLayout
@@ -127,18 +127,80 @@ e
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
-                    <Button
-                        android:id="@+id/collection_button"
+                    <LinearLayout
+                        android:id="@+id/collect_layout"
+                        android:clickable="true"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/collection"
-                        android:layout_weight="1"/>
-                    <Button
-                        android:id="@+id/love_button"
+                        android:layout_height="29dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintRight_toLeftOf="@+id/love_layout"
+                        android:layout_marginRight="8dp"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginBottom="8dp">
+
+                        <com.sackcentury.shinebuttonlib.ShineButton
+                            android:id="@+id/collect_button"
+                            android:layout_gravity="center"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_weight="1"
+                            android:clickable="false"
+                            app:allow_random_color="false"
+                            android:focusable="false"
+                            app:btn_color="@android:color/darker_gray"
+                            app:btn_fill_color="@android:color/holo_orange_light"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintRight_toLeftOf="@+id/love_button"
+                            app:siShape="@raw/collection" />
+
+                        <TextView
+                            android:id="@+id/collect_text_view"
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="1"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/love_layout"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/love_num"
-                        android:layout_weight="1"/>
+                        android:layout_height="29dp"
+                        android:orientation="horizontal"
+                        android:layout_marginRight="8dp"
+                        android:clickable="true"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginBottom="8dp">
+
+                        <com.sackcentury.shinebuttonlib.ShineButton
+                            android:id="@+id/love_button"
+                            android:layout_gravity="center"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_weight="1"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:allow_random_color="false"
+                            app:btn_color="@android:color/darker_gray"
+                            app:btn_fill_color="@android:color/holo_red_light"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintRight_toRightOf="parent"
+                            app:siShape="@raw/love" />
+
+                        <TextView
+                            android:id="@+id/love_text_view"
+                            android:layout_width="40dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="1"
+                            android:textSize="10sp" />
+                    </LinearLayout>
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -151,7 +213,7 @@ e
 
                 <android.support.constraint.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content">
 
                     <TextView
                         android:id="@+id/detail_uweight"
@@ -197,15 +259,45 @@ e
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/detail_comment_recycler_view"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false">
+
+                </android.support.v7.widget.RecyclerView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/comment_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ems="10"
+                        android:inputType="textPersonName"
+                        android:text="Name" />
+
+                    <Button
+                        android:id="@+id/send_comment_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Button" />
+                </LinearLayout>
 
             </LinearLayout>
 
 
-        </com.example.clothshop.Activity.ScrollView.DetailScrollView>
+        </com.example.clothshop.Activity.Refactor.DetailScrollView>
 
-    </com.example.clothshop.Activity.ScrollView.DetailRefreshLayout>
+    </com.example.clothshop.Activity.Refactor.DetailRefreshLayout>
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="mLayoutManager" />
 
 
 </android.support.constraint.ConstraintLayout>
