@@ -1,5 +1,7 @@
 package com.example.clothshop.Activity;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -11,7 +13,9 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -50,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
 
     private int NaviClickRecord;
 
-    private final String CACHE_DIR_NAME ="/ClothShop/picasso";
+
 
 
 
@@ -133,8 +137,6 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initFileCache();
-        loadImageCache();
         setContentView(R.layout.activity_main);
         WindowManager wm = this.getWindowManager();
         Model.SCREEMWIDTH=wm.getDefaultDisplay().getWidth();
@@ -154,20 +156,40 @@ public class MainActivity extends AppCompatActivity implements PersonFragment.On
 
     }
 
-    //创建缓存路径
-    public void initFileCache() {
-        File file = new File(Environment.getExternalStorageDirectory(), CACHE_DIR_NAME);
-        if (!file.exists()) {
-            file.mkdirs();
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+            dialog1();
+            return true;
         }
+        return super.onKeyDown(keyCode, event);
     }
-    //
-    private void loadImageCache() {
-        final String imageCacheDir = Environment.getExternalStorageDirectory() + CACHE_DIR_NAME;
-        Picasso picasso = new Picasso.Builder(this).downloader(
-                new OkHttpDownloader(new File(imageCacheDir))).build();
-        Picasso.setSingletonInstance(picasso);
 
+    private void dialog1(){
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);  //先得到构造器
+        builder.setTitle("提示"); //设置标题
+        builder.setMessage("是否确认退出?"); //设置内容
+        builder.setIcon(R.mipmap.ic_launcher);//设置图标，图片id即可
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() { //设置确定按钮
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_HOME);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                android.os.Process.killProcess(android.os.Process.myPid());
+                dialog.dismiss(); //关闭dialog
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() { //设置取消按钮
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        //参数都设置完成了，创建并显示出来
+        builder.create().show();
     }
 
     @Override

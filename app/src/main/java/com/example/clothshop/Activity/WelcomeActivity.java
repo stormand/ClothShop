@@ -2,6 +2,7 @@ package com.example.clothshop.Activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,10 @@ import android.widget.TextView;
 
 import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
+import com.squareup.picasso.OkHttpDownloader;
+import com.squareup.picasso.Picasso;
+
+import java.io.File;
 
 public class WelcomeActivity extends AppCompatActivity {
 
@@ -35,6 +40,7 @@ public class WelcomeActivity extends AppCompatActivity {
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    private final String CACHE_DIR_NAME ="/ClothShop/picasso";
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -46,8 +52,6 @@ public class WelcomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -56,11 +60,30 @@ public class WelcomeActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+        initFileCache();
+        loadImageCache();
+
         SharedPreferences sp=getSharedPreferences("first_time_open",MODE_PRIVATE);
         if (!sp.getBoolean("first_time_open",true)){
             Intent intent=new Intent(WelcomeActivity.this,MainActivity.class);
             startActivity(intent);
         }
+    }
+
+    //创建缓存路径
+    public void initFileCache() {
+        File file = new File(Environment.getExternalStorageDirectory(), CACHE_DIR_NAME);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+    }
+    //
+    private void loadImageCache() {
+        final String imageCacheDir = Environment.getExternalStorageDirectory() + CACHE_DIR_NAME;
+        Picasso picasso = new Picasso.Builder(this).downloader(
+                new OkHttpDownloader(new File(imageCacheDir))).build();
+        Picasso.setSingletonInstance(picasso);
+
     }
 
 

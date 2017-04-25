@@ -145,7 +145,6 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                     public void onClick(DialogInterface dialog, int which) {
                         // 第一个参数 dialog int which 那个条目
                         Intent fIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkName.get(which)));
-
                         fIntent.setClassName("com.android.browser","com.android.browser.BrowserActivity");
                         startActivity(fIntent);
                     }
