@@ -3,18 +3,14 @@ package com.example.clothshop.Activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.app.Notification;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -53,7 +49,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Handler;
 
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
@@ -71,6 +66,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final int REQUEST_READ_CONTACTS = 0;
     public static String LOGIN_TO_MAIN = "login_to_main";
     public static String USER_NAME = "user_name";
+    private boolean phoneType=false;
 
     private ImageHandler handler = new ImageHandler();
 
@@ -87,7 +83,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private UserLoginTask mAuthTask = null;
 
     // UI references.
-    private AutoCompleteTextView mEmailView;
+    private AutoCompleteTextView mPhoneView;
     private EditText mPasswordView;
     private EditText mImageConfirmTextView;
     private ImageView mImageConfirmView;
@@ -100,7 +96,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email_or_phone);
+        mPhoneView = (AutoCompleteTextView) findViewById(R.id.email_or_phone);
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -199,7 +195,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return true;
         }
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+            Snackbar.make(mPhoneView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
                     .setAction(android.R.string.ok, new View.OnClickListener() {
                         @Override
                         @TargetApi(Build.VERSION_CODES.M)
@@ -236,16 +232,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if (mAuthTask != null) {
             return;
         }
-
-
-
         // Reset errors.
-        mEmailView.setError(null);
+        mPhoneView.setError(null);
         mPasswordView.setError(null);
 
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
+        String phone = mPhoneView.getText().toString();
         String password = mPasswordView.getText().toString();
         String confirmcode = mImageConfirmTextView.getText().toString();
 
@@ -260,14 +253,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
+        if (TextUtils.isEmpty(phone)) {
+            mPhoneView.setError(getString(R.string.error_field_required));
+            focusView = mPhoneView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
-            cancel = true;
+        }
+        if (isPhoneValid(phone)) {
+            phoneType=true;
         }
 
         if (cancel) {
@@ -278,14 +270,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password, confirmcode);
+            mAuthTask = new UserLoginTask(phone, password, confirmcode);
             mAuthTask.execute((Void) null);
         }
     }
 
-    private boolean isEmailValid(String email) {
+    private boolean isPhoneValid(String phoneNumber) {
         //TODO: Replace this with your own logic
-        return email.matches("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$") || email.matches("^1+[0-9]{10}$");
+        return phoneNumber.matches("^1+[0-9]{10}$");
     }
 
     private boolean isPasswordValid(String password) {
@@ -369,7 +361,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 new ArrayAdapter<>(LoginActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
-        mEmailView.setAdapter(adapter);
+        mPhoneView.setAdapter(adapter);
     }
 
 
@@ -474,7 +466,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onStop();
         // 保存用户名和密码
         SharedPreferences settings = getSharedPreferences(Model.SP_NAME_PASSWD, MODE_PRIVATE);
-        settings.edit().putString(Model.USER_NAME_ATTR, mEmailView.getText().toString())
+        settings.edit().putString(Model.USER_NAME_ATTR, mPhoneView.getText().toString())
                 .putString(Model.USER_PASSWORD_ATTR, mPasswordView.getText().toString()).commit();
 
     }

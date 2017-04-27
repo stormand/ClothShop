@@ -6,12 +6,19 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.clothshop.Activity.WelcomeActivity$PlaceholderFragment">
+    tools:context="com.example.clothshop.Activity.GuideActivity$PlaceholderFragment">
 
     <TextView
         android:id="@+id/section_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
+
+    <ImageView
+        android:id="@+id/welcome_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+         />
 
     <Button
         android:id="@+id/entry_button"

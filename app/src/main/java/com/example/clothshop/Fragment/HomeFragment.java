@@ -118,7 +118,7 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         mTabLayout= (TabLayout) view.findViewById(R.id.home_tabs);
         mToolBar = (Toolbar) view.findViewById(R.id.home_toolbar);
-        mToolBar.setTitle("ToolBar");
+        mToolBar.setTitle(getResources().getString(R.string.title_home));
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolBar);
         //toolbar.inflateMenu(R.menu.menu_message);
         mViewPager = (ViewPager) view.findViewById(R.id.home_all_viewpager);

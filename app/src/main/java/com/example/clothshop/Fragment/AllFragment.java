@@ -117,7 +117,7 @@ public class AllFragment extends Fragment {
         mViewPager = (ViewPager) view.findViewById(R.id.home_all_viewpager);
         mTabLayout= (TabLayout) view.findViewById(R.id.all_tabs);
         mToolBar = (Toolbar) view.findViewById(R.id.all_toolbar);
-        mToolBar.setTitle("ToolBar");
+        mToolBar.setTitle(getResources().getString(R.string.title_explore));
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolBar);
         handler=new GetDataHandler();
         initViewPager(view,0);

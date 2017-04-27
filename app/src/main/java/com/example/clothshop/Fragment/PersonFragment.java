@@ -96,6 +96,15 @@ public class PersonFragment extends Fragment {
         setHasOptionsMenu(true);
         final Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        ImageView imageView= (ImageView) view.findViewById(R.id.person_fragment_avatar);
+        imageView.setImageResource(R.drawable.avatar);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getActivity(), LoginActivity.class);
+                startActivity(intent);
+            }
+        });
         //个人信息
         ConstraintLayout mUserInfoLayout= (ConstraintLayout) view.findViewById(R.id.user_info_layout);
         mUserInfoLayout.setOnClickListener(new View.OnClickListener() {

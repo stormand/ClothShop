@@ -20,16 +20,16 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.clothshop.Model.Model;
 import com.example.clothshop.R;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
 
-public class WelcomeActivity extends AppCompatActivity {
+public class GuideActivity extends AppCompatActivity {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -50,7 +50,7 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_welcome);
+        setContentView(R.layout.activity_guide);
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -60,15 +60,18 @@ public class WelcomeActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+
         initFileCache();
         loadImageCache();
 
         SharedPreferences sp=getSharedPreferences("first_time_open",MODE_PRIVATE);
         if (!sp.getBoolean("first_time_open",true)){
-            Intent intent=new Intent(WelcomeActivity.this,MainActivity.class);
+            Intent intent=new Intent(GuideActivity.this,MainActivity.class);
             startActivity(intent);
         }
+
     }
+
 
     //创建缓存路径
     public void initFileCache() {
@@ -84,14 +87,6 @@ public class WelcomeActivity extends AppCompatActivity {
                 new OkHttpDownloader(new File(imageCacheDir))).build();
         Picasso.setSingletonInstance(picasso);
 
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_welcome, menu);
-        return true;
     }
 
     @Override
@@ -117,8 +112,9 @@ public class WelcomeActivity extends AppCompatActivity {
          * The fragment argument representing the section number for this
          * fragment.
          */
+        private int[] imageResourse={R.drawable.avatar_male,R.drawable.avatar,R.drawable.avatar_female};
         private static final String ARG_SECTION_NUMBER = "section_number";
-        private static int mSectionNumber;
+
         public PlaceholderFragment() {
         }
 
@@ -129,7 +125,6 @@ public class WelcomeActivity extends AppCompatActivity {
         public static PlaceholderFragment newInstance(int sectionNumber) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
-            mSectionNumber=sectionNumber;
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
             return fragment;
@@ -138,8 +133,11 @@ public class WelcomeActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_welcome, container, false);
+            View rootView = inflater.inflate(R.layout.fragment_guide, container, false);
             TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+            ImageView imageView= (ImageView) rootView.findViewById(R.id.welcome_image_view);
+            imageView.setImageResource(imageResourse[getArguments().getInt(ARG_SECTION_NUMBER)-1]);
             Button entryButton= (Button) rootView.findViewById(R.id.entry_button);
             entryButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -150,20 +148,13 @@ public class WelcomeActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
             });
-            if (mSectionNumber==3){
+            if (getArguments().getInt(ARG_SECTION_NUMBER)==3){
                 entryButton.setVisibility(View.VISIBLE);
             }else {
                 entryButton.setVisibility(View.INVISIBLE);
             }
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
             return rootView;
         }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        finish();
     }
 
     /**

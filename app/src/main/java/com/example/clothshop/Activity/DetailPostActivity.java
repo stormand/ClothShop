@@ -2,6 +2,7 @@ package com.example.clothshop.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -11,6 +12,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -28,6 +30,7 @@ import android.widget.Toast;
 import com.example.clothshop.Activity.Refactor.DetailRefreshLayout;
 import com.example.clothshop.Activity.Refactor.DetailScrollView;
 import com.example.clothshop.Activity.Refactor.FullyLinearLayoutManager;
+import com.example.clothshop.Activity.Refactor.RecyclerViewDivider;
 import com.example.clothshop.Adapter.RecyclerAdapter;
 import com.example.clothshop.DB.DatabaseUtil;
 import com.example.clothshop.Info.CommentsInfo;
@@ -164,7 +167,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         });
         //toolbar
         mToolBar = (Toolbar) findViewById(R.id.detail_post_toolbar);
-        mToolBar.setTitle("ToolBar");
+        mToolBar.setTitle(getResources().getString(R.string.detail_post_title));
         mToolBar.setAlpha(0);  //先设置透明
         setSupportActionBar(mToolBar);
         ActionBar actionBar =  getSupportActionBar();
@@ -205,15 +208,18 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         mLoveLayout= (LinearLayout) findViewById(R.id.love_layout);
         mCollectLayout= (LinearLayout) findViewById(R.id.collect_layout);
         mDetailScrollView=(DetailScrollView) findViewById(R.id.detail_scroll_view);
-        mDetailScrollView.setmViewPager(mImageViewPager);}
+        mDetailScrollView.setmViewPager(mImageViewPager);
+        mDetailScrollView.setOnScrollChangedListener(this);
+    }
+
     private void setPostInfoView(){
         mDetailTitle.setText(mPostInfo.getPtitle());
         mDetailContent.setText(mPostInfo.getPcontent());
-        mDetailUweight.setText(mPostInfo.getUweight());
-        mDetailUheight.setText(mPostInfo.getUheight());
+        mDetailUweight.setText(getResources().getString(R.string.edit_weight)+mPostInfo.getUweight()+"kg");
+        mDetailUheight.setText(getResources().getString(R.string.edit_height)+mPostInfo.getUheight()+"cm");
         mDetailDateTime.setText(mPostInfo.getPdaytime());
-        mDetailUage.setText(mPostInfo.getUage());
-        mDetailUsex.setText(mPostInfo.getUsex());
+        mDetailUage.setText(getResources().getString(R.string.edit_age)+mPostInfo.getUage());
+        mDetailUsex.setText(getResources().getString(R.string.edit_sex)+mPostInfo.getUsex());
         mDetailUname.setText(mPostInfo.getUname());
     }
     private void setViewPager(){
@@ -366,6 +372,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         mCommentsInfoList=new ArrayList<CommentsInfo>();
         mCommentadapter=new CommentRecyclerAdapter(DetailPostActivity.this,mCommentsInfoList);
         mDetailCommentRecyclerView.setAdapter(mCommentadapter);
+        mDetailCommentRecyclerView.addItemDecoration(new RecyclerViewDivider(this, LinearLayoutManager.HORIZONTAL));
         if (mPostInfo.getPid().isEmpty()){
             // TODO: 2017/4/6 other oeration? 
             return;
@@ -382,7 +389,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
         float height = mImageViewPager.getHeight();  //获取图片的高度
         if (oldt < height){
             float f=Float.valueOf(oldt/height).floatValue();
-            mToolBar.setAlpha(Math.max(f,0));   // 0~255 透明度
+            mToolBar.setAlpha(Math.max(2*f,0));   // 0~255 透明度
         }else {
             mToolBar.setAlpha(1);
         }
@@ -447,7 +454,7 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
             switch (msg.what){
                 case SUCCESS:
                     mCommentadapter.notifyItemInserted(mCommentsInfoList.size()-1);
-                    LinearLayout.LayoutParams lp= (LinearLayout.LayoutParams) mDetailCommentRecyclerView.getLayoutParams();
+                    //LinearLayout.LayoutParams lp= (LinearLayout.LayoutParams) mDetailCommentRecyclerView.getLayoutParams();
                     //lp.height= RecyclerView.LayoutParams.WRAP_CONTENT;
                     //mDetailCommentRecyclerView.setLayoutParams(lp);
                     break;
@@ -733,6 +740,9 @@ public class DetailPostActivity extends AppCompatActivity implements DetailScrol
                 }
             }
         }
+
+
+
         @Override
         public void onPageScrollStateChanged(int state) {
         }
