@@ -77,7 +77,7 @@ public class UserPostRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
             sb.append(Model.IMAGE_SAVE_PATH)
                     .append(imageUrl.substring(2));
             imageUrl = sb.toString();
-            Picasso.with(mContext).load(imageUrl).placeholder(R.drawable.empty_image).error(R.drawable.error_image).resize(400,400).into(itemHolder.imageView);
+            Picasso.with(mContext).load(imageUrl).placeholder(R.drawable.load_image).error(R.drawable.error_image).resize(400,400).into(itemHolder.imageView);
         }else {
             Picasso.with(mContext).load(R.drawable.empty_image).into(itemHolder.imageView);
         }

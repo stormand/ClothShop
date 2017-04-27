@@ -358,7 +358,8 @@
                         android:layout_height="35dp"
                         android:background="@drawable/send_comment"
                         app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginBottom="10dp"/>
 
                     <EditText
                         android:id="@+id/comment_edit_text"
@@ -370,7 +371,8 @@
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintRight_toLeftOf="@+id/send_comment_button"
-                        android:layout_marginLeft="10dp" />
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginBottom="10dp"/>
 
 
 
