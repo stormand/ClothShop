@@ -101,8 +101,10 @@ public class PersonFragment extends Fragment {
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(getActivity(), LoginActivity.class);
-                startActivity(intent);
+                if (Model.MYUSER==null){
+                    Intent intent=new Intent(getActivity(), LoginActivity.class);
+                    startActivity(intent);
+                }
             }
         });
         //个人信息
