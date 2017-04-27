@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ClothShop</string>
+    <string name="app_name">易衣</string>
     <string name="title_home">推荐</string>
     <string name="title_person">个人</string>
     <string name="title_explore">发现</string>

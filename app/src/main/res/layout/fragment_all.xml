@@ -24,7 +24,7 @@
             android:id="@+id/all_tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabIndicatorColor="#ADBE107E"
+            app:tabIndicatorColor="@color/white"
             app:tabMode="fixed"
             app:tabGravity="fill"
             app:layout_scrollFlags="scroll|enterAlways"/>
